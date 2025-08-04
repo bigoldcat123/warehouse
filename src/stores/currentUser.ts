@@ -22,9 +22,15 @@ export const useCurrentUserStore = defineStore('currentUser', () => {
   function getUserDetail() {
     return currentUser.value?.detail
   }
+  function isSuperAdmin() {
+    return currentUser.value?.detail.username == 'admin'
+  }
+  function isMainComp() {
+    return currentUser.value?.detail.companyID == -1
+  }
   function getPriv() {
     return currentUser.value?.detail.priv.split(',')
   }
 
-  return { isLogin, setValue, logout, getToken,getUserDetail,getPriv}
+  return { isLogin, setValue, logout, getToken,getUserDetail,getPriv,isMainComp,isSuperAdmin}
 })

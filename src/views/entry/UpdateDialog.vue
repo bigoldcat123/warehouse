@@ -6,13 +6,13 @@
       <el-form-item label="id">
         <el-input disabled v-model="ruleForm.id" />
       </el-form-item>
-      <el-form-item label="仓库" prop="houseID">
+      <el-form-item label="仓库">
         <!-- <el-input v-model="ruleForm.houseID" autocomplete="off" /> -->
         <el-select @change="warehouseChange" v-model="p" placeholder="Select" style="width: 240px">
-          <el-option v-for="item in warehouekv" :key="item.key" :label="item.value" :value="item.key" />
+          <el-option v-for="item in warehousekv" :key="item.key" :label="item.value" :value="item.key" />
         </el-select>
       </el-form-item>
-      <el-form-item label="仓库" prop="houseID">
+      <el-form-item label="仓房">
         <!-- <el-input v-model="ruleForm.houseID" autocomplete="off" /> -->
         <el-select v-model="ruleForm.houseID" placeholder="Select" style="width: 240px">
           <el-option v-for="item in kv" :key="item.key" :label="item.value" :value="item.key" />
@@ -77,9 +77,9 @@ const handleClose = (done: () => void) => {
   emit('close')
 }
 const ruleFormRef = ref<FormInstance>()
-const warehouekv = ref<any[]>([])
+const warehousekv = ref<any[]>([])
 warehouse.belongKv().then(res => {
-  warehouekv.value = res.data.value
+  warehousekv.value = res.data.value
 })
 
 function warehouseChange(value: any) {
@@ -87,7 +87,7 @@ function warehouseChange(value: any) {
   house.findByWarehouseId(value).then(res => {
     kv.value = res.data.value
   })
-  ruleForm.houseID = undefined
+  ruleForm.Houseid = undefined
 }
 
 const validate = (rule: any, value: any, callback: any) => {
@@ -121,15 +121,15 @@ onUpdated(() => {
       kv.value = res.data.value
     })
     user.getUsersByWarehouseId(p.value).then(res => {
-  userKv.value = res.data.value
-})
+      userKv.value = res.data.value
+    })
   })
 
 })
 const rules = reactive<FormRules<typeof ruleForm>>({
 
   id: [{ validator: validate, trigger: 'blur' }],
-  houseID: [{ validator: validate, trigger: 'blur' }],
+  houseid: [{ validator: validate, trigger: 'blur' }],
   breed: [{ validator: validate, trigger: 'blur' }],
   entryTime: [{ validator: validate, trigger: 'blur' }],
   water: [{ validator: validate, trigger: 'blur' }],

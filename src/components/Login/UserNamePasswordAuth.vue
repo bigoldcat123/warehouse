@@ -1,17 +1,24 @@
 <template>
-        <el-form ref="ruleFormRef" style="max-width: 100%;" :model="ruleForm" status-icon :rules="rules" label-width="auto"
-        class="demo-ruleForm">
-        <el-form-item label="username" prop="username">
-            <el-input v-model="ruleForm.username" type="text" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="Password" prop="password">
-            <el-input v-model="ruleForm.password" type="password" autocomplete="off" />
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary"  @click="submitForm(ruleFormRef)">登陆</el-button>
-            <el-button @click="resetForm(ruleFormRef)">重置</el-button>
-        </el-form-item>
-    </el-form>
+
+
+    <el-form ref="ruleFormRef" style="max-width: 100%;" :model="ruleForm" status-icon :rules="rules" label-width="95px"
+    class="demo-ruleForm" >
+    <p style="font-size: 28px;color:white;text-align: center;" ><img src="../../assets/image/login_title.png" width="300px"></p>
+    <p> &emsp;</p>
+
+    <el-form-item label="用户名" prop="username" class="item" >
+        <el-input v-model="ruleForm.username" type="text" size="small" style="width: 150px;" autocomplete="off" />
+    </el-form-item>
+    <p> &emsp;</p>
+    <el-form-item label="密  码" prop="password" class="item">
+        <el-input v-model="ruleForm.password" type="password" size="small" style="width: 150px" autocomplete="off" />
+    </el-form-item>
+    <p> &emsp;</p>
+    <el-form-item>
+        <el-button type="primary"  @click="submitForm(ruleFormRef)">确 定</el-button>
+        <el-button @click="resetForm(ruleFormRef)">重 置</el-button>
+    </el-form-item>
+</el-form>
 </template>
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
@@ -25,11 +32,11 @@ const ruleFormRef = ref<FormInstance>()
 
 const checkUsername = (rule: any, value: string, callback: any) => {
     if (!value) {
-        return callback(new Error('Please input the userName'))
+        return callback(new Error('请输入用户名！'))
     }
     setTimeout(() => {
         if (value.length < 1) {
-            callback(new Error('length must be greater than 1'))
+            callback(new Error('用户名太短!'))
         } else {
             callback()
         }
@@ -38,7 +45,7 @@ const checkUsername = (rule: any, value: string, callback: any) => {
 
 const validatePass = (rule: any, value: any, callback: any) => {
     if (value === '') {
-        callback(new Error('Please input the password'))
+        callback(new Error('请输入密码！'))
     } else {
         callback()
     }
@@ -60,12 +67,16 @@ const submitForm = (formEl: FormInstance | undefined) => {
         if (valid) {
             Auth.daoLogin(ruleForm).then((res) => {
                 currentUser.setValue(res.data.value)
-                router.push('/warehouse')
+                if(currentUser.isMainComp()) {
+                    router.push('/alarmarg')
+                }else{
+                    router.push('/alarm')
+                }
             }).catch((err) => {
                 console.log(err);
             })
         } else {
-            console.log('error submit!')
+            console.log('登录错误!')
         }
     })
 }
@@ -75,5 +86,9 @@ const resetForm = (formEl: FormInstance | undefined) => {
     formEl.resetFields()
 }
 </script>
-<style scoped>
+<style>
+.item .el-form-item__label{
+    font-size: 16px;
+    color:rgb(8, 8, 8);
+  }
 </style>

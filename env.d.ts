@@ -13,11 +13,11 @@ declare type ResponseData<T> = {
 }
 
 declare type Page<T> = {
-    records: T[],
-    total: number,
-    size: number,
-    current: number,
-    pages: number
+    records?: T[],
+    total?: number,
+    size?: number,
+    current?: number,
+    pages?: number
 }
 
 //com.example.demo.common.CurrentUser

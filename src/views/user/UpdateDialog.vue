@@ -67,6 +67,7 @@ onUpdated(() => {
   ruleForm.sex = prop.current?.sex
   ruleForm.companyID = prop.current?.companyID
   ruleForm.position = prop.current?.position
+  ruleForm.password=''
   ruleForm.phone = prop.current?.phone
   if(prop.current!.priv.length != 0)
   privLChecked.value = prop.current!.priv.split(',').map((item:string) => Number(item))

@@ -10,7 +10,7 @@
       <el-form-item label="仓房编号" prop="houseNo">
         <el-input v-model="ruleForm.houseNo" />
       </el-form-item>
-      <el-form-item label="仓库名" prop="houseName">
+      <el-form-item label="仓房名" prop="houseName">
         <el-input v-model="ruleForm.houseName" />
       </el-form-item>
       <el-form-item label="仓房地址" prop="houseAddr">
@@ -28,13 +28,14 @@
           <el-option v-for="item in kv" :key="item.key" :label="item.value" :value="item.key" />
         </el-select>
       </el-form-item>
-      <el-form-item label="行数" prop="x">
-        <el-input v-model.number="ruleForm.x" />
-      </el-form-item>
-      <el-form-item label="列数" prop="y">
+      <el-form-item label="列数(X)" prop="y">
         <el-input v-model.number="ruleForm.y" />
       </el-form-item>
-      <el-form-item label="层数" prop="z">
+      <el-form-item label="行数(Y)" prop="x">
+        <el-input v-model.number="ruleForm.x" />
+      </el-form-item>
+
+      <el-form-item label="层数(Z)" prop="z">
         <el-input v-model.number="ruleForm.z" />
       </el-form-item>
       <el-form-item>

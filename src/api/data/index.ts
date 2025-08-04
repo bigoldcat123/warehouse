@@ -3,8 +3,9 @@ import server from '..'
 const preFix = 'data'
 export type type_Data = {
             id : number,
-             houseId : number,
+            HouseNo : string,
              houseName : string,
+             house_type:string,
              inTemperature : number,
              inHumidity : number,
              maxTemperature : number,

@@ -12,13 +12,22 @@ export type type_House = {
     x:number,
     y:number
     yuntu:string,
-    quxian:string
+    quxian:string,
+    threeD:string,
+    valeWin:string
 }
 
 class House  {
 
-    list(current:number,size:number) {
-        return server.get<ResponseData<Page<type_House>>>(preFix + `?current=${current}&size=${size}`)
+    list(current:number,size:number,wareHouseId:string,houseNo:string) {
+        return server.get<ResponseData<Page<type_House>>>(preFix,{
+            params:{
+                current,
+                size,
+                wareHouseId,
+                houseNo
+            }
+        } )
     }
     add(house:type_House) {
         return server.post(preFix,house)

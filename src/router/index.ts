@@ -8,6 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
+      redirect:'/alarm',
       component: HomeView,
       children:[
         {
@@ -24,6 +25,11 @@ const router = createRouter({
           path: '/alarm',
           name: 'alarm',
           component: () => import('@/views/alarm/index.vue')
+        },
+        {
+          path: '/alarmarg',
+          name: 'alarmarg',
+          component: () => import('@/views/alarm/arg/index.vue')
         },
         {
           path: '/data',

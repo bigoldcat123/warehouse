@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Binner: typeof import('./src/components/common/Binner.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
@@ -19,12 +20,10 @@ declare module 'vue' {
     ElInputNumber: typeof import('element-plus/es')['ElInputNumber']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
-    ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
-    ElPopover: typeof import('element-plus/es')['ElPopover']
+    ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
     ElSelect: typeof import('element-plus/es')['ElSelect']
-    ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']

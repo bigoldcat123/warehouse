@@ -25,13 +25,14 @@
           <el-option v-for="item in kv" :key="item.key" :label="item.value" :value="item.key" />
         </el-select>
       </el-form-item>
-      <el-form-item label="行数" prop="x">
-        <el-input v-model.number="ruleForm.x" />
-      </el-form-item>
-      <el-form-item label="列数" prop="y">
+      <el-form-item label="列数(X)" prop="y">
         <el-input v-model.number="ruleForm.y" />
       </el-form-item>
-      <el-form-item label="层数" prop="z">
+       <el-form-item label="行数(Y)" prop="x">
+        <el-input v-model.number="ruleForm.x" />
+      </el-form-item>
+
+      <el-form-item label="层数(Z)" prop="z">
         <el-input v-model.number="ruleForm.z" />
       </el-form-item>
       <el-form-item>

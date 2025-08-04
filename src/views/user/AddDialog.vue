@@ -105,7 +105,7 @@ const ruleForm = reactive<any>({
   password: '',
   name: '',
   sex: '',
-  companyID: undefined,
+  companyID: -1,
   position: '',
   phone: '',
   priv: null,
@@ -135,7 +135,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
         ruleForm.password = ''
         ruleForm.name = ''
         ruleForm.sex = ''
-        ruleForm.companyID = 0
+        ruleForm.companyID = -1
         ruleForm.position = ''
         ruleForm.phone = ''
         privLChecked.value = []

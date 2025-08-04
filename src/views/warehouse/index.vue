@@ -4,15 +4,19 @@
     </div>
     <div>
         <el-table :data="list?.records" border>
-            <el-table-column prop="id" label="ID" />
-            <el-table-column prop="warehouseNo" label="仓库编号" />
-            <el-table-column prop="warehouseName" label="仓库名" />
-            <el-table-column prop="warehouseAddress" label="地址" />
-            <el-table-column label="操作">
+            <el-table-column prop="id" label="ID" width="100"/>
+            <el-table-column prop="warehouseNo" label="仓库编号" min-width="20%"/>
+            <el-table-column prop="warehouseName" label="仓库名" min-width="20%"/>
+            <el-table-column prop="warehouseAddress" label="地址" min-width="20%"/>
+            <el-table-column label="操作" min-width="20%">
                 <template #default="scope">
                     <!-- {{ scope.row.id }} -->
                     <el-button type="primary" size="small" @click="() => {current= scope.row;updateDialog = true;}">编辑</el-button>
-                    <el-button type="danger" size="small" @click="() => warehouse.deleteById(scope.row.id).then(() => fetchData())">删除</el-button>
+                <el-popconfirm title="确认删除?" @confirm="() => warehouse.deleteById(scope.row.id).then(() => fetchData())">
+                    <template #reference>
+                    <el-button type="danger" size="small">删除</el-button>
+                    </template>
+                </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>

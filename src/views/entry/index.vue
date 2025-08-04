@@ -1,5 +1,5 @@
 <template>
-
+<Binner :warehouseName="binerProp_warehouseName" :warehouseNO="binerProp_warehouseNO"/>
     <el-button @click="addDialog = true" type="primary">入库</el-button>
     <div class="mb-4 mt-2 flex gap-2
     ">
@@ -11,7 +11,7 @@
         </el-select>
         <el-date-picker v-model="from" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="起始时间" />
         <el-date-picker v-model="to" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="结束时间" />
-        <el-button @click="fetchData"  type="success">查询</el-button>
+        <el-button @click="query"  type="success">查询</el-button>
         <el-button @click="reset"  type="warnning">重置</el-button>
     </div>
     <div>
@@ -34,14 +34,21 @@
                 </template>
             </el-table-column>
             <el-table-column prop="entryTime" label="入库时间" />
-            <el-table-column prop="water" label="GrainWater" />
+            <el-table-column prop="water" label="含水量" />
             <el-table-column label="操作">
                 <template #default="scope">
                     <!-- {{ scope.row.id }} -->
                     <el-button type="primary" size="small"
                         @click="() => { current = scope.row; updateDialog = true; }">编辑</el-button>
-                    <el-button type="danger" size="small"
-                        @click="() => entry.deleteById(scope.row.id).then(() => fetchData())">删除</el-button>
+
+                        <el-popconfirm title="确认删除?" @confirm="() => entry.deleteById(scope.row.id).then(() => fetchData())">
+                    <template #reference>
+                    <el-button type="danger" size="small">删除</el-button>
+                    </template>
+                </el-popconfirm>
+
+                    <!-- <el-button type="danger" size="small"
+                        @click="() => entry.deleteById(scope.row.id).then(() => fetchData())">删除</el-button> -->
                 </template>
             </el-table-column>
         </el-table>
@@ -54,6 +61,7 @@
     </UpdateDialog>
 </template>
 <script setup lang="ts">
+
 import { ref } from 'vue'
 import entry, { type type_Entry } from '@/api/entry';
 import house from '@/api/house';
@@ -61,13 +69,19 @@ import AddDialog from './AddDialog.vue';
 import UpdateDialog from './UpdateDialog.vue';
 import user from '@/api/user';
 import warehouse from '@/api/warehouse';
-
+import Binner from '@/components/common/Binner.vue';
+import { useCurrentUserStore } from '@/stores/currentUser';
+import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+const currentWareHouse = useCurrentWareHouse()
+const binerProp_warehouseNO = ref('')
+const binerProp_warehouseName = ref('')   
+const currentUser = useCurrentUserStore()
 const list = ref<Page<type_Entry>>()
 const addDialog = ref(false)
 const updateDialog = ref(false)
 const current = ref<type_Entry>()
 const currentpage = ref(1)
-const size = ref(10)
+const size = ref(import.meta.env.ENV_PAGESIZE)
 const waerhouseKv = ref<any[]>([])
 const houseKv = ref<any[]>([])
 const waerhouseID = ref<number | undefined>(undefined)
@@ -79,19 +93,43 @@ function reset () {
     houseID.value = undefined
     from.value = ''
     to.value = ''
-
+    if(currentUser.isMainComp()) {
+        binerProp_warehouseNO.value = '--'
+        binerProp_warehouseName.value = '全部'
+    }
     fetchData()
 }
 warehouse.belongKv().then(res => {
     waerhouseKv.value = res.data.value
+
+    let item = waerhouseKv.value[0]
+
+    currentWareHouse.init({
+        wareHouseNO: item.no,
+        wareHouseName: item.value,
+        waerhouseId: item.key
+    })
+    waerhouseID.value = Number.parseInt( currentWareHouse.getWareHouse().waerhouseId as string)
+    warehouseChange(waerhouseID.value)
+    fetchData()
 })
 function warehouseChange(value: any) {
     house.findByWarehouseId(value).then(res => {
         houseKv.value = res.data.value
     })
 }
+const query = () => {
+    const item = waerhouseKv.value.filter(x => x.key == waerhouseID.value)[0]
+    currentWareHouse.setWareHouse({
+        wareHouseNO: item.no,
+        wareHouseName: item.value,
+        waerhouseId: item.key
+    })
+    fetchData()
+}
 function fetchData() {
-    entry.list({warehouseId:waerhouseID.value,houseId:houseID.value,from:from.value,to:to.value},currentpage.value, size.value).then(res => {
+    
+    entry.list({warehouseId:waerhouseID.value,Houseid:houseID.value,from:from.value,to:to.value},currentpage.value, size.value).then(res => {
         list.value = res.data.value
     })
 }
@@ -107,6 +145,6 @@ const userKv = ref<any[]>([])
 user.kv().then(res => {
     userKv.value = res.data.value
 })
-fetchData()
+
 </script>
 <style scoped></style>

@@ -4,7 +4,7 @@ const preFix = 'entry'
 
 export interface type_Entry {
     id?:number
-    houseID:number
+    houseID : number,
     breed:string
     entryTime:string
     water:number
@@ -13,7 +13,7 @@ export interface type_Entry {
 }
 type EntryQuery = {
     warehouseId?:number,
-    houseId?:number,
+    Houseid? : number,
     from?:string,
     to?:string
 }

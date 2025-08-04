@@ -41,8 +41,12 @@ server.interceptors.response.use(function (response) {
       break
   }
   if (response.data.code !== '200') {
+
     return Promise.reject(response.data.message)
   }
+  // if (response.data.code !== '403') {
+  //   return Promise.reject(response.data.message)
+  // }
 
   
   return response;
