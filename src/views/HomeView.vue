@@ -11,7 +11,9 @@ import {
     Avatar,
     Bell,
     Box,
-    Flag
+    Flag,
+    EditPen,
+    CloseBold
 } from '@element-plus/icons-vue'
 import ChangePasswd from './ChangePasswd.vue';
 import { ElTag } from 'element-plus';
@@ -38,7 +40,7 @@ const v = ref(false)
 </script>
 
 <template>
-    <div class=" flex  w-full" style="overflow-x:auto;">
+    <div class=" flex w-full" style="overflow-x:auto;">
         <div class="flex flex-col h-screen" style="width:180px;background-color: #ddd;">
             <div style="font-size:30px;border:1px solid #ddd;height:100px;vertical-align: middle;text-align: center;">
                 <img src="../assets/image/title_1.png"></div>
@@ -85,7 +87,7 @@ const v = ref(false)
                 </el-menu-item>
 
 
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'" 
+                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'"
                     index="/user">
                     <el-icon>
                         <Avatar />
@@ -97,7 +99,7 @@ const v = ref(false)
             </el-menu>
         </div>
         <div class=" flex-1 flex flex-col items-end">
-            <div class="p-8" style="height:100px;border:1px;width:100%;position: relative;background-color: #efefef;">
+            <div class="p-8" style="height:100px;border:1px;width:100%;position: relative;background-color:  rgb(66,133,244);">
                 <div style="height:75px;width:600px;position: absolute;left: 50px;top:10px;"><img src="/banner2.png">
                 </div>
                 <div style="height:75px;border:1px;width:350px;position: absolute;right: 0px;">
@@ -107,8 +109,8 @@ const v = ref(false)
                     <ElTag>{{ currentUser.getUserDetail()?.username }}</ElTag><span
                         style="font-size:small;">您好！&emsp;</span>
 
-                    <el-button type="primary" size="small" @click="v = true">修改密码</el-button>
-                    <el-button type="danger" size="small" @click="logout">退出</el-button>
+                    <el-button type="primary" size="small" @click="v = true"><el-icon><EditPen/></el-icon> 修改密码</el-button>
+                    <el-button type="danger" size="small" @click="logout"><el-icon><CloseBold/></el-icon> 退出</el-button>
                 </div>
             </div>
             <div>&nbsp;</div>

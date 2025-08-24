@@ -1,6 +1,6 @@
 <template>
 <Binner :warehouseName="binerProp_warehouseName" :warehouseNO="binerProp_warehouseNO"/>
-    <el-button @click="addDialog = true" type="primary">入库</el-button>
+    <el-button @click="addDialog = true" type="primary"><el-icon><Plus /></el-icon> 入库</el-button>
     <div class="mb-4 mt-2 flex gap-2
     ">
         <el-select @change="warehouseChange" v-model="waerhouseID" placeholder="选择仓库" style="width: 180px">
@@ -11,7 +11,7 @@
         </el-select>
         <el-date-picker v-model="from" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="起始时间" />
         <el-date-picker v-model="to" type="datetime" value-format="YYYY-MM-DD HH:mm:ss" placeholder="结束时间" />
-        <el-button @click="query"  type="success">查询</el-button>
+        <el-button @click="query"  type="success"><el-icon><Search /></el-icon> 查询</el-button>
         <el-button @click="reset"  type="warnning">重置</el-button>
     </div>
     <div>
@@ -39,11 +39,11 @@
                 <template #default="scope">
                     <!-- {{ scope.row.id }} -->
                     <el-button type="primary" size="small"
-                        @click="() => { current = scope.row; updateDialog = true; }">编辑</el-button>
+                        @click="() => { current = scope.row; updateDialog = true; }"><el-icon><EditPen /></el-icon> 编辑</el-button>
 
                         <el-popconfirm title="确认删除?" @confirm="() => entry.deleteById(scope.row.id).then(() => fetchData())">
                     <template #reference>
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button type="danger" size="small"><el-icon><Delete /></el-icon>删除</el-button>
                     </template>
                 </el-popconfirm>
 
@@ -61,7 +61,7 @@
     </UpdateDialog>
 </template>
 <script setup lang="ts">
-
+import {Plus, Reading,Search,EditPen,Delete} from '@element-plus/icons-vue';
 import { ref } from 'vue'
 import entry, { type type_Entry } from '@/api/entry';
 import house from '@/api/house';
@@ -74,7 +74,7 @@ import { useCurrentUserStore } from '@/stores/currentUser';
 import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 const currentWareHouse = useCurrentWareHouse()
 const binerProp_warehouseNO = ref('')
-const binerProp_warehouseName = ref('')   
+const binerProp_warehouseName = ref('')
 const currentUser = useCurrentUserStore()
 const list = ref<Page<type_Entry>>()
 const addDialog = ref(false)
@@ -128,7 +128,7 @@ const query = () => {
     fetchData()
 }
 function fetchData() {
-    
+
     entry.list({warehouseId:waerhouseID.value,Houseid:houseID.value,from:from.value,to:to.value},currentpage.value, size.value).then(res => {
         list.value = res.data.value
     })

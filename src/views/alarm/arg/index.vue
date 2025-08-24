@@ -1,7 +1,7 @@
 <template>
             <div class=" ml-3 flex justify-right items-right" >
-            <el-button type="primary"><a href="/api/alarm/arg_excel"  >导出报警信息统计</a></el-button>
-            
+            <el-button type="primary"> <el-icon><Share/></el-icon>  <a href="/api/alarm/arg_excel"  > 导出报警信息统计</a></el-button>
+
         </div>
 <p> &nbsp;</p>
     <div>
@@ -15,7 +15,7 @@
             <el-table-column prop="exception" label="异常" min-width="15%"/>
             <el-table-column label="操作" min-width="15%">
                 <template #default="scope">
-                    <ElButton type="primary" @click="navigateTo(scope.row.wareHouseNO)" size="small">查看详细</ElButton>
+                    <ElButton type="primary" @click="navigateTo(scope.row.wareHouseNO)" size="small"><el-icon><Search /></el-icon> 查看详细</ElButton>
                 </template>
             </el-table-column>
         </el-table>
@@ -29,6 +29,7 @@ import { ref } from 'vue'
 import alarm, { type AlarmArgDTO } from '@/api/alarm';
 import { ElButton } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { Share ,Search} from '@element-plus/icons-vue';
 const router = useRouter()
 const list= ref<Page<AlarmArgDTO>>({})
 const size = 10

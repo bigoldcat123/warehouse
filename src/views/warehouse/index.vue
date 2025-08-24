@@ -1,6 +1,6 @@
 <template>
     <div class="mb-4">
-        <el-button @click="addDialog = true" type="primary">新增</el-button>
+        <el-button @click="addDialog = true" type="primary"><el-icon><Plus /></el-icon>新增</el-button>
     </div>
     <div>
         <el-table :data="list?.records" border>
@@ -11,21 +11,22 @@
             <el-table-column label="操作" min-width="20%">
                 <template #default="scope">
                     <!-- {{ scope.row.id }} -->
-                    <el-button type="primary" size="small" @click="() => {current= scope.row;updateDialog = true;}">编辑</el-button>
+                    <el-button type="primary" size="small" @click="() => {current= scope.row;updateDialog = true;}"><el-icon><EditPen /></el-icon>编辑</el-button>
                 <el-popconfirm title="确认删除?" @confirm="() => warehouse.deleteById(scope.row.id).then(() => fetchData())">
                     <template #reference>
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button type="danger" size="small"><el-icon><Delete /></el-icon>删除</el-button>
                     </template>
                 </el-popconfirm>
                 </template>
             </el-table-column>
         </el-table>
         <el-pagination @current-change="pagechange" :default-page-size="size"  :page-count="list?.pages" layout="prev, pager, next"  />
-    </div>  
+    </div>
     <AddDialog :dialog-visible="addDialog" @refresh="fetchData" @close="addDialog = false"></AddDialog>
     <UpdateDialog :warehouse="current!" :dialog-visible="updateDialog" @refresh="fetchData" @close="updateDialog = false"></UpdateDialog>
 </template>
 <script setup lang="ts">
+import {Plus,EditPen,Delete} from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import warehouse, { type type_WareHouse } from '@/api/warehouse';
 import AddDialog from './AddDialog.vue';

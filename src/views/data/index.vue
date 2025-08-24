@@ -11,7 +11,7 @@
         <el-select v-model="warehouseName" placeholder="请选择仓库名" style="width: 140px">
             <el-option v-for="item in kv" :key="item.value" :label="item.value" :value="item.value" />
         </el-select>
-        <el-button type="success" @click="query">搜索</el-button>
+        <el-button type="success" @click="query"> <el-icon><Search /></el-icon> 搜索</el-button>
         <!-- <el-button type="danger" @click="reset">重置</el-button> -->
     </div>
     <div>
@@ -38,7 +38,7 @@
                             id: scope.row.id, maxTemperature: scope.row.maxTemperature, minTemperature: scope.row.minTemperature,
                             avgTemperature: scope.row.avgTemperature, layerAvg: scope.row.layerAvg, house_type: scope.row.house_type
                         }
-                    })">详情</el-button>
+                    })"> <el-icon><Reading /></el-icon> 详情</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -49,7 +49,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-
+import {Search, Reading} from '@element-plus/icons-vue';
 import Binner from '@/components/common/Binner.vue';
 import data, { type type_Data } from '@/api/data';
 import warehouse from '@/api/warehouse';

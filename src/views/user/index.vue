@@ -1,6 +1,6 @@
 <template>
     <div class="mb-4">
-        <el-button @click="addDialog = true" type="primary">新增</el-button>
+        <el-button @click="addDialog = true" type="primary"><el-icon><Plus /></el-icon>新增</el-button>
     </div>
     <div>
         <el-table :data="list?.records" border>
@@ -28,15 +28,15 @@
                 <template #default="scope">
                     <!-- {{ scope.row.id }} -->
                     <el-button type="primary" size="small"
-                        @click="() => { current = scope.row; updateDialog = true; }">编辑</el-button>
+                        @click="() => { current = scope.row; updateDialog = true; }"><el-icon><EditPen /></el-icon>编辑</el-button>
                     <!-- <el-button v-if="scope.row.username != 'admin'" type="danger" size="small"
                         @click="() => user.deleteById(scope.row.id).then(() => fetchData())">删除</el-button> -->
 
                         <el-popconfirm title="确认删除?" @confirm="() => user.deleteById(scope.row.id).then(() => fetchData())">
                     <template #reference>
-                    <el-button type="danger" size="small">删除</el-button>
+                    <el-button type="danger" size="small"><el-icon><Delete /></el-icon>删除</el-button>
                     </template>
-                </el-popconfirm>  
+                </el-popconfirm>
 
                 </template>
             </el-table-column>
@@ -52,6 +52,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
+import {Plus,Delete,EditPen} from '@element-plus/icons-vue'
 import user, { type type_User, privList } from '@/api/user';
 import house from '@/api/house';
 import warehouse from '@/api/warehouse';

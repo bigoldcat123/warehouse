@@ -42,12 +42,12 @@
             </div>
         </div>
         <div class=" ml-3 flex justify-center items-center">
-            <el-button type="primary" @click="query">搜索</el-button>
+            <el-button type="primary" @click="query"> <el-icon><Search /></el-icon> 搜索</el-button>
         </div>
 
         <div class=" ml-3 flex justify-center items-center">
-            <el-button type="primary"><a href="/api/alarm/excel"  >导出报警信息</a></el-button>
-            
+            <el-button type="primary"><el-icon><Share /></el-icon> <a href="/api/alarm/excel"  >导出报警信息</a></el-button>
+
         </div>
     </div>
     <div>
@@ -63,10 +63,10 @@
             </el-table-column>
             <el-table-column prop="alertType" label="类型" />
             <el-table-column prop="alertTime" label="时间"  width="180"/>
-            <el-table-column prop="yuntu" label="云图" width="80">
+            <el-table-column prop="yuntu" label="云图" width="90">
                 <template #default="scope">
                     <el-button type="primary" size="small"
-                        @click="$router.push({ path: '/show', query: { imgs: scope.row.yuntu, lx: 'alarm' } })">查看</el-button>
+                        @click="$router.push({ path: '/show', query: { imgs: scope.row.yuntu, lx: 'alarm' } })"> <el-icon><Search /></el-icon> 查看</el-button>
                 </template>
             </el-table-column>
             <el-table-column label="审核"  width="180">
@@ -74,9 +74,9 @@
                     <el-tag v-if="scope.row.isVerify" type="success">已审核</el-tag>
                     <el-tag v-else type="danger">未审核</el-tag>
                     <el-button v-if="scope.row.isVerify" type="primary" size="small"
-                        @click="showHandleDialog = true; currentHandle = scope.row.handle">查看审核</el-button>
+                        @click="showHandleDialog = true; currentHandle = scope.row.handle"> <el-icon><Search /></el-icon> 查看审核</el-button>
                     <el-button :disabled="!user.getPriv()?.includes('3')" v-else type="success" size="small"
-                        @click="handleDialog = true; currentid = scope.row.id">审核</el-button>
+                        @click="handleDialog = true; currentid = scope.row.id"><el-icon><ChatLineSquare /></el-icon> 审核</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -98,6 +98,7 @@ import { useCurrentUserStore } from '@/stores/currentUser';
 import warehouse from '@/api/warehouse';
 import { useRoute } from 'vue-router';
 import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+import {Search , ChatLineSquare, Share} from '@element-plus/icons-vue'
 const currentWareHouse = useCurrentWareHouse()
 const route = useRoute()
 

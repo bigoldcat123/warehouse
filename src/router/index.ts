@@ -56,12 +56,22 @@ const router = createRouter({
           name: 'show',
           component: () => import('@/views/show/index.vue')
         },
+        {
+          path: '/tongfeng',
+          name: 'tongfeng',
+          component: () => import('@/views/tongfeng/index.vue')
+        },
       ]
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue')
+    },
+    {
+      path:'/display',
+      name:"dispaly",
+      component: () => import("@/views/display/index.vue")
     }
   ]
 })

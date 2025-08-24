@@ -1,7 +1,7 @@
 <template>
 
     <div>
-        <ElButton type="primary" @click="$router.go(-1)">返回</ElButton>
+        <ElButton type="primary" @click="$router.go(-1)"> <el-icon><ArrowLeft /></el-icon> 返回</ElButton>
     </div>
     <div class=" flex flex-wrap">
         <el-tag type="info" class=" item">品种：{{ detail?.breed }}</el-tag>
@@ -38,6 +38,7 @@
 import { ElButton } from 'element-plus';
 import data, { type type_Data_Detail } from '@/api/data';
 import { ref } from 'vue'
+import {ArrowLeft} from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router';
 const route = useRoute()
 console.log();
@@ -49,7 +50,7 @@ data.getDetil(route.query.id as unknown as number).then(res => {
 </script>
 <style scoped>
 .item{
-    font-size: 1rem;    
+    font-size: 1rem;
     padding: 1rem;
     border-radius: 0.5rem;
     margin-right: 1rem;

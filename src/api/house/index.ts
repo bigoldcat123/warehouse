@@ -14,9 +14,20 @@ export type type_House = {
     yuntu:string,
     quxian:string,
     threeD:string,
-    valeWin:string
+    valeWin:string,
+    tongfengLx:string,
+    tongfengZt:string,
+    tongfengTu:string,
+    TFModeWin:string,
+    TongFengSst:string,
 }
-
+export type TongfengInfo = {
+    tfmodeWin:string,
+    tongFengSst:string,
+    tongfengLx:string,
+    tongfengTu:string,
+    tongfengZt:string
+}
 class House  {
 
     list(current:number,size:number,wareHouseId:string,houseNo:string) {
@@ -43,6 +54,9 @@ class House  {
     }
     findByWarehouseId(id:number) {
         return server.get(preFix + '/kv/' + id)
+    }
+    getTongFengInfo(id:number) {
+        return server.get<ResponseData<TongfengInfo>>(preFix + "/tongfeng?houseId="+id)
     }
 }
 
