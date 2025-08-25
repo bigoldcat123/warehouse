@@ -42,11 +42,15 @@
             </div>
         </div>
         <div class=" ml-3 flex justify-center items-center">
-            <el-button type="primary" @click="query"> <el-icon><Search /></el-icon> 搜索</el-button>
+            <el-button type="primary" @click="query"> <el-icon>
+                    <Search />
+                </el-icon> 搜索</el-button>
         </div>
 
         <div class=" ml-3 flex justify-center items-center">
-            <el-button type="primary"><el-icon><Share /></el-icon> <a href="/api/alarm/excel"  >导出报警信息</a></el-button>
+            <el-button type="primary"><el-icon>
+                    <Share />
+                </el-icon> <a href="/api/alarm/excel">导出报警信息</a></el-button>
 
         </div>
     </div>
@@ -54,7 +58,7 @@
         <el-table :data="alarmList?.records" ref="tableref" border>
             <!-- <el-table-column prop="id" label="ID" /> -->
             <el-table-column prop="houseNo" label="仓房编号" />
-            <el-table-column prop="alertPos" label="位置" v-if="false"/>
+            <el-table-column prop="alertPos" label="位置" v-if="false" />
             <el-table-column prop="alertLevel" label="等级">
                 <template #default="scope">
                     <el-tag v-if="scope.row.alertLevel == '一般报警'" type="warning">{{ scope.row.alertLevel }}</el-tag>
@@ -62,21 +66,28 @@
                 </template>
             </el-table-column>
             <el-table-column prop="alertType" label="类型" />
-            <el-table-column prop="alertTime" label="时间"  width="180"/>
+            <el-table-column prop="alertTime" label="时间" width="180" />
             <el-table-column prop="yuntu" label="云图" width="90">
                 <template #default="scope">
                     <el-button type="primary" size="small"
-                        @click="$router.push({ path: '/show', query: { imgs: scope.row.yuntu, lx: 'alarm' } })"> <el-icon><Search /></el-icon> 查看</el-button>
+                        @click="show_yuntu(scope.row.yuntu)">
+                        <el-icon>
+                            <Search />
+                        </el-icon> 查看</el-button>
                 </template>
             </el-table-column>
-            <el-table-column label="审核"  width="180">
+            <el-table-column label="审核" width="180">
                 <template #default="scope">
                     <el-tag v-if="scope.row.isVerify" type="success">已审核</el-tag>
                     <el-tag v-else type="danger">未审核</el-tag>
                     <el-button v-if="scope.row.isVerify" type="primary" size="small"
-                        @click="showHandleDialog = true; currentHandle = scope.row.handle"> <el-icon><Search /></el-icon> 查看审核</el-button>
+                        @click="showHandleDialog = true; currentHandle = scope.row.handle"> <el-icon>
+                            <Search />
+                        </el-icon> 查看审核</el-button>
                     <el-button :disabled="!user.getPriv()?.includes('3')" v-else type="success" size="small"
-                        @click="handleDialog = true; currentid = scope.row.id"><el-icon><ChatLineSquare /></el-icon> 审核</el-button>
+                        @click="handleDialog = true; currentid = scope.row.id"><el-icon>
+                            <ChatLineSquare />
+                        </el-icon> 审核</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -87,6 +98,7 @@
     <handle :id="currentid" :dialogVisible="handleDialog" @close="handleDialog = false" @refresh="fetchData"></handle>
     <ShowHandle :handle="currentHandle" :dialogVisible="showHandleDialog" @close="showHandleDialog = false">
     </ShowHandle>
+    <ImageDialog :dialogVisible="dialog" :urlInfo="url_info" @close="dialog = false"></ImageDialog>
 </template>
 <script setup lang="ts">
 import Binner from '@/components/common/Binner.vue';
@@ -99,8 +111,13 @@ import warehouse from '@/api/warehouse';
 import { useRoute } from 'vue-router';
 import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 import {Search , ChatLineSquare, Share} from '@element-plus/icons-vue'
+import ImageDialog from '../house/ImageDialog.vue';
+import type { UrlInfo } from '@/components/HouseInfo.vue';
+import { api_PreFix } from '@/api';
 const currentWareHouse = useCurrentWareHouse()
 const route = useRoute()
+const dialog = ref(false)
+const url_info = ref<Array<UrlInfo> | undefined>()
 
 console.log(route.query);
 
@@ -119,6 +136,23 @@ const kv = ref<any[]>([])
 const binerProp_warehouseNO = ref('')
 const binerProp_warehouseName = ref('')
 const warehouseID = ref('')
+const show_yuntu = (yt:string) => {
+    const map_fn = (x: string) => {
+        if (x.startsWith('/') || x.startsWith('\\')) {
+            return '/' + api_PreFix + '/static/' + x.substring(1).replace('\\', '/')
+        } else {
+            return '/' + api_PreFix + '/static/' + x.replace('\\', '/')
+        }
+    };
+    const yuntu = yt?.split(",").map(map_fn) ?? []
+    url_info.value = [
+        {
+            name:'云图',
+            urls:yuntu
+        }
+    ]
+    dialog.value = true
+}
 warehouse.belongKv().then(res => {
     kv.value = res.data.value
     let item

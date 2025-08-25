@@ -1,26 +1,27 @@
 <template>
-    <el-dialog v-model="prop.dialogVisible" title="新增仓库" :before-close="handleClose" width="500">
+  <el-dialog v-model="prop.dialogVisible" title="新增仓库" :before-close="handleClose" width="500" header-class="p-5"
+    body-class="p-5">
 
-        <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules"
-            label-width="auto" class="demo-ruleForm">
+    <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="auto"
+      class="demo-ruleForm">
 
-            <el-form-item label="仓库编号" prop="warehouseNo">
-                <el-input v-model="ruleForm.warehouseNo"  autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="仓库名" prop="warehouseName">
-                <el-input v-model="ruleForm.warehouseName" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="仓库地址" prop="warehouseAddress">
-                <el-input v-model="ruleForm.warehouseAddress" />
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="submitForm(ruleFormRef)">
-                    提交
-                </el-button>
-                <el-button @click="$emit('close')" >取消</el-button>
-            </el-form-item>
-        </el-form>
-    </el-dialog>
+      <el-form-item label="仓库编号" prop="warehouseNo">
+        <el-input v-model="ruleForm.warehouseNo" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="仓库名" prop="warehouseName">
+        <el-input v-model="ruleForm.warehouseName" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="仓库地址" prop="warehouseAddress">
+        <el-input v-model="ruleForm.warehouseAddress" />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submitForm(ruleFormRef)">
+          提交
+        </el-button>
+        <el-button @click="$emit('close')">取消</el-button>
+      </el-form-item>
+    </el-form>
+  </el-dialog>
 </template>
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus';

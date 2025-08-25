@@ -18,8 +18,8 @@ export type type_House = {
     tongfengLx:string,
     tongfengZt:string,
     tongfengTu:string,
-    TFModeWin:string,
-    TongFengSst:string,
+    tfmodeWin:string,
+    tongFengSst:string,
 }
 export type TongfengInfo = {
     tfmodeWin:string,

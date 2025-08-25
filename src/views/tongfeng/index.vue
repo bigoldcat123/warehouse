@@ -1,31 +1,34 @@
 <template>
-    <div class="flex gap-x-4 items-center">
-        <el-button type="primary" @click="$router.go(-1)">
-            <el-icon>
-                <ArrowLeft />
-            </el-icon>返回</el-button>
-        <div>类型：{{ tongfengInfo?.tongfengLx }}</div>
-        <div>状态： {{ tongfengInfo?.tongfengZt }}</div>
+    <div class="bg-[url('/image_show_bg.png')] bg-contain min-h-screen">
+        <div class="flex gap-x-4 items-center ">
+            <el-button type="primary" @click="$router.go(-1)">
+                <el-icon>
+                    <ArrowLeft />
+                </el-icon>返回</el-button>
+            <div>类型：{{ tongfengInfo?.tongfengLx }}</div>
+            <div>状态： {{ tongfengInfo?.tongfengZt }}</div>
+        </div>
+        <div class=" flex justify-evenly pt-5 pb-5">
+            <button @click="() => currentImageInfo = 0"
+                :style="currentImageInfo == 0 ? 'background-color:rgb(66, 133, 244)' : ''"
+                class="cursor-pointer flex flex-1 justify-center text-slate-800 ">
+                通风状态图</button>
+            <button @click="() => currentImageInfo = 1"
+                :style="currentImageInfo == 1 ? 'background-color:rgb(66, 133, 244)' : ''"
+                class="  cursor-pointer flex flex-1 justify-center text-slate-800  border-l-2 border-r-2">通风水势图</button>
+            <button @click="() => currentImageInfo = 2"
+                :style="currentImageInfo == 2 ? 'background-color:rgb(66, 133, 244)' : ''"
+                class="  cursor-pointer flex flex-1 justify-center text-slate-800 ">通风窗口模型位图</button>
+        </div>
+        <!-- <div>{{ urls }}</div> -->
+        <div v-if="urls.length > 0" v-for="item in urls" class="content">
+            <img :src="item" alt="">
+        </div>
+        <div v-else class="content">
+            没有图片
+        </div>
     </div>
-    <div class=" flex justify-evenly pt-5 pb-5">
-        <button @click="() => currentImageInfo = 0"
-            :style="currentImageInfo == 0 ? 'background-color:rgb(66, 133, 244)' : ''"
-            class="cursor-pointer flex flex-1 justify-center text-slate-800 ">
-            通风状态图</button>
-        <button @click="() => currentImageInfo = 1"
-            :style="currentImageInfo == 1 ? 'background-color:rgb(66, 133, 244)' : ''"
-            class="  cursor-pointer flex flex-1 justify-center text-slate-800  border-l-2 border-r-2">通风水势图</button>
-        <button @click="() => currentImageInfo = 2"
-            :style="currentImageInfo == 2 ? 'background-color:rgb(66, 133, 244)' : ''"
-            class="  cursor-pointer flex flex-1 justify-center text-slate-800 ">通风窗口模型位图</button>
-    </div>
-    <!-- <div>{{ urls }}</div> -->
-    <div v-if="urls.length > 0" v-for="item in urls" class="content">
-        <img :src="item" alt="">
-    </div>
-    <div v-else class="content">
-        没有图片
-    </div>
+
 </template>
 <script setup lang="ts">
 import { ArrowLeft } from '@element-plus/icons-vue';

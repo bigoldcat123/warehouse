@@ -1,5 +1,5 @@
 <template>
-    <el-dialog v-model="v" title="处理" :before-close="handleClose" width="500">
+    <el-dialog v-model="v" title="处理" :before-close="handleClose" width="500" header-class="p-5" body-class="p-5">
 
         <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules"
             label-width="auto" class="demo-ruleForm">

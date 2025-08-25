@@ -1,10 +1,10 @@
 <template>
-  <el-dialog v-model="visible" title="修改仓房" :before-close="handleClose" width="500">
+  <el-dialog v-model="visible" title="修改仓房" header-class="p-5" body-class="p-5" :before-close="handleClose" width="500">
 
     <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="auto"
       class="demo-ruleForm">
 
-      <el-form-item label="仓房ID" >
+      <el-form-item label="仓房ID">
         <el-input disabled v-model="ruleForm.id" />
       </el-form-item>
       <el-form-item label="仓房编号" prop="houseNo">
@@ -18,8 +18,8 @@
       </el-form-item>
       <el-form-item label="仓房类型" prop="houseType">
         <el-select v-model="ruleForm.houseType" placeholder="Select" style="width: 240px">
-          <el-option  key="平房仓" label="平房仓" value="平房仓" />
-          <el-option  key="筒仓" label="筒仓" value="筒仓" />
+          <el-option key="平房仓" label="平房仓" value="平房仓" />
+          <el-option key="筒仓" label="筒仓" value="筒仓" />
         </el-select>
       </el-form-item>
       <el-form-item label="所属仓库" prop="warehouseID">
@@ -28,12 +28,13 @@
           <el-option v-for="item in kv" :key="item.key" :label="item.value" :value="item.key" />
         </el-select>
       </el-form-item>
-      <el-form-item label="列数(X)" prop="y">
-        <el-input v-model.number="ruleForm.y" />
-      </el-form-item>
-      <el-form-item label="行数(Y)" prop="x">
+      <el-form-item label="行数(X)" prop="x">
         <el-input v-model.number="ruleForm.x" />
       </el-form-item>
+      <el-form-item label="列数(Y)" prop="y">
+        <el-input v-model.number="ruleForm.y" />
+      </el-form-item>
+
 
       <el-form-item label="层数(Z)" prop="z">
         <el-input v-model.number="ruleForm.z" />

@@ -1,10 +1,11 @@
 <template>
-    <el-dialog v-model="v" title="处理" :before-close="handleClose" width="500">
+    <el-dialog v-model="v" title="处理" :before-close="handleClose" width="500" header-class="p-5" body-class="p-5">
 
-        <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon
-            label-width="auto" class="demo-ruleForm">
+        <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon label-width="auto"
+            class="demo-ruleForm">
             <el-form-item label="审批" prop="handle">
-                <el-input :autosize="{ minRows: 4, maxRows: 100 }" disabled v-model="ruleForm.handle" autocomplete="off" />
+                <el-input :autosize="{ minRows: 4, maxRows: 100 }" disabled v-model="ruleForm.handle"
+                    autocomplete="off" />
             </el-form-item>
         </el-form>
     </el-dialog>

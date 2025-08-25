@@ -1,5 +1,6 @@
 <template>
-  <el-dialog v-model="visiable" title="新增用户" :before-close="handleClose" width="500">
+  <el-dialog v-model="visiable" title="新增用户" :before-close="handleClose" width="500" header-class="p-5"
+    body-class="p-5">
 
     <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="auto"
       class="demo-ruleForm">
@@ -32,7 +33,9 @@
       </el-form-item>
       <el-form-item label="权利">
         <!-- <el-input v-model="ruleForm.priv" /> -->
-         <div @click="add_del_Priv(key)" class=" hover:bg-green-300 m-2 px-2 cursor-pointer outline outline-1 rounded-md" :class="privLChecked.includes(key)? 'bg-green-300' :''" v-for="item,key in privList">{{ item + '-' + key }}</div>
+        <div @click="add_del_Priv(key)" class=" hover:bg-green-300 m-2 px-2 cursor-pointer outline outline-1 rounded-md"
+          :class="privLChecked.includes(key)? 'bg-green-300' :''" v-for="item,key in privList">{{ item + '-' + key }}
+        </div>
       </el-form-item>
 
       <el-form-item>

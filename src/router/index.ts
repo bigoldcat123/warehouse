@@ -51,16 +51,8 @@ const router = createRouter({
           name: 'entry',
           component: () => import('@/views/entry/index.vue')
         },
-        {
-          path: '/show',
-          name: 'show',
-          component: () => import('@/views/show/index.vue')
-        },
-        {
-          path: '/tongfeng',
-          name: 'tongfeng',
-          component: () => import('@/views/tongfeng/index.vue')
-        },
+
+
       ]
     },
     {
@@ -72,7 +64,16 @@ const router = createRouter({
       path:'/display',
       name:"dispaly",
       component: () => import("@/views/display/index.vue")
-    }
+    },{
+      path: '/show',
+      name: 'show',
+      component: () => import('@/views/show/index.vue')
+    },
+    {
+      path: '/tongfeng',
+      name: 'tongfeng',
+      component: () => import('@/views/tongfeng/index.vue')
+    },
   ]
 })
 const adminRoutes = ['/warehouse','/user']

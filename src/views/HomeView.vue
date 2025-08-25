@@ -41,10 +41,11 @@ const v = ref(false)
 
 <template>
     <div class=" flex w-full" style="overflow-x:auto;">
-        <div class="flex flex-col h-screen" style="width:180px;background-color: #ddd;">
-            <div style="font-size:30px;border:1px solid #ddd;height:100px;vertical-align: middle;text-align: center;">
-                <img src="../assets/image/title_1.png"></div>
-            <el-menu class=" flex-1 el-menu-vertical-demo" :default-active="currentUser.isMainComp()?'/alarmarg':'/alarm'" :router="true">
+        <div class="flex flex-col h-screen" style="width:180px;">
+            <div class="py-3">
+                <img class=" object-contain" src="/banner.jpg">
+            </div>
+            <el-menu class=" flex-1 el-menu-vertical-demo " :default-active="currentUser.isMainComp()?'/alarmarg':'/alarm'" :router="true">
 
                 <el-menu-item v-if="currentUser.isMainComp()"  index="/alarmarg">
                     <el-icon>

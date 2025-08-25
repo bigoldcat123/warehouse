@@ -1,24 +1,24 @@
 <template>
-  <el-dialog v-model="v" title="修改密码" :before-close="handleClose" width="500">
+  <el-dialog v-model="v" title="修改密码" :before-close="handleClose" width="500" header-class="p-5" body-class="p-5">
 
-      <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules"
-          label-width="auto" class="demo-ruleForm">
-          <el-form-item label="旧密码" prop="old">
-              <el-input type="password"  v-model="ruleForm.old" />
-          </el-form-item>
-          <el-form-item label="新密码" prop="newP">
-              <el-input type="password"  v-model="ruleForm.newP" />
-          </el-form-item>
-          <el-form-item label="确认密码" prop="rectify">
-              <el-input type="password"  v-model="ruleForm.rectify" />
-          </el-form-item>
-          <el-form-item>
-              <el-button type="primary" @click="submitForm(ruleFormRef)">
-                  提交
-              </el-button>
-              <el-button @click="$emit('close')">取消</el-button>
-          </el-form-item>
-      </el-form>
+    <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="auto"
+      class="demo-ruleForm">
+      <el-form-item label="旧密码" prop="old">
+        <el-input type="password" v-model="ruleForm.old" />
+      </el-form-item>
+      <el-form-item label="新密码" prop="newP">
+        <el-input type="password" v-model="ruleForm.newP" />
+      </el-form-item>
+      <el-form-item label="确认密码" prop="rectify">
+        <el-input type="password" v-model="ruleForm.rectify" />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="submitForm(ruleFormRef)">
+          提交
+        </el-button>
+        <el-button @click="$emit('close')">取消</el-button>
+      </el-form-item>
+    </el-form>
   </el-dialog>
 </template>
 <script setup lang="ts">
