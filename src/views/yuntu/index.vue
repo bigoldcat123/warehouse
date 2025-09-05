@@ -2,13 +2,13 @@
     <div class="w-full h-screen min-w-[1000px] min-h-[800px] bg-[#2c3e50] overflow-auto">
         <div class="absolute z-50 top-[17px] text-[rgb(6,142,206)]"
             :style="{ left: 'max(500px, 50%)', transform: 'translateX(-50%)' }">
-            {{ urlInfo.houseName }}
+            {{ currentWarehouse.getWareHouse().wareHouseName }}
         </div>
         <div class="absolute z-50 top-[50px] text-[rgb(6,142,206)]"
             :style="{ left: 'max(500px, 50%)', transform: 'translateX(-50%)' }">
-            {{ urlInfo.name }}
+            {{ "云图播放" }}
         </div>
-        <div @click="$router.back()" class="absolute z-50 top-[25px] text-[rgb(6,142,206)] size-[20px] cursor-pointer "
+        <div @click="$router.push('/house')" class="absolute z-50 top-[25px] text-[rgb(6,142,206)] size-[20px] cursor-pointer "
             :style="{ left: 'max(968px, 97.3%)', transform: 'translateX(-50%)' }">
         </div>
         <!-- Size badge -->
@@ -59,26 +59,15 @@
                 backgroundRepeat: 'repeat-y'
             }" />
 
-            <!-- Center content area -->
-            <div v-if="!urlInfo.is_yuntu_model"
-                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-black/40 backdrop-blur">
-                <div class="w-full max-w-[800px] space-y-5">
-                    <img v-for="url in urlInfo.urls" :src="url" alt="内容图片"
-                        class="w-full h-auto shadow-xl border border-white/20" />
-                </div>
-            </div>
             <div
-                v-else
                 class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-black/40 backdrop-blur">
-                <div class="w-full max-w-[800px] space-y-5">
-                    <!-- <img v-for="url in urlInfo.urls" :src="url" alt="内容图片"
-                        class="w-full h-auto shadow-xl border border-white/20" /> -->
-                    <el-carousel height="auto" autoplay>
-                        <el-carousel-item style="height: auto;" v-for="url in urlInfo.urls">
-                            <img :src="url" alt="内容图片"
-                                class="w-full h-auto shadow-xl border border-white/20" />
+                <div class="w-full  max-w-[800px] space-y-5">
+                    <!-- <el-carousel height="auto" autoplay>
+                        <el-carousel-item :style="{height:h}" :key="url" v-for="url in urls">
+                            <img :src="url" alt="内容图片" class="w-full h-auto shadow-xl border border-white/20" />
                         </el-carousel-item>
-                    </el-carousel>
+                    </el-carousel> -->
+                    <Carousel :images="urls"></Carousel>
                 </div>
             </div>
         </div>
@@ -86,15 +75,37 @@
 </template>
 
 <script setup lang="ts">
-import type { UrlInfo } from '@/components/HouseInfo.vue'
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
+import Carousel from '@/components/common/Carousel.vue';
+import house from '@/api/house';
+import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+import { api_PreFix } from '@/api';
 const width = ref<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 const height = ref<number>(typeof window !== 'undefined' ? window.innerHeight : 0)
-const route = useRoute()
 const belowMin = computed(() => width.value < 1000 || height.value < 800)
-const urlInfo = route.query as unknown as  UrlInfo
+const currentWarehouse = useCurrentWareHouse()
+const urls = ref<Array<string>>([])
+const h = ref('10px');
+const map_fn = (x: string) => {
+    if (x.startsWith('/') || x.startsWith('\\')) {
+        return '/' + api_PreFix + '/static/' + x.substring(1).replace('\\', '/')
+    } else {
+        return '/' + api_PreFix + '/static/' + x.replace('\\', '/')
+    }
+};
 
+async function fetch_yuntu() {
+    const r = await house.listYuntu(currentWarehouse.getWareHouse().waerhouseId ?? '0')
+
+    urls.value = r.data.value.map(map_fn)
+    console.log(urls.value);
+    h.value = 'auto'
+
+}
+function cal(url: string) {
+
+}
+fetch_yuntu()
 function updateWindowSize() {
     width.value = window.innerWidth
     height.value = window.innerHeight
@@ -116,3 +127,35 @@ onBeforeUnmount(() => {
   - 维持与原版相同的布局尺寸与行为（四角、上下横幅、左右竖带与居中可滚动内容）。
   - 将原生 JS 改为 Vue3 响应式状态，实时显示当前窗口尺寸并提醒是否低于最小尺寸。
 -->
+<!-- 
+<template>
+    <Binner />
+
+    <div>
+        {{ urls }}
+    </div>
+</template>
+<script setup lang="ts">
+import { ref } from 'vue'
+import house from '@/api/house';
+import Binner from '@/components/common/Binner.vue';
+import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+import { api_PreFix } from '@/api';
+const currentWarehouse = useCurrentWareHouse()
+const urls = ref<Array<string>>([])
+const map_fn = (x: string) => {
+    if (x.startsWith('/') || x.startsWith('\\')) {
+        return '/' + api_PreFix + '/static/' + x.substring(1).replace('\\', '/')
+    } else {
+        return '/' + api_PreFix + '/static/' + x.replace('\\', '/')
+    }
+};
+
+async function fetch_yuntu() {
+    const r = await house.listYuntu(currentWarehouse.getWareHouse().waerhouseId ?? '0')
+    urls.value = r.data.value.map(map_fn)
+}
+fetch_yuntu()
+</script>
+<style scoped>
+</style> -->

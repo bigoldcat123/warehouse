@@ -1,35 +1,38 @@
 <template>
-    <div class=" bg-[rgb(249,250,252)] flex flex-col gap-y-1 text-xl max-w-72 min-w-72 p-5 ">
-        <div>{{ house.houseName }} -> {{ house.id }}</div>
-        <div>{{ house.houseType}}</div>
-        <div>{{ house.x}}*{{house.y}}*{{house.z}}</div>
-        <div>通风类型:{{ house.tongfengLx }}</div>
-        <div>通风状态: {{ house.tongfengZt }}</div>
+    <div class=" bg-[rgb(249,250,252)] flex flex-col gap-y-1 text-[15px] w-[253px] p-5 ">
+        <div>{{ house.houseNo }} 号仓房（ {{ house.houseName }} ）</div>
+        <div>种类:{{ house.breed }}</div>
+        <div>入库时间: {{ house.entryTime }}</div>
         <div class=" grid grid-cols-2 gap-x-2 gap-y-2">
-            <button class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng">通风图</button>
-            <button class=" bg-[rgb(63,157,251)] p-1" @click="show_yuntu">云图</button>
-            <button class=" bg-[rgb(63,157,251)] p-1" @click="show_quxian">曲线</button>
-            <button class=" bg-[rgb(63,157,251)] p-1" @click="show_3D">3D图</button>
-            <button class=" bg-[rgb(63,157,251)] p-1" @click="show_shuishi">水势图</button>
+            <button v-if="isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng_window">通风窗口图</button>
+            <button v-if="isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng_water">通风水势图</button>
+
+            <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_yuntu">云图</button>
+            <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_quxian">曲线</button>
+            <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_3D">3D图</button>
+            <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_shuishi">水势图</button>
         </div>
         <div class=" grid grid-cols-2 gap-x-2 gap-y-2">
-            <el-popconfirm title="确认删除?" @confirm="handle_delete">
+            <!-- <el-popconfirm title="确认删除?" @confirm="handle_delete">
                 <template #reference>
                     <button class=" bg-[rgb(63,157,251)] p-1">删除</button>
                 </template>
-            </el-popconfirm>
-            <button @click="emit('update',house)" class=" bg-[rgb(63,157,251)] p-1">编辑</button>
+</el-popconfirm> -->
+            <button v-if="!isWind" @click="emit('update', house)" class=" bg-[rgb(63,157,251)] p-1">编辑</button>
         </div>
     </div>
 </template>
 <script setup lang="ts">
 import { api_PreFix } from '@/api';
+import { useRouter } from 'vue-router';
 import type { type_House } from '@/api/house';
-import { ref } from 'vue'
-const { house } = defineProps<{
-    house:type_House
+const { house, isWind } = defineProps<{
+    house: type_House
+    isWind?: boolean
 }>()
-export type UrlInfo= { name: string, urls: Array<string> }
+const router = useRouter()
+
+export type UrlInfo = { name: string, urls: Array<string>, houseName: string,is_yuntu_model?:boolean }
 // const emit = defineEmits<{
 //     // <eventName>: <expected arguments>
 //     delete: [id:number] // named tuple syntax
@@ -37,13 +40,13 @@ export type UrlInfo= { name: string, urls: Array<string> }
 //     show_image:[data:Array<A>]
 // }>()
 const emit = defineEmits<{
-    (event: 'delete',id:number): void,
-    (event: 'update',house:type_House): void
+    (event: 'delete', id: number): void,
+    (event: 'update', house: type_House): void
     (event: 'show_image', data: Array<UrlInfo>): void
 
 }>()
-const handle_delete =() => {
-    emit('delete',house.id!)    
+const handle_delete = () => {
+    emit('delete', house.id!)
 }
 const map_fn = (x: string) => {
     if (x.startsWith('/') || x.startsWith('\\')) {
@@ -52,64 +55,80 @@ const map_fn = (x: string) => {
         return '/' + api_PreFix + '/static/' + x.replace('\\', '/')
     }
 };
-const show_tongfeng = () => {
-    console.log(house);
-    
-    const tongfengZt = house.tongfengTu?.split(',').map(map_fn) ?? []
+const show_tongfeng_window = () => {
+
+    const tongfengZt = house.tfmodeWin?.split(',').map(map_fn) ?? []
+
+    router.push({
+        path: '/show',
+        query: {
+            name: '通风窗口图',
+            urls: tongfengZt,
+            houseName: house.houseName
+        }
+    })
+}
+const show_tongfeng_water = () => {
+
     const tongFengSst = house.tongFengSst?.split(',').map(map_fn) ?? []
 
-    emit('show_image',[
-        {
-            name:'通风状态图',
-            urls: tongfengZt
-        },
-        {
+
+    router.push({
+        path: '/show',
+        query: {
             name: '通风水势图',
-            urls: tongFengSst
+            urls: tongFengSst,
+            houseName: house.houseName
         }
-    ])
+    })
 }
 const show_yuntu = () => {
     const yuntu = house.yuntu?.split(",").map(map_fn) ?? []
-    emit('show_image',[
-        {
-            name:'云图',
-            urls:yuntu
+
+    router.push({
+        path: '/show',
+        query: {
+            name: '云图',
+            urls: yuntu,
+            houseName: house.houseName
         }
-    ])
+    })
 }
-const show_quxian =() => {
+const show_quxian = () => {
     const quxian = house.quxian?.split(",").map(map_fn) ?? []
-    emit('show_image', [
-        {
+
+    router.push({
+        path: '/show',
+        query: {
             name: '曲线图',
-            urls: quxian
+            urls: quxian,
+            houseName: house.houseName
         }
-    ])
+    })
 }
 const show_3D = () => {
     const threeD = house.threeD?.split(",").map(map_fn) ?? []
-    emit('show_image', [
-        {
+
+    router.push({
+        path: '/show',
+        query: {
             name: '3D图',
-            urls: threeD
+            urls: threeD,
+            houseName: house.houseName
         }
-    ])
+    })
 }
 const show_shuishi = () => {
     const shuishi = house.valeWin?.split(",").map(map_fn) ?? []
-    const moxing = house.tfmodeWin?.split(",").map(map_fn) ?? []
-    emit('show_image', [
-        {
+
+    router.push({
+        path: '/show',
+        query: {
             name: '水势图',
-            urls: shuishi
-        },
-        {
-            name: '通风窗口模型图',
-            urls: moxing
+            urls: shuishi,
+            houseName: house.houseName
         }
-    ])
+    })
 }
 </script>
-<style scoped>
-</style>
+<style scoped></style>

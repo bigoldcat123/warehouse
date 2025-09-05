@@ -51,7 +51,11 @@ const router = createRouter({
           name: 'entry',
           component: () => import('@/views/entry/index.vue')
         },
-
+        {
+          path:'/wind',
+          name:'wind',
+          component: () => import('@/views/wind/index.vue')
+        },
 
       ]
     },
@@ -68,6 +72,11 @@ const router = createRouter({
       path: '/show',
       name: 'show',
       component: () => import('@/views/show/index.vue')
+    },
+    {
+      path: '/yuntu',
+      name: 'yuntu',
+      component: () => import('@/views/yuntu/index.vue')
     },
     {
       path: '/tongfeng',

@@ -7,9 +7,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    Binner: typeof import('./src/components/common/Binner.vue')['default']
-    Button: typeof import('./src/components/common/Button.vue')['default']
+    Carousel: typeof import('./src/components/common/Carousel.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCarousel: typeof import('element-plus/es')['ElCarousel']
+    ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
@@ -28,10 +29,7 @@ declare module 'vue' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
-    HouseInfo: typeof import('./src/components/HouseInfo.vue')['default']
-    MailAuth: typeof import('./src/components/Login/MailAuth.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    UserNamePasswordAuth: typeof import('./src/components/Login/UserNamePasswordAuth.vue')['default']
   }
 }

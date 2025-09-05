@@ -13,7 +13,7 @@ export interface type_Entry {
 }
 type EntryQuery = {
     warehouseId?:number,
-    Houseid? : number,
+    houseId? : number,
     from?:string,
     to?:string
 }

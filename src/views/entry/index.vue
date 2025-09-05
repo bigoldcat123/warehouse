@@ -129,7 +129,7 @@ const query = () => {
 }
 function fetchData() {
 
-    entry.list({warehouseId:waerhouseID.value,Houseid:houseID.value,from:from.value,to:to.value},currentpage.value, size.value).then(res => {
+    entry.list({ warehouseId: waerhouseID.value, houseId:houseID.value,from:from.value,to:to.value},currentpage.value, size.value).then(res => {
         list.value = res.data.value
     })
 }

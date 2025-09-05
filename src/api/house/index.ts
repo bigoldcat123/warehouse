@@ -20,6 +20,8 @@ export type type_House = {
     tongfengTu:string,
     tfmodeWin:string,
     tongFengSst:string,
+    breed:string,
+    entryTime:string
 }
 export type TongfengInfo = {
     tfmodeWin:string,
@@ -39,6 +41,23 @@ class House  {
                 houseNo
             }
         } )
+    }
+    listTongfeng(current: number, size: number, wareHouseId: string, houseNo: string) {
+        return server.get<ResponseData<Page<type_House>>>(preFix + '/wind', {
+            params: {
+                current,
+                size,
+                wareHouseId,
+                houseNo
+            }
+        })
+    }
+    listYuntu(wareHouseId:string) {
+        return server.get<ResponseData<Array<string>>>(preFix + '/yuntu', {
+            params: {
+                wareHouseId,
+            }
+        })
     }
     add(house:type_House) {
         return server.post(preFix,house)

@@ -1,16 +1,16 @@
 <template>
-    <el-dialog v-model="visiable" width="1132" :before-close="handleClose" :show-close="false" header-class="h"
+    <el-dialog v-model="visiable" :width="width" :before-close="handleClose" :show-close="false" header-class="h"  top="1%"
         body-class="h" footer-class="h">
-        <div class="min-h-[632px] bg-[url('/image_show_bg.png')] bg-contain relative">
-            <div class=" absolute w-[350px] left-[388px] top-[56px]  text-center text-[rgb(6,142,206)] ">{{ p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo[current_idx].name : ""}}</div>
-            <div class=" absolute left-[128px] top-[80px]  text-red-50">
-                <button   class=" ml-2 p-[5px] bg-blue-400" v-for="i,k in p.urlInfo" @click="current_idx = k">
+        <div :style="{height:height}" class=" bg-[url('/image_show_bg_2.jpg')] bg-contain relative">
+            <div class=" absolute  w-[36%] left-[32%] top-[6%]  text-center text-[rgb(6,142,206)] ">{{ p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo[current_idx].name : ""}} </div>
+            <!-- <div class=" absolute left-[1%] top-[44%]  text-red-50 flex  flex-col gap-y-3">
+                <button   class=" ml-2 p-[5px] bg-blue-400 text-[15px] w-[100px]" v-for="i,k in p.urlInfo" @click="current_idx = k">
                     {{ i.name }} 
                 </button>
-            </div>
-            <button @click="emit('close')" class=" absolute right-[20px] top-[20px] h-[30px] w-[30px]"></button>
+            </div> -->
+            <button @click="emit('close')" class="  absolute right-[2%] top-[2%] h-[3%] w-[3%]"></button>
             <div
-                class=" absolute left-[218px] top-[150px] max-h-[400px] max-w-[700px] min-h-[400px] min-w-[700px]  overflow-auto">
+                class=" absolute left-[20%] top-[13%] h-[82%] w-[60%]   overflow-auto">
                 <img v-for="url in p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo![current_idx].urls : []" class=" w-full" :src="url" alt="">
                 <div v-if="!(p.urlInfo) || p.urlInfo.length == 0 || p.urlInfo[current_idx].urls.length == 0">
                     没有图片
@@ -27,6 +27,8 @@ const p = defineProps<{
     dialogVisible: boolean,
     urlInfo?:Array<UrlInfo>
 }>()
+const height = ref("850px");
+const width = ref('1000px');
 const current_idx = ref(0)
 const emit = defineEmits<{
     (event: 'close'): void,
@@ -41,6 +43,36 @@ onUpdated(() => {
 const handleClose = (done: () => void) => {
     emit('close')
 }
+import { onBeforeUnmount } from 'vue'
+
+const windowSize = ref({ width: window.innerWidth, height: window.innerHeight })
+
+const updateWindowSize = () => {
+    windowSize.value.width = window.innerWidth
+    windowSize.value.height = window.innerHeight
+
+    // 保证比例为 2000:1700
+    const ratio = 2000 / 1700
+    let w = window.innerWidth * 0.7
+    let h = window.innerHeight * 0.95
+
+    if (w / h > ratio) {
+        w = h * ratio
+    } else {
+        h = w / ratio
+    }
+
+    width.value = `${w}px`
+    height.value = `${h}px`
+}
+
+onMounted(() => {
+    window.addEventListener('resize', updateWindowSize)
+})
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateWindowSize)
+})
 </script>
 
 <style >

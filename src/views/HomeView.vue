@@ -13,7 +13,9 @@ import {
     Box,
     Flag,
     EditPen,
-    CloseBold
+    CloseBold,
+    VideoCamera,
+    PictureFilled
 } from '@element-plus/icons-vue'
 import ChangePasswd from './ChangePasswd.vue';
 import { ElTag } from 'element-plus';
@@ -45,20 +47,7 @@ const v = ref(false)
             <div class="py-3">
                 <img class=" object-contain" src="/banner.jpg">
             </div>
-            <el-menu class=" flex-1 el-menu-vertical-demo " :default-active="currentUser.isMainComp()?'/alarmarg':'/alarm'" :router="true">
-
-                <el-menu-item v-if="currentUser.isMainComp()"  index="/alarmarg">
-                    <el-icon>
-                        <Flag />
-                    </el-icon>
-                    <span>报警统计</span>
-                </el-menu-item>
-                <el-menu-item  index="/alarm">
-                    <el-icon>
-                        <Bell />
-                    </el-icon>
-                    <span>报警信息</span>
-                </el-menu-item>
+            <el-menu class=" flex-1 el-menu-vertical-demo " :default-active="'/house'" :router="true">
 
                 <el-menu-item index="/house">
                     <el-icon>
@@ -67,20 +56,46 @@ const v = ref(false)
                     <span>仓房管理</span>
                 </el-menu-item>
 
-                <el-menu-item  index="/data">
+                <el-menu-item index="/wind">
+                    <el-icon>
+                        <VideoCamera />
+                    </el-icon>
+                    <span>通风状态</span>
+                </el-menu-item>
+                <el-menu-item index="/yuntu">
+                    <el-icon>
+                        <PictureFilled />
+                    </el-icon>
+                    <span>云图播放</span>
+                </el-menu-item>
+
+                <el-menu-item v-if="currentUser.isMainComp()" index="/alarmarg">
+                    <el-icon>
+                        <Flag />
+                    </el-icon>
+                    <span>报警统计</span>
+                </el-menu-item>
+
+                <el-menu-item index="/alarm">
+                    <el-icon>
+                        <Bell />
+                    </el-icon>
+                    <span>报警信息</span>
+                </el-menu-item>
+
+                <el-menu-item index="/data">
                     <el-icon>
                         <IconMenu />
                     </el-icon>
                     <span>数据查看</span>
                 </el-menu-item>
-                <el-menu-item  index="/entry">
+                <el-menu-item index="/entry">
                     <el-icon>
                         <setting />
                     </el-icon>
                     <span>仓房入库管理</span>
                 </el-menu-item>
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'"
-                    index="/warehouse">
+                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'" index="/warehouse">
                     <el-icon>
                         <Box />
                     </el-icon>
@@ -88,8 +103,7 @@ const v = ref(false)
                 </el-menu-item>
 
 
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'"
-                    index="/user">
+                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'" index="/user">
                     <el-icon>
                         <Avatar />
                     </el-icon>
@@ -100,7 +114,8 @@ const v = ref(false)
             </el-menu>
         </div>
         <div class=" flex-1 flex flex-col items-end">
-            <div class="p-8" style="height:100px;border:1px;width:100%;position: relative;background-color:  rgb(66,133,244);">
+            <div class="p-8"
+                style="height:100px;border:1px;width:100%;position: relative;background-color:  rgb(66,133,244);">
                 <div style="height:75px;width:600px;position: absolute;left: 50px;top:10px;"><img src="/banner2.png">
                 </div>
                 <div style="height:75px;border:1px;width:350px;position: absolute;right: 0px;">
@@ -110,8 +125,12 @@ const v = ref(false)
                     <ElTag>{{ currentUser.getUserDetail()?.username }}</ElTag><span
                         style="font-size:small;">您好！&emsp;</span>
 
-                    <el-button type="primary" size="small" @click="v = true"><el-icon><EditPen/></el-icon> 修改密码</el-button>
-                    <el-button type="danger" size="small" @click="logout"><el-icon><CloseBold/></el-icon> 退出</el-button>
+                    <el-button type="primary" size="small" @click="v = true"><el-icon>
+                            <EditPen />
+                        </el-icon> 修改密码</el-button>
+                    <el-button type="danger" size="small" @click="logout"><el-icon>
+                            <CloseBold />
+                        </el-icon> 退出</el-button>
                 </div>
             </div>
             <div>&nbsp;</div>
