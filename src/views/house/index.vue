@@ -2,7 +2,7 @@
     <Binner />
 
     <!-- 状态标签筛选栏 -->
-    <div class="flex items-center gap-3 mb-5 flex-wrap">
+    <!-- <div class="flex items-center gap-3 mb-5 flex-wrap">
         <button
             class="status-tag status-tag--active"
             :class="{ 'ring-2 ring-white/40': activeFilter === 'all' }"
@@ -53,7 +53,7 @@
             </svg>
             故障点过多: {{ faultCount }}个
         </button>
-    </div>
+    </div> -->
 
     <!-- 搜索工具栏 -->
     <div class="flex items-center gap-4 mb-5">
