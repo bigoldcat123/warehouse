@@ -26,7 +26,7 @@
       <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="90px"
         class="dark-form">
 
-        <el-form-item label="仓库" prop="houseID">
+        <el-form-item label="仓库">
           <el-select @change="warehouseChange" v-model="p" placeholder="请选择仓库" style="width: 240px" class="dark-select">
             <el-option v-for="item in warehouekv" :key="item.key" :label="item.value" :value="item.key" />
           </el-select>
