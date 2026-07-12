@@ -119,10 +119,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
             Auth.daoLogin(ruleForm)
                 .then((res) => {
                     currentUser.setValue(res.data.value);
-                    if (currentUser.isMainComp()) {
-                        router.push("/alarmarg");
-                    } else {
-                        router.push("/alarm");
+
+                    if (currentUser.getUserDetail()?.username == "jlfgs") {
+                      router.push("/panel");
+                    }else {
+                      router.push("/house");
                     }
                 })
                 .catch((err) => {

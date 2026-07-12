@@ -12,12 +12,7 @@
             :style="{ left: 'max(968px, 97.3%)', transform: 'translateX(-50%)' }">
         </div>
         <!-- Size badge -->
-        <div class="fixed top-2 left-2 z-50 text-sm text-white rounded px-3 py-2"
-            :class="belowMin ? 'bg-red-800/80' : 'bg-black/80'">
-            <div class="font-semibold">窗口尺寸</div>
-            <div>{{ width }} × {{ height }}</div>
-            <div class="opacity-80">最小：1000 × 800</div>
-        </div>
+
 
         <div class="relative w-full h-full min-w-[1000px] min-h-[800px]">
             <!-- Corners -->
@@ -60,8 +55,8 @@
             }" />
 
             <div
-                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-black/40 backdrop-blur">
-                <div class="w-full  max-w-[800px] space-y-5">
+                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center justify-center bg-[#011437] backdrop-blur">
+                <div class="w-full  max-w-[1000px] space-y-5">
                     <!-- <el-carousel height="auto" autoplay>
                         <el-carousel-item :style="{height:h}" :key="url" v-for="url in urls">
                             <img :src="url" alt="内容图片" class="w-full h-auto shadow-xl border border-white/20" />
@@ -120,42 +115,3 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', updateWindowSize)
 })
 </script>
-
-<!--
-  说明：
-  - 样式均以 Tailwind 实现，极少数使用内联 style 来设置平铺背景图片（repeat-x / repeat-y）。
-  - 维持与原版相同的布局尺寸与行为（四角、上下横幅、左右竖带与居中可滚动内容）。
-  - 将原生 JS 改为 Vue3 响应式状态，实时显示当前窗口尺寸并提醒是否低于最小尺寸。
--->
-<!-- 
-<template>
-    <Binner />
-
-    <div>
-        {{ urls }}
-    </div>
-</template>
-<script setup lang="ts">
-import { ref } from 'vue'
-import house from '@/api/house';
-import Binner from '@/components/common/Binner.vue';
-import { useCurrentWareHouse } from '@/stores/currentWareHouse';
-import { api_PreFix } from '@/api';
-const currentWarehouse = useCurrentWareHouse()
-const urls = ref<Array<string>>([])
-const map_fn = (x: string) => {
-    if (x.startsWith('/') || x.startsWith('\\')) {
-        return '/' + api_PreFix + '/static/' + x.substring(1).replace('\\', '/')
-    } else {
-        return '/' + api_PreFix + '/static/' + x.replace('\\', '/')
-    }
-};
-
-async function fetch_yuntu() {
-    const r = await house.listYuntu(currentWarehouse.getWareHouse().waerhouseId ?? '0')
-    urls.value = r.data.value.map(map_fn)
-}
-fetch_yuntu()
-</script>
-<style scoped>
-</style> -->

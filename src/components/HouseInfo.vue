@@ -2,15 +2,22 @@
     <div class=" bg-[rgb(249,250,252)] flex flex-col gap-y-1 text-[15px] w-[253px] p-5 ">
         <div>{{ house.houseNo }} 号仓房（ {{ house.houseName }} ）</div>
         <div>种类:{{ house.breed }}</div>
+        <div>水分: {{ house.water }}</div>
         <div>入库时间: {{ house.entryTime }}</div>
         <div class=" grid grid-cols-2 gap-x-2 gap-y-2">
-            <button v-if="isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng_window">通风窗口图</button>
             <button v-if="isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng_water">通风水势图</button>
+            <button style="display:none" v-if="isWind"  class=" bg-[rgb(63,157,251)] p-1" @click="show_tongfeng_window">通风窗口图</button>
 
             <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_yuntu">云图</button>
             <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_quxian">曲线</button>
             <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_3D">3D图</button>
+            <!-- //TODO -->
             <button v-if="!isWind" class=" bg-[rgb(63,157,251)] p-1" @click="show_shuishi">水势图</button>
+            <button style="display:none" v-if="!isWind"  class=" bg-[rgb(63,157,251)] p-1" @click="show_window">窗口图</button>
+            <button v-if="!isWind && house.has_kt" @click="router.push('/wsss?houseno=' + house.houseNo)" class=" bg-[rgb(63,157,251)] p-1">光伏</button>
+
+            <button v-if="!isWind" @click="emit('update', house)" class=" bg-[rgb(63,157,251)] p-1">编辑</button>
+
         </div>
         <div class=" grid grid-cols-2 gap-x-2 gap-y-2">
             <!-- <el-popconfirm title="确认删除?" @confirm="handle_delete">
@@ -18,7 +25,6 @@
                     <button class=" bg-[rgb(63,157,251)] p-1">删除</button>
                 </template>
 </el-popconfirm> -->
-            <button v-if="!isWind" @click="emit('update', house)" class=" bg-[rgb(63,157,251)] p-1">编辑</button>
         </div>
     </div>
 </template>
@@ -32,7 +38,7 @@ const { house, isWind } = defineProps<{
 }>()
 const router = useRouter()
 
-export type UrlInfo = { name: string, urls: Array<string>, houseName: string,is_yuntu_model?:boolean }
+export type UrlInfo = { name: string, urls: Array<string>, houseName?: string,is_yuntu_model?:boolean }
 // const emit = defineEmits<{
 //     // <eventName>: <expected arguments>
 //     delete: [id:number] // named tuple syntax
@@ -57,7 +63,7 @@ const map_fn = (x: string) => {
 };
 const show_tongfeng_window = () => {
 
-    const tongfengZt = house.tfmodeWin?.split(',').map(map_fn) ?? []
+    const tongfengZt = house.tongfengTu?.split(',').map(map_fn) ?? []
 
     router.push({
         path: '/show',
@@ -119,7 +125,7 @@ const show_3D = () => {
     })
 }
 const show_shuishi = () => {
-    const shuishi = house.valeWin?.split(",").map(map_fn) ?? []
+    const shuishi = house.tfModSst?.split(",").map(map_fn) ?? []
 
     router.push({
         path: '/show',
@@ -129,6 +135,18 @@ const show_shuishi = () => {
             houseName: house.houseName
         }
     })
+}
+const show_window = () => {
+  const shuishi = house.tfmodeWin?.split(",").map(map_fn) ?? []
+
+  router.push({
+      path: '/show',
+      query: {
+          name: '窗口图',
+          urls: shuishi,
+          houseName: house.houseName
+      }
+  })
 }
 </script>
 <style scoped></style>

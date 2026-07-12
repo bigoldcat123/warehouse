@@ -8,9 +8,9 @@ export type WareHouseStore = {
 }
 export const useCurrentWareHouse = defineStore('currentWareHouse', () => {
   const currentWarehouse = ref<WareHouseStore>({
-    waerhouseId: '',
-    wareHouseNO: '',
-    wareHouseName: ''
+    waerhouseId: undefined,
+    wareHouseNO: undefined,
+    wareHouseName: undefined
   })
   const isInited = ref(false)
   function init(wareHouse: WareHouseStore) {

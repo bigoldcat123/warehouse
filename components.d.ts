@@ -7,6 +7,8 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Binner: typeof import('./src/components/common/Binner.vue')['default']
+    Button: typeof import('./src/components/common/Button.vue')['default']
     Carousel: typeof import('./src/components/common/Carousel.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCarousel: typeof import('element-plus/es')['ElCarousel']
@@ -25,11 +27,22 @@ declare module 'vue' {
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
+    ElProgress: typeof import('element-plus/es')['ElProgress']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTag: typeof import('element-plus/es')['ElTag']
+    Gauge: typeof import('./src/components/charts/Gauge.vue')['default']
+    GfktGague: typeof import('./src/components/gfkt/GfktGague.vue')['default']
+    GfktInfo: typeof import('./src/components/gfkt/GfktInfo.vue')['default']
+    HouseInfo: typeof import('./src/components/HouseInfo.vue')['default']
+    LineChart: typeof import('./src/components/charts/LineChart.vue')['default']
+    MailAuth: typeof import('./src/components/Login/MailAuth.vue')['default']
+    NhlGague: typeof import('./src/components/nhl/NhlGague.vue')['default']
+    NhlGague2: typeof import('./src/components/nhl/NhlGague2.vue')['default']
+    NhlInfo: typeof import('./src/components/nhl/NhlInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserNamePasswordAuth: typeof import('./src/components/Login/UserNamePasswordAuth.vue')['default']
   }
 }

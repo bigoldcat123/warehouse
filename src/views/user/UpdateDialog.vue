@@ -11,7 +11,7 @@
         <el-input :disabled="prop.current?.username == 'admin'" v-model="ruleForm.username" />
       </el-form-item>
       <el-form-item label="密码">
-        <el-input :disabled="prop.current?.username == 'admin'" type="password" v-model="ruleForm.password" />
+        <el-input :disabled="prop.current?.username == 'admin'" type="password" placeholder="如果不修改密码，请保持密码框为空" v-model="ruleForm.password" />
       </el-form-item>
       <el-form-item label="姓名" prop="name">
         <el-input v-model="ruleForm.name" />

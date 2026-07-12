@@ -8,6 +8,7 @@
 import { ref } from 'vue'
 import {useCurrentWareHouse} from '@/stores/currentWareHouse'
 const w = useCurrentWareHouse()
+
 </script>
 <style scoped>
 </style>

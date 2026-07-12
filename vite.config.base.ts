@@ -26,7 +26,7 @@ export default defineConfig(
             }
         },
       },
-      
+
     ],
     resolve: {
       alias: {
@@ -40,10 +40,10 @@ export default defineConfig(
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
-        '/ws': {
-          target: 'ws://localhost:8080',
-          ws: true,
-        },
+        // '/ws': {
+        //   target: 'ws://localhost:8080',
+        //   ws: true,
+        // },
       },
       port:8848,
       host:'0.0.0.0'
@@ -62,4 +62,3 @@ export default defineConfig(
     }
   }
 )
-

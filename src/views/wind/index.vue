@@ -1,9 +1,9 @@
 <template>
     <Binner />
     <div class="mb-4">
-        <el-button @click="addDialog = true" type="primary"><el-icon>
+        <!-- <el-button @click="addDialog = true" type="primary"><el-icon>
                 <Plus />
-            </el-icon>新增</el-button>
+            </el-icon>新增</el-button> -->
         <span class=" ml-16">
             <!-- <el-input v-model="warehouseName" class="max-w-32 m-2" placeholder="请输入仓库名" /> -->
 

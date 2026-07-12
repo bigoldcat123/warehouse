@@ -8,7 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      redirect:'/alarm',
+      redirect:'/house',
       component: HomeView,
       children:[
         {
@@ -56,7 +56,6 @@ const router = createRouter({
           name:'wind',
           component: () => import('@/views/wind/index.vue')
         },
-
       ]
     },
     {
@@ -83,6 +82,28 @@ const router = createRouter({
       name: 'tongfeng',
       component: () => import('@/views/tongfeng/index.vue')
     },
+    {
+      path:'/panel',
+      name:'panel',
+      component:() => import('@/views/panel/index.vue')
+    },
+    {
+      path:'/wsss',
+      name:'ws',
+      component:() => import('@/views/ws/index.vue')
+    },{
+      path:"/nhl",
+      name:"nhl",
+      component:() => import('@/views/nhl/index.vue')
+    },{
+      path:"/gfkt",
+      name:"gfkt",
+      component:() => import('@/views/gf_kt/index.vue')
+    },{
+      path:'/outter',
+      name:'outter',
+      component:() => import('@/views/outter/index.vue')
+    }
   ]
 })
 const adminRoutes = ['/warehouse','/user']
@@ -94,10 +115,10 @@ router.beforeEach((to, from, next) => {
     if (to.name !== 'login' && !currentUser.isLogin()) {
       next({ name: 'login' })
     } else if (to.name == 'login' && currentUser.isLogin()) {
-      next({ name: 'home' })
+      next({ name: 'house' })
     } else {
       if(currentUser.getUserDetail()?.username != 'admin' &&  adminRoutes.includes(to.path)){
-        next({ name: 'home' })
+        next({ name: 'house' })
       }
       next()
     }

@@ -15,7 +15,8 @@ import {
     EditPen,
     CloseBold,
     VideoCamera,
-    PictureFilled
+    PictureFilled,
+    ArrowLeft
 } from '@element-plus/icons-vue'
 import ChangePasswd from './ChangePasswd.vue';
 import { ElTag } from 'element-plus';
@@ -24,6 +25,7 @@ import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 const router = useRouter()
 const currentWareHouse = useCurrentWareHouse()
 const currentUser = useCurrentUserStore()
+const SPECIAL_NAME = import.meta.env.ENV_SPECIAL_USER;
 const kv = ref<any[]>([{
     value: '分公司',
     key: -1
@@ -32,6 +34,7 @@ warehouse.kv().then(res => {
     kv.value.push(...res.data.value)
 })
 function logout() {
+
     auth.logout().then(res => {
         currentUser.logout()
         currentWareHouse.clear()
@@ -48,6 +51,12 @@ const v = ref(false)
                 <img class=" object-contain" src="/banner.jpg">
             </div>
             <el-menu class=" flex-1 el-menu-vertical-demo " :default-active="'/house'" :router="true">
+                <el-menu-item v-if="currentUser.getUserDetail()?.username == SPECIAL_NAME" index="/panel">
+                    <el-icon>
+                        <ArrowLeft />
+                    </el-icon>
+                    <span>回首页</span>
+                </el-menu-item>
 
                 <el-menu-item index="/house">
                     <el-icon>
@@ -111,6 +120,7 @@ const v = ref(false)
                 </el-menu-item>
 
 
+
             </el-menu>
         </div>
         <div class=" flex-1 flex flex-col items-end">
@@ -122,7 +132,7 @@ const v = ref(false)
                     <ElTag type="success">{{
                         kv.filter(x => x.key == currentUser.getUserDetail()!.companyID)[0]?.value
                         }}</ElTag>
-                    <ElTag>{{ currentUser.getUserDetail()?.username }}</ElTag><span
+                    <ElTag>{{ currentUser.getUserDetail()?.name }}</ElTag><span
                         style="font-size:small;">您好！&emsp;</span>
 
                     <el-button type="primary" size="small" @click="v = true"><el-icon>

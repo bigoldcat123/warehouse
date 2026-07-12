@@ -21,7 +21,10 @@ export type type_House = {
     tfmodeWin:string,
     tongFengSst:string,
     breed:string,
-    entryTime:string
+    entryTime:string,
+    water:number
+    tfModSst:string,
+    has_kt:boolean
 }
 export type TongfengInfo = {
     tfmodeWin:string,

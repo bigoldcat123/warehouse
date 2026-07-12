@@ -45,3 +45,25 @@ declare type MailLoginUser = {
     email: string
     code: string
 }
+declare type MqttDeviceInfoResponse = {
+  mid:string,
+  devices:Array<{
+    serciceId:string,
+    data:{
+      warehouse_code:number, // 这个是 house_no
+      warehouse_name:string, // 这个是 house_name
+      PV_elec:number,
+      air_data:Array<{
+        air_assetCode:string,
+        air_hour_elec:number
+      }>,
+      meter_data:Array<{
+        meter_name:string,
+        meter_addr:string,
+        meter_installAddr:string,
+        meter_elec:number
+      }>,
+      eventTime:string
+    }
+  }>
+}

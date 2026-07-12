@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 
 interface Props {
     images: string[] // 传入的图片数组
@@ -57,9 +57,16 @@ function prev() {
 function next() {
     currentIndex.value = (currentIndex.value + 1) % props.images.length
 }
-
+let interval_id :number | undefined
 onMounted(() => {
     updateHeight()
+    interval_id =setInterval(() => {
+        next()
+    },3000)
+
+})
+onUnmounted(() => {
+    clearInterval(interval_id)
 })
 
 watch(currentIndex, () => {

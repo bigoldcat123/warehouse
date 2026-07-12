@@ -12,12 +12,7 @@
             :style="{ left: 'max(968px, 97.3%)', transform: 'translateX(-50%)' }">
         </div>
         <!-- Size badge -->
-        <div class="fixed top-2 left-2 z-50 text-sm text-white rounded px-3 py-2"
-            :class="belowMin ? 'bg-red-800/80' : 'bg-black/80'">
-            <div class="font-semibold">窗口尺寸</div>
-            <div>{{ width }} × {{ height }}</div>
-            <div class="opacity-80">最小：1000 × 800</div>
-        </div>
+
 
         <div class="relative w-full h-full min-w-[1000px] min-h-[800px]">
             <!-- Corners -->
@@ -61,16 +56,16 @@
 
             <!-- Center content area -->
             <div v-if="!urlInfo.is_yuntu_model"
-                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-black/40 backdrop-blur">
-                <div class="w-full max-w-[800px] space-y-5">
+                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-[#011437] backdrop-blur">
+                <div class="w-full max-w-[1000px] space-y-5">
                     <img v-for="url in urlInfo.urls" :src="url" alt="内容图片"
                         class="w-full h-auto shadow-xl border border-white/20" />
                 </div>
             </div>
             <div
                 v-else
-                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-center bg-black/40 backdrop-blur">
-                <div class="w-full max-w-[800px] space-y-5">
+                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-y-auto p-5 flex flex-col items-centerbg-[#011437] backdrop-blur">
+                <div class="w-full max-w-[1000px] space-y-5">
                     <!-- <img v-for="url in urlInfo.urls" :src="url" alt="内容图片"
                         class="w-full h-auto shadow-xl border border-white/20" /> -->
                     <el-carousel height="auto" autoplay>

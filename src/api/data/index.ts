@@ -18,6 +18,12 @@ export type type_Data = {
 }
 
 export type type_Data_Detail = {
+       houseNo:string,
+
+       houseName:string,
+
+       wareHouseName:string,
+
        breed:string;
 
        water:string;
@@ -32,7 +38,8 @@ export type type_Data_Detail = {
 
        outHumidity:string;
        entryTime:string;
-       list:Array<Array<Array<string>>>
+       list:Array<Array<Array<string>>>,
+       testTime:string
 }
 class Data {
     list(from?:string | null,to?:string| null,houseName?:string| null,warehouseName?:string| null,current?:number,size?:number) {
