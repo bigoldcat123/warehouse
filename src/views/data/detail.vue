@@ -62,7 +62,7 @@
                 <span class="info-tag__label">均温</span>
                 <span class="info-tag__value">{{ $route.query.avgTemperature || '--' }}°C</span>
             </div>
-            <div class="info-tag" v-for="(item, key) in ($route.query.layerAvg as unknown as string || '').split('|')" :key="key" >
+            <div class="info-tag" v-for="(item, key) in ($route.query.layerAvg as unknown as string || '').split('|').filter(x => x)" :key="key" >
                 <span class="info-tag__label">{{ (key + 1) + ' 层' }}</span>
                 <span class="info-tag__value">{{ item }}</span>
             </div>
