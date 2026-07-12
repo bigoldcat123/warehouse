@@ -92,13 +92,16 @@
                                 </svg>
                                 编辑
                             </button>
-                            <button class="action-btn action-btn--danger"
-                                @click="() => { if(confirm('确认删除?')) entry.deleteById(row.id!).then(() => fetchData()) }">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
-                                </svg>
-                                删除
-                            </button>
+                            <el-popconfirm title="确认删除?" @confirm="ondel(row.id)">
+                                <template #reference>
+                                    <button class="action-btn action-btn--danger">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                                        </svg>
+                                        删除
+                                    </button>
+                                </template>
+                            </el-popconfirm>
                         </div>
                     </td>
                 </tr>
@@ -182,6 +185,9 @@ const waerhouseID = ref<number | undefined>(undefined)
 const houseID = ref<number | undefined>(undefined)
 const from = ref('')
 const to = ref('')
+function ondel(id:number) {
+    entry.deleteById(id).then(() => fetchData())
+}
 
 function reset () {
     waerhouseID.value = undefined

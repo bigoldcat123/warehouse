@@ -1,60 +1,6 @@
 <template>
     <Binner />
 
-    <!-- 状态标签筛选栏 -->
-    <!-- <div class="flex items-center gap-3 mb-5 flex-wrap">
-        <button
-            class="status-tag status-tag--active"
-            :class="{ 'ring-2 ring-white/40': activeFilter === 'all' }"
-            @click="activeFilter = 'all'"
-        >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            全部
-        </button>
-        <button
-            class="status-tag status-tag--normal"
-            :class="{ 'ring-2 ring-white/40': activeFilter === 'normal' }"
-            @click="activeFilter = 'normal'"
-        >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd" />
-            </svg>
-            正常: {{ normalCount }}个
-        </button>
-        <button
-            class="status-tag status-tag--danger"
-            :class="{ 'ring-2 ring-white/40': activeFilter === 'overheat' }"
-            @click="activeFilter = 'overheat'"
-        >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
-            </svg>
-            整体粮温过高: {{ overheatCount }}个
-        </button>
-        <button
-            class="status-tag status-tag--warning"
-            :class="{ 'ring-2 ring-white/40': activeFilter === 'abnormal' }"
-            @click="activeFilter = 'abnormal'"
-        >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-            存在异常点: {{ abnormalCount }}个
-        </button>
-        <button
-            class="status-tag status-tag--fault"
-            :class="{ 'ring-2 ring-white/40': activeFilter === 'fault' }"
-            @click="activeFilter = 'fault'"
-        >
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
-            </svg>
-            故障点过多: {{ faultCount }}个
-        </button>
-    </div> -->
-
     <!-- 搜索工具栏 -->
     <div class="flex items-center gap-4 mb-5">
         <!-- 新增按钮 -->
@@ -97,7 +43,7 @@
     <div class="flex flex-wrap gap-5">
         <HouseInfo
             :key="house.id"
-            v-for="house in filteredList"
+            v-for="house in list?.records"
             :house="house"
             @delete="handle_delete"
             @update="(house: type_House) => { current = house; updateDialog = true; }"
@@ -112,7 +58,7 @@
     <ImageDialog :dialog-visible="imageDialog" @close="imageDialog = false" @refresh="fetchData" :urlInfo="urlInfo"></ImageDialog>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import house, { type type_House } from '@/api/house';
 import HouseInfo, { type UrlInfo } from '@/components/HouseInfo.vue';
 import AddDialog from './AddDialog.vue';
@@ -134,37 +80,6 @@ const urlInfo = ref<Array<UrlInfo> | undefined>()
 const kv = ref<any[]>([])
 const warehouseName = ref('')
 const houseNo = ref('')
-const activeFilter = ref('all')
-
-// 状态统计（基于实际数据，这里做简单模拟）
-const normalCount = computed(() => {
-    if (!list.value?.records) return 0
-    return list.value.records.filter(h => h.z != null && Number(h.z) < 30).length
-})
-const overheatCount = computed(() => {
-    if (!list.value?.records) return 0
-    return list.value.records.filter(h => h.z != null && Number(h.z) >= 30).length
-})
-const abnormalCount = computed(() => 0)
-const faultCount = computed(() => 0)
-
-// 根据筛选条件过滤仓房列表
-const filteredList = computed(() => {
-    if (!list.value?.records) return []
-    const records = list.value.records
-    switch (activeFilter.value) {
-        case 'normal':
-            return records.filter(h => h.z != null && Number(h.z) < 30)
-        case 'overheat':
-            return records.filter(h => h.z != null && Number(h.z) >= 30)
-        case 'abnormal':
-            return []
-        case 'fault':
-            return []
-        default:
-            return records
-    }
-})
 
 warehouse.belongKv().then(res => {
     kv.value = res.data.value
@@ -211,42 +126,6 @@ const handle_show_iamge = (data: Array<UrlInfo>) => {
 }
 </script>
 <style scoped>
-/* 状态标签样式 */
-.status-tag {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-.status-tag:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-.status-tag--active {
-    background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
-}
-.status-tag--normal {
-    background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%);
-}
-.status-tag--danger {
-    background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
-}
-.status-tag--warning {
-    background: linear-gradient(135deg, #FDD835 0%, #F9A825 100%);
-    color: #333;
-}
-.status-tag--fault {
-    background: linear-gradient(135deg, #FB8C00 0%, #E65100 100%);
-}
-
 /* 按钮样式 */
 .btn-primary {
     display: flex;
