@@ -5,9 +5,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 //撒打算大
 //another
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @SpringBootApplication
 @Slf4j
 @MapperScan("com.example.demo.system.mapper")
+@EnableScheduling
 public class DemoApplication {
 
 	public static void main(String[] args) {

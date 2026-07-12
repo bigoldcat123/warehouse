@@ -7,8 +7,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.demo.system.entity.DTO.GfKTDTO;
 import com.example.demo.system.entity.DTO.HouseDTO;
 import com.example.demo.system.service.IEntryService;
+import com.example.demo.system.service.IGfKtService;
+import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -114,7 +117,15 @@ public class House implements Serializable {
 
     @TableField("TongFeng_sst")
     private String TongFengSst;
-    public HouseDTO toDTO(IEntryService entry_service) {
+
+    @TableField("air_hour_elec")
+    private double airHourElec;
+    @TableField("meter_elec")
+    private double meterElec;
+    @TableField("PV_elec")
+    private int pvElec;
+
+    public HouseDTO toDTO(IEntryService entry_service, @Nullable IGfKtService gfKtService) {
         HouseDTO dto = new HouseDTO();
         BeanUtils.copyProperties(this, dto);
         QueryWrapper<Entry> queryWrapper = new QueryWrapper<>();
@@ -126,7 +137,19 @@ public class House implements Serializable {
             dto.setEntryTime(entry.getEntryTime());
             dto.setWater(entry.getWater());
         }
+        if (gfKtService != null) {
+            QueryWrapper<GfKt> gfKtQueryWrapper = new QueryWrapper<>();
+            gfKtQueryWrapper.eq("HouseNo",this.houseNo);
+            if (gfKtService.exists(gfKtQueryWrapper)) {
+                dto.setHas_kt(true);
+            }
+        }
+        return dto;
+    }
 
+    public GfKTDTO into_gf_kt() {
+        GfKTDTO dto = new GfKTDTO();
+        BeanUtils.copyProperties(this, dto);
         return dto;
     }
 }

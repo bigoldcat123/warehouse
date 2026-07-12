@@ -45,19 +45,20 @@ public class HouseController {
     IDataService dataService;
     @Autowired
     IAlarmService alarmService;
+    @Autowired
+    IGfKtService gfKtService;
 
     @GetMapping
     public R findAll(Integer current, Integer size,Integer wareHouseId,String houseNo) {
 
         QueryWrapper<House> queryWrapper = new QueryWrapper<>();
-//        if (!CurrentUser.isMainCompany()) {
         if(wareHouseId !=null)
             queryWrapper.in("warehouseID", wareHouseId);
         if(houseNo != null && !houseNo.isEmpty())
             queryWrapper.like("HouseNo", houseNo);
-//        }
+
         Page<House> page = houseService.page(new Page<>(current, size),queryWrapper);
-        List<HouseDTO> list = page.getRecords().stream().map(x -> x.toDTO(entryService)).toList();
+        List<HouseDTO> list = page.getRecords().stream().map(x -> x.toDTO(entryService,gfKtService)).toList();
 
         Page<HouseDTO> p = new Page<>();
         p.setRecords(list);
@@ -96,7 +97,7 @@ public class HouseController {
             queryWrapper.like("HouseNo", houseNo);
 //        }
         Page<TongfengDev> page = tongfengDevService.page(new Page<>(current, size),queryWrapper);
-        List<HouseDTO> list = page.getRecords().stream().map(x -> x.toHouse(houseService)).filter(Objects::nonNull).map(x -> x.toDTO(entryService)).toList();
+        List<HouseDTO> list = page.getRecords().stream().map(x -> x.toHouse(houseService)).filter(Objects::nonNull).map(x -> x.toDTO(entryService,null)).toList();
 
         Page<HouseDTO> p = new Page<>();
         p.setRecords(list);

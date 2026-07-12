@@ -16,5 +16,6 @@ public class HouseDTO extends House {
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDateTime entryTime;
     Float water;
+    boolean has_kt;
 
 }
