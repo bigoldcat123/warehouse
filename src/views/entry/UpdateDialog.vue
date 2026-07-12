@@ -58,7 +58,6 @@
             value-format="YYYY-MM-DD HH:mm:ss"
             placeholder="选择入库时间"
             class="dark-date"
-            :teleported="false"
           />
         </el-form-item>
         <el-form-item label="含水量" prop="water">
