@@ -1,19 +1,30 @@
 <template>
-    <el-dialog v-model="visiable" :width="width" :before-close="handleClose" :show-close="false" header-class="h"  top="1%"
-        body-class="h" footer-class="h">
-        <div :style="{height:height}" class=" bg-[url('/image_show_bg_2.jpg')] bg-contain relative">
-            <div class=" absolute  w-[36%] left-[32%] top-[6%]  text-center text-[rgb(6,142,206)] ">{{ p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo[current_idx].name : ""}} </div>
-            <!-- <div class=" absolute left-[1%] top-[44%]  text-red-50 flex  flex-col gap-y-3">
-                <button   class=" ml-2 p-[5px] bg-blue-400 text-[15px] w-[100px]" v-for="i,k in p.urlInfo" @click="current_idx = k">
-                    {{ i.name }} 
+    <el-dialog v-model="visiable" :width="width" :before-close="handleClose" :show-close="false" class="image-dialog"
+        :modal-class="'image-dialog__overlay'" top="1%">
+        <div :style="{height:height}" class="relative image-viewer">
+            <!-- 标题栏 -->
+            <div class="image-viewer__header">
+                <svg class="w-5 h-5 text-[#64b5f6] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="text-white text-base font-semibold">
+                    {{ p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo[current_idx].name : "" }}
+                </span>
+                <button @click="emit('close')" class="image-viewer__close" aria-label="关闭">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
-            </div> -->
-            <button @click="emit('close')" class="  absolute right-[2%] top-[2%] h-[3%] w-[3%]"></button>
-            <div
-                class=" absolute left-[20%] top-[13%] h-[82%] w-[60%]   overflow-auto">
-                <img v-for="url in p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo![current_idx].urls : []" class=" w-full" :src="url" alt="">
-                <div v-if="!(p.urlInfo) || p.urlInfo.length == 0 || p.urlInfo[current_idx].urls.length == 0">
-                    没有图片
+            </div>
+
+            <!-- 图片列表 -->
+            <div class="image-viewer__body">
+                <img v-for="url in p.urlInfo && p.urlInfo.length > 0 ? p.urlInfo![current_idx].urls : []" class="image-viewer__img" :src="url" alt="">
+                <div v-if="!(p.urlInfo) || p.urlInfo.length == 0 || p.urlInfo[current_idx].urls.length == 0" class="image-viewer__empty">
+                    <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>没有图片</span>
                 </div>
             </div>
         </div>
@@ -75,32 +86,82 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style >
-/* Remove all padding from el-dialog body */
-.h {
-    padding: 0;
-    margin: 0;
-    height: 0;
+<style scoped>
+.image-viewer {
+    background: #1a3a5c;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
-
-.el-dialog {
-        --el-dialog-width: 50%;
-        --el-dialog-margin-top: 15vh;
-        --el-dialog-bg-color: var(--el-bg-color);
-        --el-dialog-box-shadow: var(--el-box-shadow);
-        --el-dialog-title-font-size: var(--el-font-size-large);
-        --el-dialog-content-font-size: 14px;
-        --el-dialog-font-line-height: var(--el-font-line-height-primary);
-        --el-dialog-padding-primary: 16px;
-        --el-dialog-border-radius: var(--el-border-radius-base);
-        background: var(--el-dialog-bg-color);
-        border-radius: var(--el-dialog-border-radius);
-        box-shadow: var(--el-dialog-box-shadow);
-        box-sizing: border-box;
-        margin: var(--el-dialog-margin-top, 15vh) auto 50px;
-        overflow-wrap: break-word;
-        padding: 0px;
-        position: relative;
-        width: var(--el-dialog-width, 50%);
+.image-viewer__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2968a8 0%, #1a3a5c 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+.image-viewer__close {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: #b0d0f0;
+    padding: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.image-viewer__close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+.image-viewer__body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+    background: #1a3a5c;
+}
+.image-viewer__img {
+    width: 100%;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.image-viewer__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+}
+</style>
+<style>
+.image-dialog.el-dialog {
+    background: #1a3a5c !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6) !important;
+    overflow: hidden;
+    padding: 0 !important;
+    margin: 1vh auto 0 !important;
+}
+.image-dialog .el-dialog__body {
+    padding: 0 !important;
+    background: #1a3a5c !important;
+    color: white;
+}
+.image-dialog .el-dialog__header {
+    display: none;
+}
+.image-dialog__overlay.el-overlay {
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(4px);
 }
 </style>
