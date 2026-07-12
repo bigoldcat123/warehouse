@@ -29,11 +29,23 @@
         </div>
         <div class="filter-item">
             <label class="filter-label">起始</label>
-            <input type="datetime-local" v-model="from" class="custom-input" />
+            <el-date-picker
+                v-model="from"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择起始时间"
+                class="dark-date"
+            />
         </div>
         <div class="filter-item">
             <label class="filter-label">结束</label>
-            <input type="datetime-local" v-model="to" class="custom-input" />
+            <el-date-picker
+                v-model="to"
+                type="datetime"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择结束时间"
+                class="dark-date"
+            />
         </div>
         <div class="flex items-center gap-2 ml-auto">
             <button class="btn-success" @click="query">
@@ -526,5 +538,28 @@ user.kv().then(res => {
 .page-btn:disabled {
     opacity: 0.35;
     cursor: not-allowed;
+}
+
+/* 日期选择器 */
+.dark-date .el-input__wrapper {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+.dark-date .el-input__wrapper:hover,
+.dark-date .el-input__wrapper.is-focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #43A047 !important;
+}
+.dark-date .el-input__inner {
+    color: white !important;
+}
+.dark-date .el-input__inner::placeholder {
+    color: rgba(255, 255, 255, 0.35) !important;
+}
+.dark-date .el-input__prefix,
+.dark-date .el-input__suffix {
+    color: #b0d0f0 !important;
 }
 </style>
