@@ -36,7 +36,7 @@
                         <div class="flex flex-wrap gap-1">
                             <template v-if="row.priv && row.priv.length > 0">
                                 <span v-for="item in row.priv.split(',')" :key="item" class="priv-badge"
-                                    :class="privColorClass(item)">{{ privList[item] }}</span>
+                                    :class="privColorClass(item)">{{ privList[Number(item)] }}</span>
                             </template>
                             <span v-else class="text-[#b0d0f0] text-xs">--</span>
                         </div>
@@ -52,7 +52,7 @@
                                 编辑
                             </button>
                             <el-popconfirm title="确认删除?"
-                                @confirm="() => user.deleteById(row.id).then(() => fetchData())">
+                                @confirm="() => user.deleteById(row.id!).then(() => fetchData())">
                                 <template #reference>
                                     <button class="action-btn action-btn--danger">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

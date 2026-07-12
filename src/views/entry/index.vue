@@ -92,7 +92,7 @@
                                 </svg>
                                 编辑
                             </button>
-                            <el-popconfirm title="确认删除?" @confirm="ondel(row.id)">
+                            <el-popconfirm title="确认删除?" @confirm="ondel(row.id!)">
                                 <template #reference>
                                     <button class="action-btn action-btn--danger">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

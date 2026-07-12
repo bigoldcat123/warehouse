@@ -16,7 +16,9 @@ export interface type_Alarm {
 }
 export type AlarmArgDTO = {
     houseNO: string,
+    wareHouseNO: string,
     houseName: string,
+    wareHouseName: string,
     common: number,
     serious: number,
     hot: number,

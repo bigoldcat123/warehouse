@@ -4,6 +4,7 @@ const preFix = 'data'
 export type type_Data = {
             id : number,
             HouseNo : string,
+            houseNo : string,// 与上面的HouseNo 是同一个东西
              houseName : string,
              house_type:string,
              inTemperature : number,
