@@ -1,116 +1,286 @@
 <template>
-<div class=" h-full overflow-auto">
-
-    <div class=" text-gray-950  bg-slate-50 text-center text-2xl font-bold" style="height:40px;text-align:center;margin-bottom:10px;line-height: 40px;">
-        <!-- <span class="text-lime-400">当前仓库</span>&nbsp;&nbsp;<span>仓库编号：{{ w.getWareHouse().wareHouseNO }}</span>&nbsp;&nbsp; <span>仓库名称：{{ w.getWareHouse().wareHouseName }}</span> -->
-        {{ detail?.wareHouseName }}-{{ detail?.houseNo }}({{detail?.houseName}})
-    </div>
-        <div>
-            <ElButton type="primary" @click="$router.go(-1)"> <el-icon><ArrowLeft /></el-icon> 返回</ElButton>
+    <div class="detail-page">
+        <!-- 标题栏 -->
+        <div class="detail-header">
+            <svg class="w-6 h-6 text-[#64b5f6] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span class="text-white text-xl font-bold">
+                {{ detail?.wareHouseName }}-{{ detail?.houseNo }}({{ detail?.houseName }})
+            </span>
+            <button class="back-btn" @click="$router.go(-1)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                返回
+            </button>
         </div>
-        <div class=" flex flex-wrap">
-            <el-tag type="info" class=" item">品种：{{ detail?.breed }}</el-tag>
-            <el-tag type="info" class=" item" >水分：{{ detail?.water }}</el-tag>
-            <el-tag type="info" class=" item" >入库时间：{{ detail?.entryTime }}</el-tag>
-            <el-tag type="info" class=" item" >保管：{{ detail?.keeper }}</el-tag>
-            <el-tag type="info" class=" item" >仓温：{{ detail?.inTemperature }}</el-tag>
-            <el-tag type="info" class=" item" >外温度：{{ detail?.outTemperature }}</el-tag>
-            <el-tag type="info" class=" item" >仓湿：{{ detail?.inHumidity }}</el-tag>
-            <el-tag type="info" class=" item" >外湿：{{ detail?.outHumidity }}</el-tag>
-            <el-tag type="info" class=" item" >高温：{{ $route.query.maxTemperature }}</el-tag>
-            <el-tag type="info" class=" item" >低温：{{ $route.query.minTemperature }}</el-tag>
-            <el-tag type="info" class=" item" >均温：{{ $route.query.avgTemperature }}</el-tag>
-            <el-tag type="info" class=" item" v-show="item.length > 0" v-for="item,key in ($route.query.layerAvg as unknown as string ).split('|')">{{ (key + 1) + ' 层：' + item }}</el-tag>
 
-            <el-tag type="info" class=" item" >检测时间：{{ detail?.testTime }}</el-tag>
-
+        <!-- 信息标签区 -->
+        <div class="info-tags">
+            <div class="info-tag">
+                <span class="info-tag__label">品种</span>
+                <span class="info-tag__value">{{ detail?.breed || '--' }}</span>
+            </div>
+            <div class="info-tag">
+                <span class="info-tag__label">水分</span>
+                <span class="info-tag__value">{{ detail?.water || '--' }}</span>
+            </div>
+            <div class="info-tag">
+                <span class="info-tag__label">入库时间</span>
+                <span class="info-tag__value">{{ detail?.entryTime || '--' }}</span>
+            </div>
+            <div class="info-tag">
+                <span class="info-tag__label">保管</span>
+                <span class="info-tag__value">{{ detail?.keeper || '--' }}</span>
+            </div>
+            <div class="info-tag info-tag--temp">
+                <span class="info-tag__label">仓温</span>
+                <span class="info-tag__value">{{ detail?.inTemperature || '--' }}°C</span>
+            </div>
+            <div class="info-tag info-tag--temp">
+                <span class="info-tag__label">外温</span>
+                <span class="info-tag__value">{{ detail?.outTemperature || '--' }}°C</span>
+            </div>
+            <div class="info-tag info-tag--humidity">
+                <span class="info-tag__label">仓湿</span>
+                <span class="info-tag__value">{{ detail?.inHumidity || '--' }}%</span>
+            </div>
+            <div class="info-tag info-tag--humidity">
+                <span class="info-tag__label">外湿</span>
+                <span class="info-tag__value">{{ detail?.outHumidity || '--' }}%</span>
+            </div>
+            <div class="info-tag info-tag--hot">
+                <span class="info-tag__label">高温</span>
+                <span class="info-tag__value">{{ $route.query.maxTemperature || '--' }}°C</span>
+            </div>
+            <div class="info-tag info-tag--cold">
+                <span class="info-tag__label">低温</span>
+                <span class="info-tag__value">{{ $route.query.minTemperature || '--' }}°C</span>
+            </div>
+            <div class="info-tag info-tag--avg">
+                <span class="info-tag__label">均温</span>
+                <span class="info-tag__value">{{ $route.query.avgTemperature || '--' }}°C</span>
+            </div>
+            <div class="info-tag" v-for="(item, key) in ($route.query.layerAvg as unknown as string || '').split('|')" :key="key">
+                <span class="info-tag__label">{{ (key + 1) + ' 层' }}</span>
+                <span class="info-tag__value">{{ item }}</span>
+            </div>
+            <div class="info-tag info-tag--time">
+                <span class="info-tag__label">检测时间</span>
+                <span class="info-tag__value">{{ detail?.testTime || '--' }}</span>
+            </div>
         </div>
-        <div class="flex flex-wrap" style="justify-content: center;">
-        <div >
-            <div class="m-2" v-for="item, key in detail?.list">
-                <div>
-                    <span v-if="route.query.house_type=='平房仓'" class="titem" style="background-color:#e7e5e4;">{{ key +1 }} 层</span>
-                    <span v-else class="titem" style="background-color:#e7e5e4;">点位</span>
-                    <span  class="titem side"  v-for="i,kk in item[0]">{{ kk + 1 }}</span>
+
+        <!-- 数据矩阵 -->
+        <div class="matrix-container">
+            <div class="matrix-item" v-for="(item, key) in detail?.list" :key="key">
+                <!-- 表头 -->
+                <div class="matrix-row matrix-row--header">
+                    <span class="matrix-cell matrix-cell--label">
+                        {{ route.query.house_type == '平房仓' ? (key + 1) + ' 层' : '点位' }}
+                    </span>
+                    <span class="matrix-cell matrix-cell--index" v-for="(i, kk) in item[0]" :key="kk">
+                        {{ kk + 1 }}
+                    </span>
                 </div>
-                <div v-for="x,keyx in item">
-                    <span class="titem side">{{ keyx+1 }} </span>
-                    <span class="titem" v-for="y in x" >
+                <!-- 数据行 -->
+                <div class="matrix-row" v-for="(x, keyx) in item" :key="keyx">
+                    <span class="matrix-cell matrix-cell--index">{{ keyx + 1 }}</span>
+                    <span class="matrix-cell matrix-cell--data" v-for="(y, yi) in x" :key="yi"
+                        :class="getTempClass(y)">
                         {{ cal_temperature(y) }}
-                        <!-- <div v-if="is_ok(y)" class="absolute h-screen w-screen bg-red">???</div> -->
                     </span>
                 </div>
             </div>
-            </div>
         </div>
-</div>
+    </div>
 </template>
 <script setup lang="ts">
-import Banner from '@/components/common/Binner.vue'
-import { ElButton } from 'element-plus';
 import data, { type type_Data_Detail } from '@/api/data';
 import { ref } from 'vue'
-import {ArrowLeft} from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router';
 const route = useRoute()
-console.log();
 
 const detail = ref<type_Data_Detail>()
 data.getDetil(route.query.id as unknown as number).then(res => {
     detail.value = res.data.value
 })
-function cal_temperature(num:string) {
+
+function cal_temperature(num: string) {
     const n = Number(num)
-   if (n && n >= -40 && n <= 80) {
-    return num
-   }else {
-    return "-"
-   }
+    if (n && n >= -40 && n <= 80) {
+        return num
+    } else {
+        return "-"
+    }
 }
 
-
-function is_ok(num:string) {
+function is_ok(num: string) {
     const n = Number(num)
-   if (n && n >= -40 && n <= 80) {
-    return true
-   }else {
-    return false
-   }
+    if (n && n >= -40 && n <= 80) {
+        return true
+    } else {
+        return false
+    }
 }
 
+function getTempClass(num: string) {
+    const n = Number(num)
+    if (!n || n < -40 || n > 80) return 'temp--invalid'
+    if (n >= 35) return 'temp--hot'
+    if (n <= 10) return 'temp--cold'
+    return 'temp--normal'
+}
 </script>
 <style scoped>
-.item{
-    font-size: 1rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-right: 1rem;
-    margin-top: 1rem;
-    cursor: pointer;
-}
-.titem{
-    background-color: #ffffff;
-    padding: 0.25rem;
-    /*border-radius: 0.5rem;
-    margin-right: 0.25rem;
-    margin-top: 0.25rem;*/
-    height:2.5rem;
-    cursor: pointer;
-    min-width: 4rem;
-    display: inline-block;
-    width:4.5rem;
-    border: 1px solid #ccc;
-}
-.side {
-    background-color: #f5f5f4;
-    text-align: center;
-}
-.lie {
-    background-color: blueviolet;
+.detail-page {
+    min-height: 100%;
+    padding-bottom: 20px;
 }
 
-.container {
-  display: flex;
-  justify-content: center;   /* 水平方向居中对齐 */
+/* 标题栏 */
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #2968a8 0%, #1a3a5c 100%);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
+.back-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #b0d0f0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* 信息标签区 */
+.info-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.info-tag {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    min-width: 100px;
+}
+.info-tag__label {
+    font-size: 11px;
+    color: #b0d0f0;
+    font-weight: 500;
+}
+.info-tag__value {
+    font-size: 14px;
+    color: white;
+    font-weight: 600;
+}
+.info-tag--temp {
+    background: rgba(251, 140, 0, 0.15);
+    border-color: rgba(251, 140, 0, 0.3);
+}
+.info-tag--humidity {
+    background: rgba(0, 188, 212, 0.15);
+    border-color: rgba(0, 188, 212, 0.3);
+}
+.info-tag--hot {
+    background: rgba(229, 57, 53, 0.15);
+    border-color: rgba(229, 57, 53, 0.3);
+}
+.info-tag--hot .info-tag__value { color: #EF9A9A; }
+.info-tag--cold {
+    background: rgba(30, 136, 229, 0.15);
+    border-color: rgba(30, 136, 229, 0.3);
+}
+.info-tag--cold .info-tag__value { color: #90CAF9; }
+.info-tag--avg {
+    background: rgba(67, 160, 71, 0.15);
+    border-color: rgba(67, 160, 71, 0.3);
+}
+.info-tag--avg .info-tag__value { color: #A5D6A7; }
+.info-tag--time {
+    background: rgba(156, 39, 176, 0.15);
+    border-color: rgba(156, 39, 176, 0.3);
+}
+
+/* 数据矩阵 */
+.matrix-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+.matrix-item {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.matrix-row {
+    display: flex;
+}
+.matrix-row--header {
+    background: linear-gradient(135deg, #2968a8 0%, #1e5f8a 100%);
+}
+.matrix-cell {
+    padding: 8px 12px;
+    font-size: 13px;
+    text-align: center;
+    min-width: 64px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.matrix-cell--label {
+    background: rgba(30, 136, 229, 0.3);
+    color: white;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: left;
+}
+.matrix-cell--index {
+    background: rgba(255, 255, 255, 0.06);
+    color: #b0d0f0;
+    font-weight: 500;
+}
+.matrix-row--header .matrix-cell--index {
+    background: transparent;
+    color: white;
+    font-weight: 600;
+}
+.matrix-cell--data {
+    background: #1e4a6e;
+    color: white;
+    font-weight: 500;
+}
+.matrix-cell--data:hover {
+    background: rgba(30, 136, 229, 0.3);
+}
+
+/* 温度值颜色 */
+.temp--normal { color: #A5D6A7; }
+.temp--hot { color: #EF9A9A; background: rgba(229, 57, 53, 0.2) !important; }
+.temp--cold { color: #90CAF9; background: rgba(30, 136, 229, 0.2) !important; }
+.temp--invalid { color: rgba(255, 255, 255, 0.3); }
 </style>
