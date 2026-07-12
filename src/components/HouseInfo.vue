@@ -1,8 +1,7 @@
 <template>
-    <div class="house-card group" @mouseenter="hovered = true" @mouseleave="hovered = false">
+    <div class="house-card">
         <!-- 标题栏 -->
         <div class="flex items-center gap-2 px-4 pt-4 pb-2 border-b border-white/10">
-            <!-- 仓房图标 -->
             <svg class="w-5 h-5 text-[#64b5f6] flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 2.84L18 11v9h-2v-6H8v6H6v-9l6-5.16z"/>
             </svg>
@@ -11,50 +10,20 @@
             </span>
         </div>
 
-        <!-- 信息类型标签 -->
-        <div class="px-4 pt-2 pb-1">
-            <span class="text-xs text-[#b0d0f0] bg-white/10 rounded px-2 py-0.5">
-                {{ house.houseType || '平房仓' }}
-            </span>
-            <span class="text-xs text-[#b0d0f0] ml-2" v-if="house.breed">
-                {{ house.breed }}
-            </span>
-        </div>
-
-        <!-- 双列数据区 -->
-        <div class="px-4 py-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">仓温:</span>
-                <span class="text-white font-semibold">{{ house.z != null ? house.z + '°C' : '--' }}</span>
+        <!-- 基础信息（只展示种类、水分、入库时间） -->
+        <div class="px-4 py-3 flex flex-col gap-y-1.5 text-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-[#b0d0f0] text-xs">种类:</span>
+                <span class="text-white font-semibold">{{ house.breed || '--' }}</span>
             </div>
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">最高粮温:</span>
-                <span class="text-white font-semibold">{{ house.z != null ? (Number(house.z) + 1.5).toFixed(1) + '°C' : '--' }}</span>
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">仓湿:</span>
+            <div class="flex items-center gap-2">
+                <span class="text-[#b0d0f0] text-xs">水分:</span>
                 <span class="text-white font-semibold">{{ house.water != null ? house.water + '%' : '--' }}</span>
             </div>
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">平均粮温:</span>
-                <span class="text-white font-semibold">{{ house.z != null ? (Number(house.z) - 1.2).toFixed(1) + '°C' : '--' }}</span>
+            <div class="flex items-center gap-2">
+                <span class="text-[#b0d0f0] text-xs">入库时间:</span>
+                <span class="text-white font-semibold">{{ house.entryTime || '--' }}</span>
             </div>
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">气温:</span>
-                <span class="text-white font-semibold">{{ house.x != null ? house.x + '°C' : '--' }}</span>
-            </div>
-            <div class="flex items-center gap-1">
-                <span class="text-[#b0d0f0] text-xs">气湿:</span>
-                <span class="text-white font-semibold">{{ house.y != null ? house.y + '%' : '--' }}</span>
-            </div>
-        </div>
-
-        <!-- 状态栏 -->
-        <div class="flex items-center justify-between px-4 py-2 border-t border-white/10 text-xs">
-            <span class="text-[#4CAF50] font-semibold">粮温状态: 正常</span>
-            <span class="text-[#b0d0f0]">
-                {{ house.entryTime ? '入库: ' + house.entryTime : '' }}
-            </span>
         </div>
 
         <!-- 操作按钮区 -->
@@ -75,14 +44,12 @@
 <script setup lang="ts">
 import { api_PreFix } from '@/api';
 import { useRouter } from 'vue-router';
-import { ref } from 'vue';
 import type { type_House } from '@/api/house';
 const { house, isWind } = defineProps<{
     house: type_House
     isWind?: boolean
 }>()
 const router = useRouter()
-const hovered = ref(false)
 
 export type UrlInfo = { name: string, urls: Array<string>, houseName?: string, is_yuntu_model?: boolean }
 
