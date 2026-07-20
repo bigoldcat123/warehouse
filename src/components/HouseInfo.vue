@@ -38,6 +38,8 @@
             <button style="display:none" v-if="!isWind" class="action-btn" @click="show_window">窗口图</button>
             <button v-if="!isWind && house.has_kt" @click="router.push('/wsss?houseno=' + house.houseNo)" class="action-btn">光伏</button>
             <button v-if="!isWind" @click="emit('update', house)" class="action-btn">编辑</button>
+            <button @click="emit('update', house)" class="action-btn">动态云图</button>
+            <button @click="emit('update', house)" class="action-btn">动态3D图</button>
         </div>
     </div>
 </template>

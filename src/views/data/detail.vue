@@ -249,7 +249,7 @@ function getTempClass(num: string) {
     padding: 8px 12px;
     font-size: 13px;
     text-align: center;
-    min-width: 64px;
+    min-width: 80px;
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .matrix-cell--label {
@@ -263,6 +263,7 @@ function getTempClass(num: string) {
     background: rgba(255, 255, 255, 0.06);
     color: #b0d0f0;
     font-weight: 500;
+    min-width: 80px;
 }
 .matrix-row--header .matrix-cell--index {
     background: transparent;
