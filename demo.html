@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>曲线图 · 丝滑循环播放</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f5f9ff 0%, #e6edf7 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      padding: 16px;
+    }
+
+    .carousel-wrapper {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      border-radius: 48px 48px 32px 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 20, 40, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+      padding: 24px 24px 32px;
+      transition: all 0.2s ease;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 8px 30px rgba(0, 20, 30, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      overflow: hidden;
+      /* 所有图片叠放 + 过渡由 JS 控制，这里只保证容器相对定位 */
+    }
+
+    /* 所有图片绝对定位，充满容器，默认透明且过渡平滑 */
+    .slide-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;    /* 保持曲线图完整可见，不裁剪 */
+      object-position: center;
+      padding: 8px;           /* 留一点呼吸空间 */
+      background: #ffffff;
+      opacity: 0;
+      transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: opacity;
+      pointer-events: none;   /* 避免干扰点击，纯展示 */
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* 当前活跃的图片（完全可见） */
+    .slide-img.active {
+      opacity: 1;
+      transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 10;           /* 保证活跃图在上层 */
+    }
+
+    /* 上一张淡出的图片稍微提高层级，避免被其他透明图遮挡 */
+    .slide-img.prev {
+      z-index: 5;
+      opacity: 0;
+    }
+
+    /* 控制区域：指示器和按钮 */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding: 0 8px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .indicators {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 40px;
+      background: #cbd5e1;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .dot.active {
+      background: #2a6df4;
+      width: 32px;
+      box-shadow: 0 4px 10px rgba(42, 109, 244, 0.3);
+    }
+
+    .dot:hover:not(.active) {
+      background: #94a3b8;
+      transform: scale(1.2);
+    }
+
+    .action-btn {
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #1e293b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0,0,0,0.05);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.3px;
+    }
+
+    .action-btn:hover {
+      background: #ffffff;
+      box-shadow: 0 8px 20px rgba(0, 20, 40, 0.08);
+      transform: translateY(-2px);
+      border-color: #b3c9f0;
+    }
+
+    .action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      background: #eef3fc;
+      padding: 4px 12px;
+      border-radius: 40px;
+      color: #334155;
+      letter-spacing: 0.2px;
+      border: 1px solid #dce5f0;
+    }
+
+    /* 小屏适配 */
+    @media (max-width: 600px) {
+      .carousel-wrapper {
+        padding: 16px 16px 24px;
+        border-radius: 32px;
+      }
+      .canvas-container {
+        aspect-ratio: 4 / 3;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .indicators {
+        justify-content: center;
+      }
+      .action-btn {
+        justify-content: center;
+        padding: 12px 18px;
+      }
+    }
+
+    /* 辅助文字 */
+    .footnote {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="carousel-wrapper">
+  <!-- 图片容器 -->
+  <div class="canvas-container" id="canvasContainer">
+    <!-- 所有曲线图通过 JS 动态注入，便于维护 -->
+  </div>
+
+  <!-- 控制栏 -->
+  <div class="controls">
+    <div class="indicators" id="indicatorsContainer"></div>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <button class="action-btn" id="playPauseBtn" aria-label="播放/暂停">
+        <span id="playIcon">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+        </span>
+        <span id="playText">暂停</span>
+      </button>
+      <span class="badge" id="counterDisplay">1 / 6</span>
+    </div>
+  </div>
+  <div class="footnote">✦ 曲线变化 · 丝滑循环 ✦</div>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // ---------- 配置 ----------
+    // 使用 6 张不同的曲线图 (SVG 曲线风格, 体现变化)
+    // 所有图片均为内联 SVG，确保无外部请求，且清晰度完美
+    const IMAGES = [
+      // 图1: 上升趋势
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2a6df4" stop-opacity="0.2"/><stop offset="100%" stop-color="#2a6df4" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 380 L160 320 L260 280 L360 220 L460 160 L560 120 L660 80 L740 60" stroke="#2a6df4" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 380 L160 320 L260 280 L360 220 L460 160 L560 120 L660 80 L740 60" stroke="url(#g1)" stroke-width="18" fill="none" opacity="0.4" stroke-linecap="round"/>
+        <circle cx="60" cy="380" r="7" fill="#2a6df4" /><circle cx="740" cy="60" r="7" fill="#2a6df4" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">稳步上升</text>
+        <text x="650" y="100" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">📈</text>
+      </svg>`,
+      // 图2: 波动向上
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f97316" stop-opacity="0.2"/><stop offset="100%" stop-color="#f97316" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 350 L160 280 L260 320 L360 200 L460 240 L560 140 L660 100 L740 90" stroke="#f97316" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 350 L160 280 L260 320 L360 200 L460 240 L560 140 L660 100 L740 90" stroke="url(#g2)" stroke-width="18" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="60" cy="350" r="7" fill="#f97316" /><circle cx="740" cy="90" r="7" fill="#f97316" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">震荡攀升</text>
+        <text x="650" y="130" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">📊</text>
+      </svg>`,
+      // 图3: 先降后升 (V型)
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/><stop offset="100%" stop-color="#10b981" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 120 L160 220 L260 320 L360 380 L460 320 L560 220 L660 140 L740 100" stroke="#10b981" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 120 L160 220 L260 320 L360 380 L460 320 L560 220 L660 140 L740 100" stroke="url(#g3)" stroke-width="18" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="60" cy="120" r="7" fill="#10b981" /><circle cx="740" cy="100" r="7" fill="#10b981" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">V型反转</text>
+        <text x="650" y="140" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">📉📈</text>
+      </svg>`,
+      // 图4: 持续下降
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.2"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 80 L160 120 L260 180 L360 240 L460 300 L560 340 L660 380 L740 410" stroke="#ef4444" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 80 L160 120 L260 180 L360 240 L460 300 L560 340 L660 380 L740 410" stroke="url(#g4)" stroke-width="18" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="60" cy="80" r="7" fill="#ef4444" /><circle cx="740" cy="410" r="7" fill="#ef4444" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">稳步下行</text>
+        <text x="650" y="370" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">📉</text>
+      </svg>`,
+      // 图5: 高位震荡
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.2"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 120 L160 180 L260 110 L360 190 L460 130 L560 170 L660 110 L740 150" stroke="#8b5cf6" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 120 L160 180 L260 110 L360 190 L460 130 L560 170 L660 110 L740 150" stroke="url(#g5)" stroke-width="18" fill="none" opacity="0.25" stroke-linecap="round"/>
+        <circle cx="60" cy="120" r="7" fill="#8b5cf6" /><circle cx="740" cy="150" r="7" fill="#8b5cf6" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">高位箱体</text>
+        <text x="650" y="150" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">〰️</text>
+      </svg>`,
+      // 图6: 加速上升 (陡峭)
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+        <rect width="800" height="450" fill="#fafcff" rx="12" ry="12"/>
+        <defs><linearGradient id="g6" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.2"/><stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.01"/></linearGradient></defs>
+        <path d="M60 380 L160 340 L260 280 L360 180 L460 100 L560 60 L660 40 L740 30" stroke="#0ea5e9" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M60 380 L160 340 L260 280 L360 180 L460 100 L560 60 L660 40 L740 30" stroke="url(#g6)" stroke-width="18" fill="none" opacity="0.3" stroke-linecap="round"/>
+        <circle cx="60" cy="380" r="7" fill="#0ea5e9" /><circle cx="740" cy="30" r="7" fill="#0ea5e9" />
+        <text x="40" y="420" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569">加速拉升</text>
+        <text x="650" y="70" font-family="Segoe UI, sans-serif" font-size="18" fill="#475569" font-weight="300">🚀</text>
+      </svg>`
+    ];
+
+    // ---------- 状态 ----------
+    let currentIndex = 0;            // 当前显示图片索引
+    const total = IMAGES.length;
+    let intervalId = null;
+    let isPlaying = true;
+
+    // DOM 元素
+    const container = document.getElementById('canvasContainer');
+    const indicatorsContainer = document.getElementById('indicatorsContainer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const playIcon = document.getElementById('playIcon');
+    const playText = document.getElementById('playText');
+    const counterDisplay = document.getElementById('counterDisplay');
+
+    // ---------- 创建图片元素 ----------
+    function buildSlides() {
+      container.innerHTML = '';
+      IMAGES.forEach((svgString, idx) => {
+        const img = document.createElement('img');
+        // 将 SVG 字符串转为 data:image/svg+xml
+        const encoded = encodeURIComponent(svgString);
+        img.src = `data:image/svg+xml,${encoded}`;
+        img.alt = `曲线图 ${idx + 1}`;
+        img.className = 'slide-img';
+        if (idx === 0) img.classList.add('active');
+        img.dataset.index = idx;
+        container.appendChild(img);
+      });
+    }
+
+    // ---------- 创建指示点 ----------
+    function buildIndicators() {
+      indicatorsContainer.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dot.setAttribute('aria-label', `转到第 ${i+1} 张`);
+        dot.addEventListener('click', () => {
+          goToSlide(i);
+          resetAutoPlay(); // 点击后重置自动播放计时
+        });
+        indicatorsContainer.appendChild(dot);
+      }
+    }
+
+    // ---------- 切换核心 (带过渡) ----------
+    function goToSlide(index) {
+      if (index === currentIndex) return;
+      if (index < 0 || index >= total) return;
+
+      const slides = container.querySelectorAll('.slide-img');
+      // 移除所有 active / prev 状态
+      slides.forEach(el => {
+        el.classList.remove('active', 'prev');
+      });
+
+      // 当前即将被切换的旧图 -> 标记为 prev (保持过渡)
+      const oldSlide = slides[currentIndex];
+      if (oldSlide) {
+        oldSlide.classList.add('prev');
+        // 让 prev 保持可见但 opacity 0 (已经由 .prev 控制)
+      }
+
+      // 新图设为 active
+      const newSlide = slides[index];
+      if (newSlide) {
+        newSlide.classList.add('active');
+        // 确保新图在最上层 (z-index 由 active 控制)
+      }
+
+      // 更新索引
+      currentIndex = index;
+
+      // 更新指示器
+      updateIndicators();
+
+      // 更新计数器
+      counterDisplay.textContent = `${currentIndex + 1} / ${total}`;
+    }
+
+    // ---------- 更新指示器样式 ----------
+    function updateIndicators() {
+      const dots = indicatorsContainer.querySelectorAll('.dot');
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentIndex);
+      });
+    }
+
+    // ---------- 下一张 ----------
+    function nextSlide() {
+      const next = (currentIndex + 1) % total;
+      goToSlide(next);
+    }
+
+    // ---------- 自动播放控制 ----------
+    function startAutoPlay() {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(nextSlide, 2200); // 2.2s 切换，留出过渡时间
+      isPlaying = true;
+      updatePlayButton();
+    }
+
+    function stopAutoPlay() {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+      isPlaying = false;
+      updatePlayButton();
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        stopAutoPlay();
+      } else {
+        startAutoPlay();
+      }
+    }
+
+    function resetAutoPlay() {
+      // 如果当前是播放状态，重置计时器（延续自动播放）
+      if (isPlaying) {
+        // 重启定时器，避免点击后立即切换
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = setInterval(nextSlide, 2200);
+        } else {
+          startAutoPlay();
+        }
+      }
+    }
+
+    // ---------- 更新播放按钮 UI ----------
+    function updatePlayButton() {
+      if (isPlaying) {
+        playIcon.innerHTML = `<svg viewBox="0 0 24 24"><rect x="5" y="3" width="4" height="18" /><rect x="15" y="3" width="4" height="18" /></svg>`;
+        playText.textContent = '暂停';
+      } else {
+        playIcon.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>`;
+        playText.textContent = '播放';
+      }
+    }
+
+    // ---------- 初始化 ----------
+    function init() {
+      buildSlides();
+      buildIndicators();
+      counterDisplay.textContent = `1 / ${total}`;
+
+      // 事件绑定
+      playPauseBtn.addEventListener('click', togglePlay);
+
+      // 默认自动播放
+      startAutoPlay();
+
+      // 键盘或者页面可见性变化时保持稳定性 (可选)
+      // 当页面隐藏时暂停，显示时继续 (增强体验)
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (isPlaying) {
+            // 暂停但不更改按钮状态？保留状态，仅清除计时器
+            if (intervalId) {
+              clearInterval(intervalId);
+              intervalId = null;
+            }
+          }
+        } else {
+          if (isPlaying && !intervalId) {
+            // 恢复计时
+            intervalId = setInterval(nextSlide, 2200);
+          }
+        }
+      });
+    }
+
+    // 启动
+    init();
+  })();
+</script>
+
+</body>
+</html>

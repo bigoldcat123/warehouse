@@ -35,6 +35,10 @@ export type TongfengInfo = {
 }
 class House  {
 
+    getImageUrl(type:string,orgNo:string,houseNo:string) {
+      return server.get<ResponseData<Array<string>>>(`${preFix}/image/${orgNo}/${type}/${houseNo}`,)
+    }
+
     list(current:number,size:number,wareHouseId:string,houseNo:string) {
         return server.get<ResponseData<Page<type_House>>>(preFix,{
             params:{

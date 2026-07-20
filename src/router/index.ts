@@ -73,6 +73,11 @@ const router = createRouter({
       component: () => import('@/views/show/index.vue')
     },
     {
+      path: '/showCarousel',
+      name: 'showCarousel',
+      component: () => import('@/views/showCarousel/index.vue')
+    },
+    {
       path: '/yuntu',
       name: 'yuntu',
       component: () => import('@/views/yuntu/index.vue')
