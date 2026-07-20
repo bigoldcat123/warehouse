@@ -9,9 +9,15 @@ import com.example.demo.system.entity.DTO.TongFengDTO;
 import com.example.demo.system.entity.PO.*;
 import com.example.demo.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,6 +53,41 @@ public class HouseController {
     IAlarmService alarmService;
     @Autowired
     IGfKtService gfKtService;
+
+    @Value("${staticRootDir}")
+    String imagePath;
+    @GetMapping("/image/{orgNo}/{type}/{warehouseNo}")
+    public R get3DImageUrls(
+            @PathVariable String orgNo,
+            @PathVariable String warehouseNo,
+            @PathVariable String type) {
+
+        Path dir = Paths.get(imagePath, orgNo, type, warehouseNo);
+        System.out.println(dir.toAbsolutePath());
+
+        if (!Files.exists(dir) || !Files.isDirectory(dir)) {
+            return R.ok(Collections.emptyList());
+        }
+
+        try (Stream<Path> paths = Files.list(dir)) {
+            List<String> urls = paths
+                    .filter(Files::isRegularFile)
+                    .sorted(Comparator.comparingLong(path -> {
+                        try {
+                            return Files.getLastModifiedTime(path).toMillis();
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    }))
+                    .map(path -> "/static/" + orgNo + "/" + type + "/" + warehouseNo + "/" + path.getFileName())
+                    .collect(Collectors.toList());
+
+            return R.ok(urls);
+        } catch (IOException e) {
+            return R.ok(Collections.emptyList());
+        }
+    }
+
 
     @GetMapping
     public R findAll(Integer current, Integer size,Integer wareHouseId,String houseNo) {
