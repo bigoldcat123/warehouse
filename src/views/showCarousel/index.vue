@@ -54,11 +54,11 @@
 
             <!-- Center content area: Carousel -->
             <div
-                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-hidden flex flex-col bg-[#011437] backdrop-blur">
+                class="absolute top-[118px] bottom-[62px] left-[167px] right-[167px] z-30 overflow-auto flex flex-col bg-[#011437] backdrop-blur">
                 <!-- Carousel canvas -->
-                <div class="relative flex-1 w-full max-w-[1200px] mx-auto my-4 px-4">
-                    <div class="carousel-container relative w-full h-full rounded-[20px] overflow-hidden bg-black/40 shadow-2xl"
-                        style="aspect-ratio: 16/9; max-height: 100%;"
+                <div class="w-full max-w-[1200px] mx-auto my-4 px-4 flex-1 min-h-0 flex items-center justify-center">
+                    <div class="carousel-container relative w-full rounded-[20px] overflow-hidden bg-black/40 shadow-2xl"
+                        style="aspect-ratio: 16/9; max-height: min(65vh, calc(100vw * 9 / 16));"
                         @mouseenter="pauseOnHover && stopAutoPlay()"
                         @mouseleave="pauseOnHover && isPlaying && startAutoPlay()">
                         <!-- All images absolutely positioned, fade transition -->
@@ -76,8 +76,8 @@
                     </div>
                 </div>
 
-                <!-- Controls -->
-                <div class="w-full max-w-[1200px] mx-auto px-4 pb-4 flex items-center justify-between gap-4 flex-wrap">
+                <!-- Controls: always visible, never shrink -->
+                <div class="flex-shrink-0 w-full max-w-[1200px] mx-auto px-4 pb-4 flex items-center justify-between gap-4 flex-wrap">
                     <!-- Indicators -->
                     <div class="flex gap-2.5 items-center flex-wrap">
                         <button v-for="(_, idx) in processedUrls" :key="idx" class="carousel-dot" :class="{ active: idx === currentIndex }"
