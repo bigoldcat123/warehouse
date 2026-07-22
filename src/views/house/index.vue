@@ -58,7 +58,8 @@
     <ImageDialog :dialog-visible="imageDialog" @close="imageDialog = false" @refresh="fetchData" :urlInfo="urlInfo"></ImageDialog>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import house, { type type_House } from '@/api/house';
 import HouseInfo, { type UrlInfo } from '@/components/HouseInfo.vue';
 import AddDialog from './AddDialog.vue';
@@ -68,6 +69,8 @@ import { useCurrentUserStore } from '@/stores/currentUser';
 import Binner from '@/components/common/Binner.vue';
 import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 import ImageDialog from './ImageDialog.vue';
+defineOptions({ name: 'HousePage' })
+
 const currentWareHouse = useCurrentWareHouse()
 const currentUser = useCurrentUserStore()
 const list = ref<Page<type_House>>()
@@ -80,7 +83,7 @@ const urlInfo = ref<Array<UrlInfo> | undefined>()
 const kv = ref<any[]>([])
 const warehouseName = ref('')
 const houseNo = ref('')
-
+console.log("Hello")
 warehouse.belongKv().then(res => {
     kv.value = res.data.value
     let item = kv.value[0]
@@ -100,8 +103,23 @@ function fetchData() {
         list.value = res.data.value
         sapre_list = (res.data.value.records)!;
         current.value = list.value.records![0]
+        // 数据加载完成后恢复滚动位置
+        const savedScroll = sessionStorage.getItem('house_scroll_position')
+        if (savedScroll) {
+            setTimeout(() => {
+                window.scrollTo(0, parseInt(savedScroll))
+                sessionStorage.removeItem('house_scroll_position')
+            }, 100)
+        }
     })
 }
+
+// 离开页面前保存滚动位置
+onBeforeRouteLeave((to, from, next) => {
+    const scrollPosition = window.scrollY || document.documentElement.scrollTop
+    sessionStorage.setItem('house_scroll_position', scrollPosition.toString())
+    next()
+})
 function pagechange(page: number) {
     currentpage.value = page
     fetchData()
