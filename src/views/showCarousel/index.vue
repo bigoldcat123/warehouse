@@ -59,8 +59,7 @@
                 <div class="w-full max-w-[1200px] mx-auto my-4 px-4 flex-1 min-h-0 flex items-center justify-center">
                     <div class="carousel-container relative w-full rounded-[20px] overflow-hidden bg-black/40 shadow-2xl"
                         style="aspect-ratio: 16/9; max-height: min(65vh, calc(100vw * 9 / 16));"
-                        @mouseenter="pauseOnHover && stopAutoPlay()"
-                        @mouseleave="pauseOnHover && isPlaying && startAutoPlay()">
+                       >
                         <!-- All images absolutely positioned, fade transition -->
                         <img v-for="(url, idx) in processedUrls" :key="idx" :src="url" alt="内容图片"
                             class="carousel-slide" :class="{
@@ -108,7 +107,7 @@
 import type { UrlInfo } from '@/components/HouseInfo.vue'
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
-
+console.log("this is version 3")
 const route = useRoute()
 const urlInfo = route.query as unknown as UrlInfo
 
@@ -126,7 +125,7 @@ const pauseOnHover = ref(true)
 let intervalId: ReturnType<typeof setInterval> | null = null
 
 const total = computed(() => processedUrls.value.length)
-const AUTO_PLAY_INTERVAL = 2500 // ms, a bit slower than demo's 2200 for smoother feel
+const AUTO_PLAY_INTERVAL = 1000 // ms, a bit slower than demo's 2200 for smoother feel
 
 function goToSlide(index: number) {
     if (index === currentIndex.value) return
@@ -174,19 +173,7 @@ function resetAutoPlay() {
     }
 }
 
-// Pause auto-play when the page is hidden (saves resources)
-function handleVisibility() {
-    if (document.hidden) {
-        if (isPlaying.value && intervalId) {
-            clearInterval(intervalId)
-            intervalId = null
-        }
-    } else {
-        if (isPlaying.value && !intervalId && total.value > 1) {
-            intervalId = setInterval(nextSlide, AUTO_PLAY_INTERVAL)
-        }
-    }
-}
+
 
 // Reset index if urls change
 watch(() => processedUrls.value, () => {
@@ -197,18 +184,14 @@ watch(() => processedUrls.value, () => {
 
 onMounted(() => {
     startAutoPlay()
-    document.addEventListener('visibilitychange', handleVisibility)
 })
 
-onBeforeUnmount(() => {
-    if (intervalId) clearInterval(intervalId)
-    document.removeEventListener('visibilitychange', handleVisibility)
-})
+
 </script>
 
 <style scoped>
 .carousel-container {
-    background: radial-gradient(ellipse at center, #0a1e4a 0%, #011437 100%);
+    background: radial-gradient(ellipse at center, #ffffff 0%, #ffffff 100%);
 }
 
 .carousel-slide {

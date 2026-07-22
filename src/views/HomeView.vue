@@ -49,7 +49,7 @@ const v = ref(false)
         <!-- 左侧深色侧边栏 -->
         <aside class="sidebar">
             <div class="sidebar__brand py-3">
-                <img class="object-contain" src="/banner.jpg" alt="logo">
+                <img class="object-contain" src="/banner1.png" alt="logo">
             </div>
             <el-menu class="sidebar-menu" :default-active="'/house'" :router="true"
                 background-color="transparent" text-color="#b0d0f0" active-text-color="#ffffff">

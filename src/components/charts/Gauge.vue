@@ -1,7 +1,7 @@
 <template>
 <div class="w-[320px] relative">
     <div ref="chart" class=" w-full h-[300px]"  ></div>
-    <div class=" absolute w-full text-center bottom-7 text-[1rem]">{{p.name}}</div>
+    <div class=" absolute w-full text-center bottom-7 text-[1rem] text-white">{{p.name}}</div>
 </div>
 </template>
 <script setup lang="ts">

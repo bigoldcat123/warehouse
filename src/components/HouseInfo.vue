@@ -85,6 +85,11 @@
             >
                 光伏
             </button>
+
+            <button @click="show_dynamic_yuntu" class="action-btn">
+                动态云图
+            </button>
+            <button @click="show_3d" class="action-btn">动态3D图</button>
             <button
                 v-if="!isWind"
                 @click="emit('update', house)"
@@ -92,10 +97,6 @@
             >
                 编辑
             </button>
-            <button @click="show_dynamic_yuntu" class="action-btn">
-                动态云图
-            </button>
-            <button @click="show_3d" class="action-btn">动态3D图</button>
         </div>
     </div>
 </template>
