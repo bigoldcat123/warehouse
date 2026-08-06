@@ -91,6 +91,12 @@
             </button>
             <button @click="show_3d" class="action-btn">动态3D图</button>
             <button
+                @click="router.push({ path: '/tempLine', query: { x: house.x, y: house.y, z: house.z } })"
+                class="action-btn"
+            >
+                温度折线图
+            </button>
+            <button
                 v-if="!isWind"
                 @click="emit('update', house)"
                 class="action-btn"

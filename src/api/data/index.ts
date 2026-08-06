@@ -42,12 +42,40 @@ export type type_Data_Detail = {
        list:Array<Array<Array<string>>>,
        testTime:string
 }
+
+// 温度记录：指定点 / 指定层平均 / 全仓平均 共用同一结构
+export type type_TempRecord = {
+    testDate: string  // 检测时间 yyyy-MM-dd HH:mm:ss
+    temp: number      // 温度值（摄氏度）
+}
+
 class Data {
     list(from?:string | null,to?:string| null,houseName?:string| null,warehouseName?:string| null,current?:number,size?:number) {
         return server.post<ResponseData<Page<type_Data>>>(preFix + `/${current}/${size}`,{from,to,houseName,warehouseName})
     }
     getDetil(id:number) {
         return server.get<ResponseData<type_Data_Detail>>(`${preFix}/${id}`)
+    }
+
+    // 查询指定点温度记录（按三维坐标 层/行/列）
+    tempRecords(houseNo: string, ceng: number, hang: number, lie: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/tempRecords`, {
+            params: { houseNo, ceng, hang, lie }
+        })
+    }
+
+    // 查询指定层平均温度
+    layerAvgTemp(houseNo: string, ceng: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/layerAvgTemp`, {
+            params: { houseNo, ceng }
+        })
+    }
+
+    // 查询全部点平均温度
+    allAvgTemp(houseNo: string) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/allAvgTemp`, {
+            params: { houseNo }
+        })
     }
 }
 

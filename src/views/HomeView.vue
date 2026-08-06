@@ -16,7 +16,8 @@ import {
     CloseBold,
     VideoCamera,
     PictureFilled,
-    ArrowLeft
+    ArrowLeft,
+    Odometer
 } from '@element-plus/icons-vue'
 import ChangePasswd from './ChangePasswd.vue';
 import { ElTag } from 'element-plus';
@@ -99,6 +100,12 @@ const v = ref(false)
                         <IconMenu />
                     </el-icon>
                     <span>数据查看</span>
+                </el-menu-item>
+                <el-menu-item index="/gas" disabled>
+                    <el-icon>
+                        <Odometer />
+                    </el-icon>
+                    <span>气体浓度</span>
                 </el-menu-item>
                 <el-menu-item index="/entry">
                     <el-icon>
@@ -299,5 +306,13 @@ const v = ref(false)
 }
 .sidebar-menu .el-menu-item.is-active .el-icon {
     color: #ffffff;
+}
+.sidebar-menu .el-menu-item.is-disabled {
+    color: rgba(176, 208, 240, 0.4) !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.sidebar-menu .el-menu-item.is-disabled .el-icon {
+    color: rgba(100, 181, 246, 0.4);
 }
 </style>

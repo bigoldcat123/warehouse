@@ -56,6 +56,11 @@ const router = createRouter({
           name:'wind',
           component: () => import('@/views/wind/index.vue')
         },
+        {
+          path:'/tempLine',
+          name:'tempLine',
+          component: () => import('@/views/tempLine/index.vue')
+        },
       ]
     },
     {
