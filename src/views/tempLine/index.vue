@@ -31,6 +31,27 @@
         <div v-else class="temp-body">
             <!-- 左侧控制面板 -->
             <aside class="temp-controls">
+                <!-- 公共：日期范围过滤 -->
+                <div class="filter-section">
+                    <div class="control-title">时间范围</div>
+                    <div class="control-desc">选择起止时间（精确到小时），仅显示区间内的数据；留空则显示全部</div>
+                    <el-date-picker
+                        v-model="dateRange"
+                        type="datetimerange"
+                        range-separator="至"
+                        start-placeholder="开始时间"
+                        end-placeholder="结束时间"
+                        format="YYYY-MM-DD HH:00"
+                        value-format="YYYY-MM-DD HH:mm:ss"
+                        class="date-picker"
+                        :clearable="true"
+                    />
+                    <div v-if="dateRange && dateRange.length === 2" class="range-summary">
+                        {{ dateRange[0] }} <span class="arrow">→</span> {{ dateRange[1] }}
+                        <button class="tag__close" @click="dateRange = null" title="清除过滤">×</button>
+                    </div>
+                </div>
+
                 <!-- 模式1：按点 -->
                 <template v-if="mode === 'point'">
                     <div class="control-title">选择测温点</div>
@@ -238,6 +259,22 @@ async function fetchAvg() {
 // ========= 通用状态 =========
 const adding = ref(false)
 
+// 日期范围过滤（格式：YYYY-MM-DD HH:mm:ss；为 null 表示不过滤）
+const dateRange = ref<[string, string] | null>(null)
+
+// 按时间区间过滤温度记录
+function filterData(data: type_TempRecord[]): type_TempRecord[] {
+    if (!dateRange.value || dateRange.value.length !== 2) return data
+    const [startStr, endStr] = dateRange.value
+    const start = new Date(startStr).getTime()
+    const end = new Date(endStr).getTime()
+    if (Number.isNaN(start) || Number.isNaN(end)) return data
+    return data.filter(d => {
+        const t = new Date(d.testDate).getTime()
+        return t >= start && t <= end
+    })
+}
+
 // ========= 颜色 =========
 // 固定调色板，给折线 & tag 小圆点统一配色
 const PALETTE = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
@@ -275,7 +312,7 @@ function buildSeries(): any[] {
             smooth: true,
             showSymbol: true,
             itemStyle: { color: colorOf(p.key) },
-            data: p.data.map(d => [d.testDate, d.temp]),
+            data: filterData(p.data).map(d => [d.testDate, d.temp]),
         }))
     }
     if (mode.value === 'layer') {
@@ -285,7 +322,7 @@ function buildSeries(): any[] {
             smooth: true,
             showSymbol: true,
             itemStyle: { color: colorOf(l.key) },
-            data: l.data.map(d => [d.testDate, d.temp]),
+            data: filterData(l.data).map(d => [d.testDate, d.temp]),
         }))
     }
     return [
@@ -295,7 +332,7 @@ function buildSeries(): any[] {
             smooth: true,
             showSymbol: true,
             itemStyle: { color: colorOf('avg') },
-            data: avgData.value.map(d => [d.testDate, d.temp]),
+            data: filterData(avgData.value).map(d => [d.testDate, d.temp]),
         },
     ]
 }
@@ -350,9 +387,17 @@ function ensureChart() {
 }
 
 // ========= 响应式触发 =========
-// 数据变化 → 重绘
+// 数据变化 / 日期范围变化 → 重绘
 watch(
-    () => [mode.value, points.value.length, layers.value.length, avgData.value.length, avgLoaded.value],
+    () => [
+        mode.value,
+        points.value.length,
+        layers.value.length,
+        avgData.value.length,
+        avgLoaded.value,
+        dateRange.value?.[0] ?? null,
+        dateRange.value?.[1] ?? null,
+    ],
     () => nextTick(renderChart),
 )
 
@@ -498,6 +543,45 @@ onUnmounted(() => {
     background: rgba(255, 255, 255, 0.06) !important;
     border-color: rgba(255, 255, 255, 0.12) !important;
     color: #b0d0f0 !important;
+}
+
+/* 日期范围过滤 */
+.filter-section {
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.temp-controls :deep(.date-picker) {
+    width: 100%;
+}
+.temp-controls :deep(.el-date-editor) {
+    width: 100% !important;
+}
+.temp-controls :deep(.el-date-editor .el-input__wrapper) {
+    background: rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) inset !important;
+}
+.temp-controls :deep(.el-date-editor .el-input__inner) {
+    color: #ffffff !important;
+}
+.temp-controls :deep(.el-range-separator),
+.temp-controls :deep(.el-range__icon) {
+    color: #b0d0f0 !important;
+}
+.range-summary {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: rgba(30, 136, 229, 0.15);
+    border: 1px solid rgba(30, 136, 229, 0.3);
+    border-radius: 4px;
+    color: #b0d0f0;
+    font-size: 11px;
+}
+.range-summary .arrow {
+    color: #64b5f6;
 }
 
 .add-btn {
