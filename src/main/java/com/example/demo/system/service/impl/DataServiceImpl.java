@@ -3,12 +3,14 @@ package com.example.demo.system.service.impl;
 import com.example.demo.common.Utils;
 import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.DTO.DataDetailDTO;
+import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.Data;
 import com.example.demo.system.entity.PO.Entry;
 import com.example.demo.system.entity.PO.House;
 import com.example.demo.system.entity.PO.Warehouse;
 import com.example.demo.system.mapper.DataMapper;
 import com.example.demo.system.service.*;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -110,6 +112,39 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
 
         dataDetailDTO.setList(parseLayers(temps,house));
         return dataDetailDTO;
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int x, int y, int z) {
+        // 根据粮房编号查询所有数据记录
+        QueryWrapper<Data> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("HouseNo", houseNo).orderByAsc("TestDate");
+        List<Data> dataList = baseMapper.selectList(queryWrapper);
+        
+        // 构造临时House对象用于温度解析
+        House tempHouse = new House();
+        tempHouse.setX(x);
+        tempHouse.setY(y);
+        tempHouse.setZ(z);
+        
+        List<HouseTempRecordDTO> records = new ArrayList<>();
+        
+        // 遍历每条数据记录
+        for (Data data : dataList) {
+            HouseTempRecordDTO record = new HouseTempRecordDTO();
+            record.setTestDate(data.getTestDate());
+            
+            // 解析温度数据
+            String[] temps_1 = data.getTemperatureSet().split("#");
+            String[] temps = get_temps(temps_1, tempHouse);
+            
+            // 转为List
+            record.setTemp(Arrays.asList(temps));
+            
+            records.add(record);
+        }
+        
+        return records;
     }
 
 

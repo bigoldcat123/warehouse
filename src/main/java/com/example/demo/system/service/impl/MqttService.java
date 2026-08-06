@@ -78,7 +78,8 @@ public class MqttService {
         if (client == null || !client.isConnected()) {
             init();
         }
-        if (client.isConnected()) {
+
+        if (client!= null && client.isConnected()) {
             subscribe();
             gfKtService.list().forEach(x -> {
                 try {
