@@ -29,7 +29,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (jwttokenString != null && jwttokenString.startsWith("Bearer ")) {
             jwttokenString = jwttokenString.replace("Bearer ", "");
             JwtAuthorization jwtAuthorization = new JwtAuthorization(jwttokenString);
-            jwtAuthorizationManager.verify(() -> jwtAuthorization, null);
+            jwtAuthorizationManager.verify(() -> jwtAuthorization, request);
         }
         filterChain.doFilter(request, response);
     }
