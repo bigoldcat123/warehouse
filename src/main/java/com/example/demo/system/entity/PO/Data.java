@@ -50,6 +50,8 @@ public class Data implements Serializable {
 
     @TableField("TemperatureSet")
     private String temperatureSet;
+    @TableField("gasStrength")
+    private  String gasStrength;
 
     @TableField("GrainWater")
     private Float grainWater;

@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 粮房温度记录DTO
- * 包含检测日期和对应的温度数组
+ * 包含检测日期和对应的单个温度值
  */
 @Data
 public class HouseTempRecordDTO {
@@ -20,7 +19,7 @@ public class HouseTempRecordDTO {
     private LocalDateTime testDate;
     
     /**
-     * 温度数组（一维数组，按层→行→列顺序排列）
+     * 温度值（单个点）
      */
-    private List<String> temp;
+    private Float temp;
 }

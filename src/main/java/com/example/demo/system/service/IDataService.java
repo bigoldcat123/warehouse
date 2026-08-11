@@ -23,12 +23,38 @@ public interface IDataService extends IService<Data> {
     DataDetailDTO getDataDetail(Integer id);
 
     /**
-     * 根据粮房编号和维度(x,y,z)返回温度记录数组
+     * 根据粮房编号和指定点坐标，返回该点的温度记录数组
      * @param houseNo 粮房编号
-     * @param x 行数
-     * @param y 列数
-     * @param z 层数
-     * @return [{testDate, temp}] 每条记录包含检测日期和温度数组
+     * @param ceng 层坐标（从1开始）
+     * @param hang 行坐标（从1开始）
+     * @param lie 列坐标（从1开始）
+     * @return [{testDate, temp}] 每条记录包含检测日期和该点的温度值
      */
-    List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int x, int y, int z);
+    List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int ceng, int hang, int lie);
+
+    /**
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均温度
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     * @return [{testDate, temp}] 每条记录包含检测日期和该层的平均温度
+     */
+    List<HouseTempRecordDTO> getLayerAvgTempByHouseNo(String houseNo, int ceng);
+
+    /**
+     * 根据粮房编号，返回每个时间点全部温度点的平均值
+     * @param houseNo 粮房编号
+     * @return [{testDate, temp}] 每条记录包含检测日期和全部点的平均温度
+     */
+    List<HouseTempRecordDTO> getAllAvgTempByHouseNo(String houseNo);
+
+    /**
+     * 批量插入随机温度数据（用于测试）
+     * @param houseNo 粮房编号
+     * @param count 插入记录条数
+     * @param x 行数(hang)
+     * @param y 列数(lie)
+     * @param z 层数(ceng)
+     * @return 插入的记录数
+     */
+    int insertRandomData(String houseNo, int count, int x, int y, int z);
 }

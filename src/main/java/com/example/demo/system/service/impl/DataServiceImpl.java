@@ -12,12 +12,15 @@ import com.example.demo.system.mapper.DataMapper;
 import com.example.demo.system.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <p>
@@ -115,36 +118,174 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
     }
 
     @Override
-    public List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int x, int y, int z) {
-        // 根据粮房编号查询所有数据记录
-        QueryWrapper<Data> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("HouseNo", houseNo).orderByAsc("TestDate");
-        List<Data> dataList = baseMapper.selectList(queryWrapper);
-        
-        // 构造临时House对象用于温度解析
-        House tempHouse = new House();
-        tempHouse.setX(x);
-        tempHouse.setY(y);
-        tempHouse.setZ(z);
-        
-        List<HouseTempRecordDTO> records = new ArrayList<>();
-        
-        // 遍历每条数据记录
-        for (Data data : dataList) {
-            HouseTempRecordDTO record = new HouseTempRecordDTO();
-            record.setTestDate(data.getTestDate());
-            
-            // 解析温度数据
-            String[] temps_1 = data.getTemperatureSet().split("#");
-            String[] temps = get_temps(temps_1, tempHouse);
-            
-            // 转为List
-            record.setTemp(Arrays.asList(temps));
-            
-            records.add(record);
+    public List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo",houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .flatMap(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    return Arrays.stream(segments)
+                            .map(seg -> {
+                                // 按 $ 分割：列:行:层$温度$5
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                // 按 : 分割坐标：列:行:层（1-based）
+                                String[] coords = parts[0].split(":");
+                                if (coords.length < 3) return null;
+                                try {
+                                    int segLie = Integer.parseInt(coords[0]);
+                                    int segHang = Integer.parseInt(coords[1]);
+                                    int segCeng = Integer.parseInt(coords[2]);
+                                    // 过滤匹配的 层、行、列
+                                    if (segCeng == ceng && segHang == hang && segLie == lie) {
+                                        HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                                        dto.setTestDate(x.getTestDate());
+                                        String tempStr = parts[1].trim();
+                                        if ("NULL".equals(tempStr)) {
+                                            dto.setTemp(0f);
+                                        } else {
+                                            dto.setTemp(Float.parseFloat(tempStr));
+                                        }
+                                        return dto;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    return null;
+                                }
+                                return null;
+                            })
+                            .filter(dto -> dto != null);
+                })
+                .toList();
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getLayerAvgTempByHouseNo(String houseNo, int ceng) {
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .map(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    // 收集该层所有温度值
+                    List<Float> temps = Arrays.stream(segments)
+                            .map(seg -> {
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                String[] coords = parts[0].split(":");
+                                if (coords.length < 3) return null;
+                                try {
+                                    int segCeng = Integer.parseInt(coords[2]);
+                                    if (segCeng == ceng) {
+                                        String tempStr = parts[1].trim();
+                                        if ("NULL".equals(tempStr)) return 0f;
+                                        return Float.parseFloat(tempStr);
+                                    }
+                                } catch (NumberFormatException ignored) {
+                                }
+                                return null;
+                            })
+                            .filter(t -> t != null)
+                            .toList();
+                    // 计算该层平均温度
+                    if (temps.isEmpty()) return null;
+                    float avg = (float) temps.stream()
+                            .mapToDouble(f -> f)
+                            .average()
+                            .orElse(0);
+                    HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                    dto.setTestDate(x.getTestDate());
+                    dto.setTemp(avg);
+                    return dto;
+                })
+                .filter(dto -> dto != null)
+                .toList();
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getAllAvgTempByHouseNo(String houseNo) {
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .map(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    // 收集全部温度值
+                    List<Float> temps = Arrays.stream(segments)
+                            .map(seg -> {
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                try {
+                                    String tempStr = parts[1].trim();
+                                    if ("NULL".equals(tempStr)) return 0f;
+                                    return Float.parseFloat(tempStr);
+                                } catch (NumberFormatException ignored) {
+                                }
+                                return null;
+                            })
+                            .filter(t -> t != null)
+                            .toList();
+                    // 计算全部点的平均温度
+                    if (temps.isEmpty()) return null;
+                    double avg = temps.stream()
+                            .mapToDouble(f -> f)
+                            .average()
+                            .orElse(0);
+                    HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                    dto.setTestDate(x.getTestDate());
+                    dto.setTemp((float) avg);
+                    return dto;
+                })
+                .filter(dto -> dto != null)
+                .toList();
+    }
+
+    @Override
+    public int insertRandomData(String houseNo, int count, int x, int y, int z) {
+        Random random = new Random();
+        List<Data> dataList = new ArrayList<>();
+
+        // 基准时间：2026-01-01 08:00:00
+        LocalDateTime baseTime = LocalDateTime.of(2026, 1, 1, 8, 0, 0);
+
+        for (int n = 0; n < count; n++) {
+            Data data = new Data();
+            data.setHouseNo(houseNo);
+            // 每条记录间隔 4 小时
+            data.setTestDate(baseTime.plusHours(4L * n));
+            data.setInTemperature(15.0f + random.nextFloat() * 10);
+            data.setInHumidity(40.0f + random.nextFloat() * 30);
+            data.setOutTemperature(5.0f + random.nextFloat() * 20);
+            data.setOutHumidity(30.0f + random.nextFloat() * 40);
+            data.setGrainWater(10.0f + random.nextFloat() * 5);
+
+            // 生成 gasStrength：列(lie):行(hang):层(ceng)$值$5
+            StringBuilder sb = new StringBuilder();
+            for (int lie = 1; lie <= y; lie++) {
+                for (int hang = 1; hang <= x; hang++) {
+                    for (int ceng = 1; ceng <= z; ceng++) {
+                        if (sb.length() > 0) sb.append("#");
+                        float temp = 10.0f + random.nextFloat() * 25;
+                        sb.append(String.format("%d:%d:%d$%.1f$5", lie, hang, ceng, temp));
+                    }
+                }
+            }
+            data.setGasStrength(sb.toString());
+            data.setTemperatureSet(sb.toString());
+            dataList.add(data);
         }
-        
-        return records;
+
+        saveBatch(dataList);
+        return dataList.size();
     }
 
 

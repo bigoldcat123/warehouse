@@ -6,6 +6,7 @@ import com.example.demo.common.CurrentUser;
 import com.example.demo.common.R;
 import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.DTO.DataDetailDTO;
+import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.Data;
 import com.example.demo.system.entity.PO.House;
 import com.example.demo.system.entity.PO.Warehouse;
@@ -114,5 +115,43 @@ public class DataController {
     public R dataDetail(@PathVariable Integer id) {
        DataDetailDTO d =  dataService.getDataDetail(id);
        return R.ok(d);
+    }
+
+    /**
+     * 根据粮房编号和指定点坐标，返回该点的温度记录数组
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     * @param hang 行坐标（从1开始）
+     * @param lie 列坐标（从1开始）
+     */
+    @GetMapping("/tempRecords")
+    public R getTempRecords(@RequestParam String houseNo,
+                            @RequestParam int ceng,
+                            @RequestParam int hang,
+                            @RequestParam int lie) {
+        List<HouseTempRecordDTO> records = dataService.getTempRecordsByHouseNo(houseNo, ceng, hang, lie);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均温度
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     */
+    @GetMapping("/layerAvgTemp")
+    public R getLayerAvgTemp(@RequestParam String houseNo,
+                             @RequestParam int ceng) {
+        List<HouseTempRecordDTO> records = dataService.getLayerAvgTempByHouseNo(houseNo, ceng);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号，返回每个时间点全部温度点的平均值
+     * @param houseNo 粮房编号
+     */
+    @GetMapping("/allAvgTemp")
+    public R getAllAvgTemp(@RequestParam String houseNo) {
+        List<HouseTempRecordDTO> records = dataService.getAllAvgTempByHouseNo(houseNo);
+        return R.ok(records);
     }
 }
