@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useCurrentUserStore } from '@/stores/currentUser'
-const whiteList = ['/xxx']
+const whiteList = ['/xxx', '/external-login']
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -67,6 +67,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue')
+    },
+    {
+      path: '/external-login',
+      name: 'external-login',
+      component: () => import('@/views/ExternalLogin.vue')
     },
     {
       path:'/display',

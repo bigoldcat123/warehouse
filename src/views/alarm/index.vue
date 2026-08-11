@@ -121,7 +121,7 @@
                                 </svg>
                                 查看
                             </button>
-                            <button v-else :disabled="!user.getPriv()?.includes('3')"
+                            <button v-else-if="!user.isGuest()" :disabled="!user.getPriv()?.includes('3')"
                                 class="action-btn action-btn--success"
                                 :class="{ 'action-btn--disabled': !user.getPriv()?.includes('3') }"
                                 @click="handleDialog = true; currentid = row.id">

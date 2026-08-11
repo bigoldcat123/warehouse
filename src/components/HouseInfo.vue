@@ -106,7 +106,7 @@
                 气体浓度
             </button>
             <button
-                v-if="!isWind"
+                v-if="!isWind && !currentUser.isGuest()"
                 @click="emit('update', house)"
                 class="action-btn"
             >
@@ -121,7 +121,9 @@ import { useRouter } from "vue-router";
 import type { type_House } from "@/api/house";
 import houseApi from "@/api/house";
 import { useCurrentWareHouse } from "@/stores/currentWareHouse";
+import { useCurrentUserStore } from "@/stores/currentUser";
 const w = useCurrentWareHouse();
+const currentUser = useCurrentUserStore();
 
 const { house, isWind } = defineProps<{
     house: type_House;

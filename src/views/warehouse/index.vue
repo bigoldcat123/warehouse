@@ -1,7 +1,7 @@
 <template>
     <!-- 工具栏 -->
     <div class="flex items-center gap-4 mb-5">
-        <button class="btn-primary" @click="addDialog = true">
+        <button v-if="!currentUser.isGuest()" class="btn-primary" @click="addDialog = true">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -28,7 +28,7 @@
                     <td class="text-white">{{ row.warehouseName }}</td>
                     <td class="text-[#b0d0f0]">{{ row.warehouseAddress || '--' }}</td>
                     <td class="text-center">
-                        <div class="flex items-center justify-center gap-2">
+                        <div v-if="!currentUser.isGuest()" class="flex items-center justify-center gap-2">
                             <button class="action-btn action-btn--primary"
                                 @click="() => { current = row; updateDialog = true; }">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,6 +102,8 @@ import { ref, computed } from 'vue'
 import warehouse, { type type_WareHouse } from '@/api/warehouse';
 import AddDialog from './AddDialog.vue';
 import UpdateDialog from './UpdateDialog.vue';
+import { useCurrentUserStore } from '@/stores/currentUser';
+const currentUser = useCurrentUserStore()
 const list = ref<Page<type_WareHouse>>()
 const addDialog = ref(false)
 const updateDialog = ref(false)

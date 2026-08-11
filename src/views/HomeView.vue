@@ -152,7 +152,7 @@ const v = ref(false)
                     </span>
                     <span class="text-[#b0d0f0] text-sm">您好！</span>
 
-                    <button class="topbar__btn topbar__btn--primary" @click="v = true">
+                    <button v-if="!currentUser.isGuest()" class="topbar__btn topbar__btn--primary" @click="v = true">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
