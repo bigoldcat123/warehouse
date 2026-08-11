@@ -22,6 +22,10 @@ public class JwtAuthorizationManager implements AuthorizationManager<Object>{
     String environment;
     @Value("${devToken}")
     String devToken;
+    @Value("${guestToken}")
+    String guestToken;
+    @Value("${guest.username}")
+    String guestUsername;
     @Override
     @Nullable
     public AuthorizationDecision check(Supplier<Authentication> authentication,@Nullable Object object) {
@@ -32,6 +36,14 @@ public class JwtAuthorizationManager implements AuthorizationManager<Object>{
         if(environment.equals("dev")&& jwtAuthorization.getCredentials().equals(devToken)) {
             jwtAuthorization.setAuthenticated(true);
             jwtAuthorization.setCurrentUser( CurrentUser.getDevFakeCurrentUser());
+            SecurityContext emptyContext = SecurityContextHolder.createEmptyContext();
+            emptyContext.setAuthentication(jwtAuthorization);
+            SecurityContextHolder.setContext(emptyContext);
+            return new AuthorizationDecision(true);
+        }
+        if(jwtAuthorization.getCredentials().equals(guestToken)) {
+            jwtAuthorization.setAuthenticated(true);
+            jwtAuthorization.setCurrentUser(CurrentUser.getGuestFakeCurrentUser(guestUsername));
             SecurityContext emptyContext = SecurityContextHolder.createEmptyContext();
             emptyContext.setAuthentication(jwtAuthorization);
             SecurityContextHolder.setContext(emptyContext);

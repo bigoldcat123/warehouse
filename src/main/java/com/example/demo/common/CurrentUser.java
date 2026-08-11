@@ -45,4 +45,14 @@ public class CurrentUser {
         currentUser.setPriv("1");
         return currentUser;
     }
+
+    public static CurrentUser getGuestFakeCurrentUser(String username) {
+        CurrentUser currentUser = new CurrentUser();
+        currentUser.setId(-1);
+        currentUser.setName(username);
+        currentUser.setUsername(username);
+        currentUser.setCompanyID(-1);
+        currentUser.setPriv("guest");
+        return currentUser;
+    }
 }
