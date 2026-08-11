@@ -103,7 +103,7 @@
                 })"
                 class="action-btn"
             >
-                温度折线图
+                气体浓度
             </button>
             <button
                 v-if="!isWind"
