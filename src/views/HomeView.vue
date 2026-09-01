@@ -101,12 +101,12 @@ const v = ref(false)
                     </el-icon>
                     <span>数据查看</span>
                 </el-menu-item>
-                <el-menu-item index="/gas" disabled>
+                <!-- <el-menu-item index="/gas" disabled>
                     <el-icon>
                         <Odometer />
                     </el-icon>
                     <span>气体浓度</span>
-                </el-menu-item>
+                </el-menu-item> -->
                 <el-menu-item index="/entry">
                     <el-icon>
                         <setting />
