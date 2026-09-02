@@ -4,8 +4,17 @@
     <div ref="chartRef" class="w-full h-full"></div>
 
     <!-- 控制面板 -->
-    <div class="absolute top-4 left-4 w-[260px] rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#d6e4f0] p-4 shadow-lg backdrop-blur">
-      <div class="text-base font-bold mb-3 text-[#7ec3ff]">{{ cfg.title }}</div>
+    <div v-if="panelOpen" class="absolute top-4 left-4 w-[260px] rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#d6e4f0] p-4 shadow-lg backdrop-blur">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-base font-bold text-[#7ec3ff]">{{ cfg.title }}</div>
+        <button
+          @click="panelOpen = false"
+          class="flex items-center justify-center w-6 h-6 rounded hover:bg-[#2a4a6a] cursor-pointer transition-colors"
+          title="收起"
+        >
+          <svg viewBox="0 0 24 24" class="w-4 h-4 fill-none stroke-current stroke-2 text-[#9fb8cc]"><polyline points="15 18 9 12 15 6" /></svg>
+        </button>
+      </div>
 
       <div class="space-y-2 text-sm">
         <div class="flex items-center justify-between">
@@ -38,6 +47,16 @@
         <div class="flex justify-between"><span>维度 X/Y/Z</span><span>{{ store.dimX }} × {{ store.dimY }} × {{ store.dimZ }}</span></div>
       </div>
     </div>
+
+    <!-- 收起后的展开按钮 -->
+    <button
+      v-else
+      @click="panelOpen = true"
+      class="absolute top-4 left-4 w-9 h-9 rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#9fb8cc] flex items-center justify-center shadow-lg backdrop-blur cursor-pointer hover:bg-[#1a3a5a] transition-colors"
+      title="展开控制面板"
+    >
+      <svg viewBox="0 0 24 24" class="w-5 h-5 fill-none stroke-current stroke-2"><polyline points="9 18 15 12 9 6" /></svg>
+    </button>
 
     <!-- 加载/空状态提示 -->
     <div v-if="store.loading" class="absolute inset-0 z-10 flex items-center justify-center text-sm text-[#7ec3ff] bg-[#0b1b2b]/70">
@@ -77,6 +96,7 @@ const currentTime = computed<string | undefined>({
 
 const orientation = ref<CubeSliceOrientation>('xy')
 const sliceIndex = ref(0)
+const panelOpen = ref(true)
 
 const sliceCount = computed(() =>
   orientation.value === 'xy' ? store.dimZ : orientation.value === 'xz' ? store.dimY : store.dimX,
