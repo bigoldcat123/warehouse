@@ -130,6 +130,18 @@ const router = createRouter({
       path:'/gas3d',
       name:'gas3d',
       component:() => import('@/views/gas3d/index.vue')
+    },{
+      path:'/heatmap',
+      name:'heatmap',
+      component:() => import('@/views/heatmap/index.vue')
+    },{
+      path:'/humidityHeatmap',
+      name:'humidityHeatmap',
+      component:() => import('@/views/humidityHeatmap/index.vue')
+    },{
+      path:'/gasHeatmap',
+      name:'gasHeatmap',
+      component:() => import('@/views/gasHeatmap/index.vue')
     }
   ],
   scrollBehavior(to,from,savedPosition) {

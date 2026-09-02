@@ -10,6 +10,7 @@ declare module 'vue' {
     Binner: typeof import('./src/components/common/Binner.vue')['default']
     Button: typeof import('./src/components/common/Button.vue')['default']
     Carousel: typeof import('./src/components/common/Carousel.vue')['default']
+    CubeHeatmap: typeof import('./src/components/CubeHeatmap.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCarousel: typeof import('element-plus/es')['ElCarousel']
     ElCarouselItem: typeof import('element-plus/es')['ElCarouselItem']

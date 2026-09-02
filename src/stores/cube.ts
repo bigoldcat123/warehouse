@@ -11,8 +11,7 @@ export interface SensorPoint {
   value: number
 }
 
-/** 无效点位标识（接口文档：源数据未覆盖的点位返回 "-999"，前端识别为无效数值） */
-export const INVALID_TEMP = -999
+import { INVALID_TEMP } from '@/utils/cubeSlice'
 
 /** 三维数组指标：温度 / 湿度 / 气体浓度 */
 export type CubeKind = 'temperature' | 'humidity' | 'gas'

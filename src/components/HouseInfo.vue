@@ -91,15 +91,15 @@
             </button>
             <button @click="show_3d" class="action-btn">动态3D图</button>
             -->
-            <button class="action-btn">温度剖面图</button>
+            <button @click="show_heatmap" class="action-btn">温度剖面图</button>
             <button @click="show_3d_temp" class="action-btn">3D温度图</button>
 
-            <button class="action-btn">湿度剖面图</button>
+            <button @click="show_humidityHeatmap" class="action-btn">湿度剖面图</button>
             <button @click="show_humidity3d" class="action-btn">
                 3D湿度图
             </button>
 
-            <button class="action-btn">气体浓度剖面图</button>
+            <button @click="show_gasHeatmap" class="action-btn">气体浓度剖面图</button>
             <button @click="show_gas3d" class="action-btn">3D气体浓度</button>
             <button
                 @click="
@@ -276,6 +276,33 @@ const show_humidity3d = () => {
 const show_gas3d = () => {
     router.push({
         path: "/gas3d",
+        query: {
+            houseNo: house.houseNo,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_heatmap = () => {
+    router.push({
+        path: "/heatmap",
+        query: {
+            houseNo: house.houseNo,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_humidityHeatmap = () => {
+    router.push({
+        path: "/humidityHeatmap",
+        query: {
+            houseNo: house.houseNo,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_gasHeatmap = () => {
+    router.push({
+        path: "/gasHeatmap",
         query: {
             houseNo: house.houseNo,
             houseName: house.houseName,
