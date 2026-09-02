@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -286,6 +288,26 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
 
         saveBatch(dataList);
         return dataList.size();
+    }
+
+    @Override
+    public Map<LocalDateTime, List<List<List<String>>>> getTemperatureCubeByHouseNo(String houseNo) {
+        Map<LocalDateTime, List<List<List<String>>>> result = new LinkedHashMap<>();
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null) {
+            return result;
+        }
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        q.orderByAsc("TestDate");
+        List<Data> list = list(q);
+
+        for (Data data : list) {
+            if (data.getGasStrength() == null) continue;
+            String[] temps = get_temps(data.getGasStrength().split("#"), house);
+            result.put(data.getTestDate(), parseLayers(temps, house));
+        }
+        return result;
     }
 
 

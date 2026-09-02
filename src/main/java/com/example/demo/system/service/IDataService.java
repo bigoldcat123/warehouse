@@ -7,6 +7,8 @@ import com.example.demo.system.entity.PO.Data;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * <p>
@@ -57,4 +59,11 @@ public interface IDataService extends IService<Data> {
      * @return 插入的记录数
      */
     int insertRandomData(String houseNo, int count, int x, int y, int z);
+    /**
+     * 根据粮房编号，返回每个时间点的三维温度数组
+     * 源数据按 # 分割记录，按 $ 分割：列:行:层$温度$5
+     * @param houseNo 粮房编号
+     * @return {采集时间: 三维温度数组[层][行][列]}，按时间升序
+     */
+    Map<LocalDateTime, List<List<List<String>>>> getTemperatureCubeByHouseNo(String houseNo);
 }

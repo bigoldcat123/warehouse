@@ -154,4 +154,14 @@ public class DataController {
         List<HouseTempRecordDTO> records = dataService.getAllAvgTempByHouseNo(houseNo);
         return R.ok(records);
     }
+    /**
+     * 根据粮房编号，返回每个时间点的三维温度数组 [层][行][列]
+     * 源数据按 # 分割记录，按 $ 分割：列:行:层$温度$5
+     * @param houseNo 粮房编号
+     * @return {采集时间: 三维温度数组}，按时间升序
+     */
+    @GetMapping("/temperatureCube")
+    public R getTemperatureCube(@RequestParam String houseNo) {
+        return R.ok(dataService.getTemperatureCubeByHouseNo(houseNo));
+    }
 }
