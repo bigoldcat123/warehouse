@@ -42,7 +42,7 @@
 
         <!-- 操作按钮区 -->
         <div class="px-4 pb-4 grid grid-cols-2 gap-2">
-            <button
+            <!-- <button
                 v-if="isWind"
                 class="action-btn"
                 @click="show_tongfeng_water"
@@ -90,6 +90,15 @@
                 动态云图
             </button>
             <button @click="show_3d" class="action-btn">动态3D图</button>
+            -->
+            <button
+                v-if="!isWind && !currentUser.isGuest()"
+                @click="emit('update', house)"
+                class="action-btn"
+            >
+                编辑
+            </button>
+            <button @click="show_3d_temp" class="action-btn">3D温度</button>
             <button
                 @click="router.push({
                     path: '/tempLine',
@@ -104,13 +113,6 @@
                 class="action-btn"
             >
                 气体浓度
-            </button>
-            <button
-                v-if="!isWind && !currentUser.isGuest()"
-                @click="emit('update', house)"
-                class="action-btn"
-            >
-                编辑
             </button>
         </div>
     </div>
@@ -238,6 +240,15 @@ const show_3D = () => {
         query: {
             name: "3D图",
             urls: threeD,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_3d_temp = () => {
+    router.push({
+        path: "/granary3d",
+        query: {
+            houseNo: house.houseNo,
             houseName: house.houseName,
         },
     });
