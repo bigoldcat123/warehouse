@@ -68,7 +68,7 @@ const v = ref(false)
                     <span>仓房管理</span>
                 </el-menu-item>
 
-                <el-menu-item index="/wind">
+                <!-- <el-menu-item index="/wind">
                     <el-icon>
                         <VideoCamera />
                     </el-icon>
@@ -79,7 +79,7 @@ const v = ref(false)
                         <PictureFilled />
                     </el-icon>
                     <span>云图播放</span>
-                </el-menu-item>
+                </el-menu-item> -->
 
                 <el-menu-item v-if="currentUser.isMainComp()" index="/alarmarg">
                     <el-icon>

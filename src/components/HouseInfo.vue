@@ -91,30 +91,39 @@
             </button>
             <button @click="show_3d" class="action-btn">动态3D图</button>
             -->
+            <button class="action-btn">温度剖面图</button>
+            <button @click="show_3d_temp" class="action-btn">3D温度图</button>
+
+            <button class="action-btn">湿度剖面图</button>
+            <button @click="show_humidity3d" class="action-btn">
+                3D湿度图
+            </button>
+
+            <button class="action-btn">气体浓度剖面图</button>
+            <button @click="show_gas3d" class="action-btn">3D气体浓度</button>
+            <button
+                @click="
+                    router.push({
+                        path: '/tempLine',
+                        query: {
+                            houseNo: house.houseNo,
+                            houseName: house.houseName,
+                            x: house.x,
+                            y: house.y,
+                            z: house.z,
+                        },
+                    })
+                "
+                class="action-btn"
+            >
+                气体浓度
+            </button>
             <button
                 v-if="!isWind && !currentUser.isGuest()"
                 @click="emit('update', house)"
                 class="action-btn"
             >
                 编辑
-            </button>
-            <button @click="show_3d_temp" class="action-btn">3D温度</button>
-            <button @click="show_humidity3d" class="action-btn">3D湿度</button>
-            <button @click="show_gas3d" class="action-btn">3D浓度</button>
-            <button
-                @click="router.push({
-                    path: '/tempLine',
-                    query: {
-                        houseNo: house.houseNo,
-                        houseName: house.houseName,
-                        x: house.x,
-                        y: house.y,
-                        z: house.z,
-                    },
-                })"
-                class="action-btn"
-            >
-                气体浓度
             </button>
         </div>
     </div>
@@ -187,20 +196,20 @@ const show_3d = async () => {
     });
 };
 const show_dynamic_yuntu = async () => {
-  const res = await houseApi.getImageUrl(
-      "mlcc",
-      w.getWareHouse().wareHouseNO ?? "",
-      house.houseNo,
-  );
+    const res = await houseApi.getImageUrl(
+        "mlcc",
+        w.getWareHouse().wareHouseNO ?? "",
+        house.houseNo,
+    );
 
-  router.push({
-      path: "/showCarousel",
-      query: {
-          name: "动态云图",
-          urls: res.data.value,
-          houseName: house.houseName,
-      },
-  });
+    router.push({
+        path: "/showCarousel",
+        query: {
+            name: "动态云图",
+            urls: res.data.value,
+            houseName: house.houseName,
+        },
+    });
 };
 const show_tongfeng_water = () => {
     const tongFengSst = house.tongFengSst?.split(",").map(map_fn) ?? [];
