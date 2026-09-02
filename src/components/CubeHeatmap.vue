@@ -1,7 +1,23 @@
 <template>
-  <div class="w-full h-full bg-[#0b1b2b] relative overflow-hidden select-none">
-    <!-- echarts 画布 -->
-    <div ref="chartRef" class="w-full h-full"></div>
+  <div ref="rootRef" class="w-full h-full bg-[#0b1b2b] relative overflow-hidden select-none">
+    <!-- 纯 canvas 手绘：平滑色场 + 坐标轴 + 色标 -->
+    <canvas
+      ref="canvasRef"
+      class="block w-full h-full"
+      @mousemove="onHover"
+      @mouseleave="onLeave"
+    />
+
+    <!-- 悬浮提示（HTML 覆盖层，随鼠标移动） -->
+    <div
+      v-if="tooltip"
+      class="absolute z-20 pointer-events-none rounded border border-[#2a4a6a] bg-[#10243a]/95 px-2 py-1 text-xs text-[#d6e4f0] shadow-lg whitespace-nowrap"
+      :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }"
+    >
+      <div class="text-[#9fb8cc]">{{ tooltip.head }}</div>
+      <div v-if="tooltip.value !== null">{{ cfg.label }}：<b class="text-[#7ec3ff]">{{ tooltip.value }}</b></div>
+      <div v-else class="text-[#9fb8cc]">无数据</div>
+    </div>
 
     <!-- 控制面板 -->
     <div v-if="panelOpen" class="absolute top-4 left-4 w-[260px] rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#d6e4f0] p-4 shadow-lg backdrop-blur">
@@ -76,9 +92,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import * as echarts from 'echarts'
 import { useCubeStore, CUBE_METRICS, type CubeKind } from '@/stores/cube'
 import { sliceCube, type CubeSliceOrientation } from '@/utils/cubeSlice'
+import { renderCubeHeatCanvas, paletteAt } from '@/utils/cubeHeatCanvas'
 
 const props = defineProps<{ houseNo: string; metric?: CubeKind }>()
 
@@ -86,8 +102,8 @@ const store = useCubeStore(props.metric ?? 'temperature')
 
 const cfg = computed(() => CUBE_METRICS[props.metric ?? 'temperature'])
 
-const chartRef = ref<HTMLDivElement | null>(null)
-let chart: echarts.ECharts | undefined
+const rootRef = ref<HTMLDivElement | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null)
 
 const currentTime = computed<string | undefined>({
   get: () => store.currentTime ?? undefined,
@@ -126,98 +142,196 @@ function formatTime(t: string) {
   return t.replace('T', ' ')
 }
 
-function buildOption() {
+/* ---------------- 纯 canvas 绘制 ---------------- */
+
+/** 图面边距（CSS px）：右侧留给色标 */
+const MARGIN = { top: 24, right: 78, bottom: 40, left: 46 }
+/** 数据绘图区（CSS px），由 draw() 更新，hover 计算复用 */
+let plot = { x: 0, y: 0, w: 0, h: 0 }
+
+interface HoverCell { r: number; c: number }
+const hover = ref<HoverCell | null>(null)
+interface Tip { head: string; value: string | null; x: number; y: number }
+const tooltip = ref<Tip | null>(null)
+
+function fmtTick(v: number) {
+  return Number.isInteger(v) ? String(v) : v.toFixed(1)
+}
+
+function draw() {
+  const canvas = canvasRef.value
+  const root = rootRef.value
+  if (!canvas || !root) return
+  const W = root.clientWidth
+  const H = root.clientHeight
+  if (W === 0 || H === 0) return
+  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  canvas.width = Math.round(W * dpr)
+  canvas.height = Math.round(H * dpr)
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+  // 背景
+  ctx.fillStyle = '#0b1b2b'
+  ctx.fillRect(0, 0, W, H)
+
   const s = slice.value
+  const cols = s.cols.length
+  const rows = s.rows.length
+  if (cols === 0 || rows === 0) return
+
+  plot = {
+    x: MARGIN.left,
+    y: MARGIN.top,
+    w: Math.max(10, W - MARGIN.left - MARGIN.right),
+    h: Math.max(10, H - MARGIN.top - MARGIN.bottom),
+  }
+
+  // 热力色场：二维数组 → 小方格 → 高斯模糊卷积扩散
+  const field = renderCubeHeatCanvas(
+    s,
+    { min: cfg.value.min, max: cfg.value.max },
+    Math.round(plot.w),
+    Math.round(plot.h),
+  )
+  if (field) {
+    ctx.imageSmoothingEnabled = true
+    ctx.drawImage(field, plot.x, plot.y, plot.w, plot.h)
+  }
+
+  const cellW = plot.w / cols
+  const cellH = plot.h / rows
+
+  // 坐标轴线（左 + 下）
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.moveTo(plot.x, plot.y)
+  ctx.lineTo(plot.x, plot.y + plot.h)
+  ctx.lineTo(plot.x + plot.w, plot.y + plot.h)
+  ctx.stroke()
+
+  // 刻度标签：格心对齐，过密时按间隔抽稀
+  ctx.fillStyle = '#9fb8cc'
+  ctx.font = '11px sans-serif'
+  const xStride = Math.max(1, Math.ceil(cols / Math.max(1, Math.floor(plot.w / 30))))
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'top'
+  for (let c = 0; c < cols; c += xStride) {
+    ctx.fillText(s.cols[c], plot.x + (c + 0.5) * cellW, plot.y + plot.h + 6)
+  }
+  const yStride = Math.max(1, Math.ceil(rows / Math.max(1, Math.floor(plot.h / 20))))
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  for (let r = 0; r < rows; r += yStride) {
+    ctx.fillText(s.rows[r], plot.x - 8, plot.y + (r + 0.5) * cellH)
+  }
+
+  // 轴名
   const names = axisNames.value
-  const data: [number, number, number | string][] = []
-  for (let r = 0; r < s.grid.length; r++) {
-    for (let c = 0; c < s.grid[r].length; c++) {
-      data.push([c, r, s.grid[r][c] ?? '-'])
+  ctx.fillStyle = '#9fb8cc'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'bottom'
+  ctx.fillText(names.x, plot.x + plot.w / 2, H - 4)
+  ctx.save()
+  ctx.translate(12, plot.y + plot.h / 2)
+  ctx.rotate(-Math.PI / 2)
+  ctx.textBaseline = 'top'
+  ctx.fillText(names.y, 0, 0)
+  ctx.restore()
+
+  // 色标：垂直渐变条（下 min → 上 max）+ min/mid/max 刻度 + 单位
+  const lgX = plot.x + plot.w + 18
+  const lgW = 12
+  const lgY = plot.y
+  const lgH = plot.h
+  const grad = ctx.createLinearGradient(0, lgY + lgH, 0, lgY)
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8
+    const [R, G, B] = paletteAt(t)
+    grad.addColorStop(t, `rgb(${R},${G},${B})`)
+  }
+  ctx.fillStyle = grad
+  ctx.fillRect(lgX, lgY, lgW, lgH)
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'
+  ctx.lineWidth = 1
+  ctx.strokeRect(lgX + 0.5, lgY + 0.5, lgW - 1, lgH - 1)
+  ctx.fillStyle = '#9fb8cc'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'middle'
+  const lx = lgX + lgW + 5
+  ctx.fillText(fmtTick(cfg.value.max), lx, lgY)
+  ctx.fillText(fmtTick((cfg.value.min + cfg.value.max) / 2), lx, lgY + lgH / 2)
+  ctx.fillText(fmtTick(cfg.value.min), lx, lgY + lgH)
+  ctx.textBaseline = 'bottom'
+  ctx.fillText(cfg.value.unit, lgX, lgY - 6)
+
+  // 悬浮格高亮
+  const hv = hover.value
+  if (hv && hv.r >= 0 && hv.r < rows && hv.c >= 0 && hv.c < cols) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'
+    ctx.lineWidth = 1.5
+    ctx.strokeRect(plot.x + hv.c * cellW + 0.5, plot.y + hv.r * cellH + 0.5, cellW - 1, cellH - 1)
+  }
+}
+
+function onHover(e: MouseEvent) {
+  const root = rootRef.value
+  const s = slice.value
+  const cols = s.cols.length
+  const rows = s.rows.length
+  if (!root || cols === 0 || rows === 0) return
+  const rect = root.getBoundingClientRect()
+  const mx = e.clientX - rect.left
+  const my = e.clientY - rect.top
+  const c = Math.floor((mx - plot.x) / (plot.w / cols))
+  const r = Math.floor((my - plot.y) / (plot.h / rows))
+  if (r < 0 || r >= rows || c < 0 || c >= cols) {
+    if (hover.value) {
+      hover.value = null
+      tooltip.value = null
+      draw()
     }
+    return
   }
-  return {
-    backgroundColor: 'transparent',
-    grid: { left: 70, right: 90, top: 40, bottom: 40 },
-    tooltip: {
-      formatter: (params: any) => {
-        const c = params.value[0] as number
-        const r = params.value[1] as number
-        const head = `${names.y}${s.rows[r] ?? '-'} · ${names.x}${s.cols[c] ?? '-'}`
-        const v = s.grid[r]?.[c]
-        if (v === null || v === undefined) return `${head}<br/>无数据`
-        return `${head}<br/>${cfg.value.label}：<b>${v.toFixed(1)} ${cfg.value.unit}</b>`
-      },
-    },
-    xAxis: {
-      type: 'category',
-      data: s.cols,
-      name: names.x,
-      nameTextStyle: { color: '#9fb8cc' },
-      axisLabel: { color: '#9fb8cc' },
-      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.15)' } },
-      splitArea: { show: true, areaStyle: { color: ['rgba(16,36,58,0.4)', 'rgba(16,36,58,0.9)'] } },
-    },
-    yAxis: {
-      type: 'category',
-      data: s.rows,
-      name: names.y,
-      nameTextStyle: { color: '#9fb8cc' },
-      axisLabel: { color: '#9fb8cc' },
-      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.15)' } },
-      splitArea: { show: true, areaStyle: { color: ['rgba(16,36,58,0.4)', 'rgba(16,36,58,0.9)'] } },
-    },
-    visualMap: {
-      min: cfg.value.min,
-      max: cfg.value.max,
-      calculable: true,
-      orient: 'vertical',
-      right: 0,
-      top: 'center',
-      textStyle: { color: '#9fb8cc' },
-      inRange: { color: ['#2b6cff', '#22c3d6', '#3ecf5a', '#f2c531', '#f0433a'] },
-    },
-    series: [
-      {
-        type: 'heatmap',
-        data,
-        label: { show: true, color: '#e8f2fb', fontSize: 11 },
-        itemStyle: { borderColor: '#0b1b2b', borderWidth: 1 },
-      },
-    ],
+  hover.value = { r, c }
+  const names = axisNames.value
+  const v = s.grid[r]?.[c]
+  tooltip.value = {
+    head: `${names.y}${s.rows[r]} · ${names.x}${s.cols[c]}`,
+    value: v === null || v === undefined ? null : `${v.toFixed(1)} ${cfg.value.unit}`,
+    x: mx + 150 > root.clientWidth ? mx - 138 : mx + 12,
+    y: my + 70 > root.clientHeight ? my - 60 : my + 12,
   }
+  draw()
 }
 
-function render() {
-  if (!chart) return
-  chart.setOption(buildOption(), true)
-}
-
-function ensureChart() {
-  if (chart) return
-  if (!chartRef.value) return
-  chart = echarts.init(chartRef.value)
-  render()
-}
-
-function onResize() {
-  chart?.resize()
+function onLeave() {
+  hover.value = null
+  tooltip.value = null
+  draw()
 }
 
 watch(
   () => [slice.value, cfg.value] as const,
-  () => nextTick(render),
+  () => nextTick(draw),
 )
 
 watch(() => props.houseNo, (no) => store.fetchCube(no), { immediate: true })
 
+let resizeObserver: ResizeObserver | undefined
+
 onMounted(() => {
-  ensureChart()
-  window.addEventListener('resize', onResize)
+  nextTick(draw)
+  if (rootRef.value) {
+    resizeObserver = new ResizeObserver(() => draw())
+    resizeObserver.observe(rootRef.value)
+  }
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onResize)
-  chart?.dispose()
-  chart = undefined
+  resizeObserver?.disconnect()
+  resizeObserver = undefined
 })
 </script>
