@@ -43,6 +43,10 @@ export type type_Data_Detail = {
        testTime:string
 }
 
+// 三维温度数组: key 为采集时间(ISO-8601, 升序), value 为 [层 z][行 x][列 y] 的字符串温度(1 位小数)
+// "-999" 表示无效点位; 粮房不存在或无数据时为空对象 {}
+export type type_TemperatureCube = Record<string, string[][][]>
+
 // 温度记录：指定点 / 指定层平均 / 全仓平均 共用同一结构
 export type type_TempRecord = {
     testDate: string  // 检测时间 yyyy-MM-dd HH:mm:ss
@@ -74,6 +78,12 @@ class Data {
     // 查询全部点平均温度
     allAvgTemp(houseNo: string) {
         return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/allAvgTemp`, {
+            params: { houseNo }
+        })
+    }
+    // 根据粮房编号获取每个采集时间点的三维温度数组(公开接口, 无需鉴权)
+    temperatureCube(houseNo: string) {
+        return server.get<ResponseData<type_TemperatureCube>>(`${preFix}/temperatureCube`, {
             params: { houseNo }
         })
     }
