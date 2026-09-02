@@ -80,9 +80,10 @@ interface SensorPoint {
 
 const TEMP_MIN = 10
 const TEMP_MAX = 40
-const GAP = 2 // 测点间距
-const LAYER_GAP = 0.8 // 层与层之间的间隔
-const BALL_R = GAP * 0.24 // 测点圆球半径
+const ROOM_W = 16 // 仓房宽(x方向, 固定)
+const ROOM_D = 16 // 仓房深(y方向, 固定)
+const ROOM_H = 9 // 仓房高(z方向, 固定)
+const BALL_R = 0.35 // 测点圆球半径(固定)
 const TILE_OPACITY = 0.5 // 常态透明度
 const cellGeo = new THREE.SphereGeometry(BALL_R, 24, 16)
 
@@ -195,21 +196,13 @@ function generateMockData(): SensorPoint[] {
   return list
 }
 
+/** 测点位置: 房间均分为 dimX×dimY×dimZ 个格子, 取格子中心, 点数变化时间距自适应 */
 function pointPosition(p: SensorPoint): THREE.Vector3 {
   return new THREE.Vector3(
-    (p.x - (dimX.value - 1) / 2) * GAP,
-    layerY(p.z) + BALL_R + 0.02,
-    (p.y - (dimY.value - 1) / 2) * GAP,
+    -ROOM_W / 2 + ((p.x + 0.5) / dimX.value) * ROOM_W,
+    ((p.z + 0.5) / dimZ.value) * ROOM_H,
+    -ROOM_D / 2 + ((p.y + 0.5) / dimY.value) * ROOM_D,
   )
-}
-/** 第 z 层的底部高度 */
-function layerY(z: number): number {
-  return z * (GAP + LAYER_GAP)
-}
-
-/** 粮堆总高(含层间隔) */
-function warehouseHeight(): number {
-  return layerY(dimZ.value - 1) + BALL_R * 2 + 0.04
 }
 
 /** 重建测点实例(按显示层过滤) */
@@ -262,9 +255,9 @@ function rebuildWarehouse() {
   warehouseGroup = new THREE.Group()
   scene.add(warehouseGroup)
 
-  const w = dimX.value * GAP
-  const d = dimY.value * GAP
-  const h = warehouseHeight()
+  const w = ROOM_W
+  const d = ROOM_D
+  const h = ROOM_H
   const lineMat = new THREE.LineBasicMaterial({ color: 0x5a8ab8 })
 
   // 地坪
@@ -309,8 +302,7 @@ function regenerate() {
   if (visibleLayer.value !== 'all' && (visibleLayer.value as number) >= dimZ.value) {
     visibleLayer.value = 'all'
   }
-  rebuildWarehouse()
-  controls?.target.set(0, (warehouseHeight()) / 2, 0)
+  rebuildInstances()
 }
 
 function initScene() {
@@ -331,7 +323,7 @@ function initScene() {
   controls.enableDamping = true
   controls.dampingFactor = 0.08
   controls.maxDistance = 120
-  controls.target.set(0, 3, 0)
+  controls.target.set(0, ROOM_H / 2, 0)
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.45))
   const dir = new THREE.DirectionalLight(0xfff2dd, 1.1)
@@ -351,6 +343,7 @@ function initScene() {
   highlightMesh.scale.setScalar(1.06)
   highlightMesh.visible = false
   scene.add(highlightMesh)
+  rebuildWarehouse()
 
   animate()
 }
