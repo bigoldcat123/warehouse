@@ -28,7 +28,7 @@ import com.example.demo.security.provider.MyDaoAuthenticationProvider;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    String [] writeList = {"/ws","/static/**","/alarm/excel","/alarm/arg_excel","/data/temperatureCube"};
+    String [] writeList = {"/ws","/static/**","/alarm/excel","/alarm/arg_excel","/data/temperatureCube","/data/humidityCube","/data/gasCube"};
     @Bean
     public AuthenticationManager authenticationManager(
             MyDaoAuthenticationProvider myDaoAuthenticationProvider

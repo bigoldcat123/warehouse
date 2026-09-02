@@ -66,4 +66,17 @@ public interface IDataService extends IService<Data> {
      * @return {采集时间: 三维温度数组[层][行][列]}，按时间升序
      */
     Map<LocalDateTime, List<List<List<String>>>> getTemperatureCubeByHouseNo(String houseNo);
+    /**
+     * 根据粮房编号，返回每个时间点的湿度三维数组（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @return {采集时间: 湿度三维数组[层][行][列]}
+     */
+    Map<LocalDateTime, List<List<List<String>>>> getHumidityCubeByHouseNo(String houseNo);
+
+    /**
+     * 根据粮房编号，返回每个时间点的气体浓度三维数组（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @return {采集时间: 气体浓度三维数组[层][行][列]}
+     */
+    Map<LocalDateTime, List<List<List<String>>>> getGasCubeByHouseNo(String houseNo);
 }

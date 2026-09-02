@@ -310,6 +310,54 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
         return result;
     }
 
+    @Override
+    public Map<LocalDateTime, List<List<List<String>>>> getHumidityCubeByHouseNo(String houseNo) {
+        Map<LocalDateTime, List<List<List<String>>>> result = new LinkedHashMap<>();
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null) {
+            return result;
+        }
+        result.put(LocalDateTime.now().withNano(0), buildRandomCube(house, 20, 90));
+        return result;
+    }
+
+    @Override
+    public Map<LocalDateTime, List<List<List<String>>>> getGasCubeByHouseNo(String houseNo) {
+        Map<LocalDateTime, List<List<List<String>>>> result = new LinkedHashMap<>();
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null) {
+            return result;
+        }
+        result.put(LocalDateTime.now().withNano(0), buildRandomCube(house, 300, 3000));
+        return result;
+    }
+
+    /**
+     * 根据仓房 xyz 维度生成随机三维数组 [层][行][列]，保留 1 位小数
+     * @param house 仓房（取 z/x/y 维度）
+     * @param min 随机最小值（含）
+     * @param max 随机最大值（含）
+     */
+    static private List<List<List<String>>> buildRandomCube(House house, double min, double max) {
+        Random random = new Random();
+        int x = house.getX();
+        int y = house.getY();
+        int z = house.getZ();
+        List<List<List<String>>> cube = new ArrayList<>();
+        for (int ceng = 0; ceng < z; ceng++) {
+            List<List<String>> layer = new ArrayList<>();
+            for (int hang = 0; hang < x; hang++) {
+                List<String> row = new ArrayList<>();
+                for (int lie = 0; lie < y; lie++) {
+                    row.add(String.format("%.1f", min + random.nextDouble() * (max - min)));
+                }
+                layer.add(row);
+            }
+            cube.add(layer);
+        }
+        return cube;
+    }
+
 
     static private String[] get_temps(String[] v_temps,House house)
     {

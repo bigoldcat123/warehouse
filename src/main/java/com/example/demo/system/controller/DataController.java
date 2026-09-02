@@ -164,4 +164,25 @@ public class DataController {
     public R getTemperatureCube(@RequestParam String houseNo) {
         return R.ok(dataService.getTemperatureCubeByHouseNo(houseNo));
     }
+    /**
+     * 根据粮房编号，返回每个时间点的湿度三维数组 [层][行][列]
+     * 当前无真实数据，按仓房 xyz 维度返回随机模拟数据
+     * @param houseNo 粮房编号
+     * @return {采集时间: 湿度三维数组}，按时间升序
+     */
+    @GetMapping("/humidityCube")
+    public R getHumidityCube(@RequestParam String houseNo) {
+        return R.ok(dataService.getHumidityCubeByHouseNo(houseNo));
+    }
+
+    /**
+     * 根据粮房编号，返回每个时间点的气体浓度三维数组 [层][行][列]
+     * 当前无真实数据，按仓房 xyz 维度返回随机模拟数据
+     * @param houseNo 粮房编号
+     * @return {采集时间: 气体浓度三维数组}，按时间升序
+     */
+    @GetMapping("/gasCube")
+    public R getGasCube(@RequestParam String houseNo) {
+        return R.ok(dataService.getGasCubeByHouseNo(houseNo));
+    }
 }
