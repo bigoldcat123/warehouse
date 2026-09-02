@@ -22,6 +22,11 @@ const router = createRouter({
           component: () => import('@/views/house/index.vue')
         },
         {
+          path: '/warehouseSettings',
+          name: 'warehouseSettings',
+          component: () => import('@/views/warehouseSettings/index.vue')
+        },
+        {
           path: '/alarm',
           name: 'alarm',
           component: () => import('@/views/alarm/index.vue')

@@ -68,6 +68,13 @@ const v = ref(false)
                     <span>仓房管理</span>
                 </el-menu-item>
 
+                <el-menu-item index="/warehouseSettings">
+                    <el-icon>
+                        <EditPen />
+                    </el-icon>
+                    <span>基础信息设置</span>
+                </el-menu-item>
+
                 <!-- <el-menu-item index="/wind">
                     <el-icon>
                         <VideoCamera />

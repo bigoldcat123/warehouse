@@ -28,6 +28,7 @@ declare module 'vue' {
     ElProgress: typeof import('element-plus/es')['ElProgress']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
+    ElTimeSelect: typeof import('element-plus/es')['ElTimeSelect']
     Gauge: typeof import('./src/components/charts/Gauge.vue')['default']
     GfktGague: typeof import('./src/components/gfkt/GfktGague.vue')['default']
     GfktInfo: typeof import('./src/components/gfkt/GfktInfo.vue')['default']
