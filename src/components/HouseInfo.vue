@@ -99,6 +99,8 @@
                 编辑
             </button>
             <button @click="show_3d_temp" class="action-btn">3D温度</button>
+            <button @click="show_humidity3d" class="action-btn">3D湿度</button>
+            <button @click="show_gas3d" class="action-btn">3D浓度</button>
             <button
                 @click="router.push({
                     path: '/tempLine',
@@ -247,6 +249,24 @@ const show_3D = () => {
 const show_3d_temp = () => {
     router.push({
         path: "/granary3d",
+        query: {
+            houseNo: house.houseNo,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_humidity3d = () => {
+    router.push({
+        path: "/humidity3d",
+        query: {
+            houseNo: house.houseNo,
+            houseName: house.houseName,
+        },
+    });
+};
+const show_gas3d = () => {
+    router.push({
+        path: "/gas3d",
         query: {
             houseNo: house.houseNo,
             houseName: house.houseName,

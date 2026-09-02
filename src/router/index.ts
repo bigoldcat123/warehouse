@@ -122,6 +122,14 @@ const router = createRouter({
       path:'/granary3d',
       name:'granary3d',
       component:() => import('@/views/granary3d/index.vue')
+    },{
+      path:'/humidity3d',
+      name:'humidity3d',
+      component:() => import('@/views/humidity3d/index.vue')
+    },{
+      path:'/gas3d',
+      name:'gas3d',
+      component:() => import('@/views/gas3d/index.vue')
     }
   ],
   scrollBehavior(to,from,savedPosition) {

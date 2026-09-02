@@ -87,6 +87,18 @@ class Data {
             params: { houseNo }
         })
     }
+    // 根据粮房编号获取每个采集时间点的湿度三维数组(公开接口, 无需鉴权, 当前为随机模拟数据)
+    humidityCube(houseNo: string) {
+        return server.get<ResponseData<type_TemperatureCube>>(`${preFix}/humidityCube`, {
+            params: { houseNo }
+        })
+    }
+    // 根据粮房编号获取每个采集时间点的气体浓度三维数组(公开接口, 无需鉴权, 当前为随机模拟数据)
+    gasCube(houseNo: string) {
+        return server.get<ResponseData<type_TemperatureCube>>(`${preFix}/gasCube`, {
+            params: { houseNo }
+        })
+    }
 }
 
 export default new Data()

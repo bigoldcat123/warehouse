@@ -5,7 +5,7 @@
 
     <!-- 控制面板 -->
     <div class="absolute top-4 left-4 w-[260px] rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#d6e4f0] p-4 shadow-lg backdrop-blur">
-      <div class="text-base font-bold mb-3 text-[#7ec3ff]">3D粮仓温度展示</div>
+      <div class="text-base font-bold mb-3 text-[#7ec3ff]">{{ cfg.title }}</div>
 
       <div class="space-y-2 text-sm">
         <div class="flex items-center justify-between">
@@ -34,19 +34,19 @@
       <div class="mt-3 pt-3 border-t border-[#2a4a6a] text-xs space-y-1 text-[#9fb8cc]">
         <div class="flex justify-between"><span>维度 X/Y/Z</span><span>{{ store.dimX }} × {{ store.dimY }} × {{ store.dimZ }}</span></div>
         <div class="flex justify-between"><span>测点总数</span><span>{{ stats.count }}</span></div>
-        <div class="flex justify-between"><span>平均温度</span><span>{{ stats.avg }} ℃</span></div>
-        <div class="flex justify-between"><span>最高温度</span><span class="text-[#ff7a59]">{{ stats.max }} ℃</span></div>
-        <div class="flex justify-between"><span>最低温度</span><span class="text-[#59b7ff]">{{ stats.min }} ℃</span></div>
+        <div class="flex justify-between"><span>平均{{ cfg.label }}</span><span>{{ stats.avg }} {{ cfg.unit }}</span></div>
+        <div class="flex justify-between"><span>最高{{ cfg.label }}</span><span class="text-[#ff7a59]">{{ stats.max }} {{ cfg.unit }}</span></div>
+        <div class="flex justify-between"><span>最低{{ cfg.label }}</span><span class="text-[#59b7ff]">{{ stats.min }} {{ cfg.unit }}</span></div>
       </div>
     </div>
 
     <!-- 色标 -->
     <div class="absolute bottom-6 right-6 rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] px-4 py-3 text-xs text-[#d6e4f0]">
-      <div class="mb-1">温度(℃)</div>
+      <div class="mb-1">{{ cfg.label }}({{ cfg.unit }})</div>
       <div class="flex items-center gap-2">
-        <span>{{ TEMP_MIN }}</span>
+        <span>{{ cfg.min }}</span>
         <div class="w-[160px] h-[10px] rounded" :style="{ background: legendGradient }"></div>
-        <span>{{ TEMP_MAX }}</span>
+        <span>{{ cfg.max }}</span>
       </div>
     </div>
 
@@ -57,7 +57,7 @@
       :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
     >
       <div>坐标：X{{ tooltip.px }} · Y{{ tooltip.py }} · Z{{ tooltip.pz }}</div>
-      <div>温度：<span class="font-bold" :style="{ color: tooltip.color }">{{ tooltip.value }} ℃</span></div>
+      <div>{{ cfg.label }}：<span class="font-bold" :style="{ color: tooltip.color }">{{ tooltip.value }} {{ cfg.unit }}</span></div>
     </div>
 
     <!-- 加载/空状态提示 -->
@@ -80,14 +80,13 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { useTemperatureCubeStore, type SensorPoint } from '@/stores/temperatureCube'
+import { useCubeStore, CUBE_METRICS, type CubeKind, type SensorPoint } from '@/stores/cube'
 
-const props = defineProps<{ houseNo: string }>()
+const props = defineProps<{ houseNo: string; metric?: CubeKind }>()
 
-const store = useTemperatureCubeStore()
+const store = useCubeStore(props.metric ?? 'temperature')
 
-const TEMP_MIN = 10
-const TEMP_MAX = 40
+const cfg = computed(() => CUBE_METRICS[props.metric ?? 'temperature'])
 const ROOM_W = 16 // 仓房宽(x方向, 固定)
 const ROOM_D = 16 // 仓房深(y方向, 固定)
 const ROOM_H = 9 // 仓房高(z方向, 固定)
@@ -175,7 +174,7 @@ function valueColor(t: number): THREE.Color {
 }
 
 function colorOf(value: number): THREE.Color {
-  return valueColor((value - TEMP_MIN) / (TEMP_MAX - TEMP_MIN))
+  return valueColor((value - cfg.value.min) / (cfg.value.max - cfg.value.min))
 }
 
 /** 测点位置: 房间均分为 dimX×dimY×dimZ 个格子, 取格子中心, 点数变化时间距自适应 */
