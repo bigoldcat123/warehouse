@@ -24,7 +24,9 @@
 
         <div class="grid grid-cols-2 gap-x-6">
           <el-form-item label="仓房编号" prop="houseNo">
-            <el-input v-model="ruleForm.houseNo" placeholder="请输入仓房编号" class="dark-input" />
+            <el-select v-model="ruleForm.houseNo" placeholder="请选择仓房" class="dark-select" style="width: 100%">
+              <el-option v-for="h in unsetHouses" :key="h.houseNo" :label="h.houseNo + (h.houseName ? ' - ' + h.houseName : '')" :value="h.houseNo" />
+            </el-select>
           </el-form-item>
 
           <el-form-item label="温度报警上限(℃)" prop="temperatureMax">
@@ -85,7 +87,17 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus';
 import { onUpdated, reactive, ref } from 'vue'
-import warehouseSettings from '@/api/warehouseSettings';
+import warehouseSettings, { type type_UnsetHouse } from '@/api/warehouseSettings';
+import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+const w = useCurrentWareHouse()
+const unsetHouses = ref<type_UnsetHouse[]>([])
+const loadUnsetHouses = () => {
+    const warehouseId = w.getWareHouse().waerhouseId
+    if (!warehouseId) return
+    warehouseSettings.unset(warehouseId).then(res => {
+        unsetHouses.value = res.data.value ?? []
+    })
+}
 const prop = defineProps<{
   dialogVisible: boolean,
 }>()
@@ -99,6 +111,7 @@ const handleClose = (done: () => void) => {
 }
 onUpdated(() => {
   visible.value = prop.dialogVisible
+  if (prop.dialogVisible) loadUnsetHouses()
 })
 
 const ruleFormRef = ref<FormInstance>()
@@ -142,7 +155,7 @@ const ruleForm = reactive({
 })
 
 const rules = reactive<FormRules<typeof ruleForm>>({
-  houseNo: [{ validator: validateRequired('请输入仓房编号'), trigger: 'blur' }],
+  houseNo: [{ validator: validateRequired('请选择仓房'), trigger: 'change' }],
   temperatureMax: [{ validator: validateRequired('请输入温度报警上限'), trigger: 'blur' },
   { validator: validateNumber('请输入数字'), trigger: 'blur' }],
   temperatureCollectTime: [{ validator: validateRequired('请选择温度采集时间'), trigger: 'change' }],

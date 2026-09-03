@@ -134,7 +134,9 @@ import warehouseSettings, { type type_WarehouseSettings } from '@/api/warehouseS
 import AddDialog from './AddDialog.vue';
 import UpdateDialog from './UpdateDialog.vue';
 import { useCurrentUserStore } from '@/stores/currentUser';
+import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 const currentUser = useCurrentUserStore()
+const w = useCurrentWareHouse()
 const list = ref<Page<type_WarehouseSettings>>()
 const addDialog = ref(false)
 const updateDialog = ref(false)
@@ -163,7 +165,7 @@ const pageList = computed(() => {
 })
 
 function fetchData() {
-    warehouseSettings.list(currentpage.value, size.value, houseNo.value).then(res => {
+    warehouseSettings.list(currentpage.value, size.value, houseNo.value, w.getWareHouse().waerhouseId).then(res => {
         list.value = res.data.value
     })
 }

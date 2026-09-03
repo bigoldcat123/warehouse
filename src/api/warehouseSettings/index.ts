@@ -16,15 +16,25 @@ export type type_WarehouseSettings = {
     createTime?: string,
     updateTime?: string
 }
+export type type_UnsetHouse = {
+    id: number,
+    houseNo: string,
+    houseName: string,
+    warehouseID: number
+}
 class WarehouseSettings {
-    list(current: number, size: number, houseNo: string) {
+    list(current: number, size: number, houseNo: string, warehouseID?: string | number) {
         return server.get<ResponseData<Page<type_WarehouseSettings>>>(preFix, {
             params: {
                 current,
                 size,
-                houseNo
+                houseNo,
+                warehouseID
             }
         })
+    }
+    unset(warehouseId: string | number) {
+        return server.get<ResponseData<type_UnsetHouse[]>>(`${preFix}/unset/${warehouseId}`)
     }
     add(settings: type_WarehouseSettings) {
         return server.post(preFix, settings)
