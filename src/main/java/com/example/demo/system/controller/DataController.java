@@ -194,7 +194,7 @@ public class DataController {
     }
 
     /**
-     * 根据粮房编号和指定点坐标，返回该点的气体浓度记录数组（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号和指定点坐标，返回该点的气体浓度记录数组
      * @param houseNo 粮房编号
      * @param ceng 层坐标（从1开始）
      * @param hang 行坐标（从1开始）
@@ -210,7 +210,7 @@ public class DataController {
     }
 
     /**
-     * 根据粮房编号和层坐标，返回该层每个时间点的平均气体浓度（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均气体浓度
      * @param houseNo 粮房编号
      * @param ceng 层坐标（从1开始）
      */
@@ -222,7 +222,7 @@ public class DataController {
     }
 
     /**
-     * 根据粮房编号，返回每个时间点全部气体浓度点的平均值（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号，返回每个时间点全部气体浓度点的平均值
      * @param houseNo 粮房编号
      */
     @GetMapping("/allAvgGas")

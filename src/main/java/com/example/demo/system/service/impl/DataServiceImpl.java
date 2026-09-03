@@ -52,9 +52,6 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
     /** 湿度随机模拟范围（%） */
     private static final double HUMIDITY_MIN = 20.0;
     private static final double HUMIDITY_MAX = 90.0;
-    /** 气体浓度随机模拟范围（ppm） */
-    private static final double GAS_MIN = 300.0;
-    private static final double GAS_MAX = 3000.0;
 
     @Override
     public List<DataDTO> parseDTO(List<Data> list) {
@@ -264,7 +261,7 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
                 .toList();
     }
 
-    // ==================== 湿度 / 气体浓度 折线数据（随机模拟） ====================
+    // ==================== 湿度（随机模拟）/ 气体浓度（真实数据） 折线数据 ====================
 
     @Override
     public List<HouseTempRecordDTO> getHumidityRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {
@@ -304,38 +301,134 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
 
     @Override
     public List<HouseTempRecordDTO> getGasRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {
-        House house = houseService.getHouseByNo(houseNo);
-        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
-                || ceng < 1 || ceng > house.getZ()
-                || hang < 1 || hang > house.getX()
-                || lie < 1 || lie > house.getY()) {
-            return List.of();
-        }
-        long seed = seedOf(houseNo, "gas");
-        return randomRecords(house, GAS_MIN, GAS_MAX, seed,
-                cube -> cube[ceng - 1][hang - 1][lie - 1]);
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .flatMap(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    return Arrays.stream(segments)
+                            .map(seg -> {
+                                // 按 $ 分割：列:行:层$气体浓度$5
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                // 按 : 分割坐标：列:行:层（1-based）
+                                String[] coords = parts[0].split(":");
+                                if (coords.length < 3) return null;
+                                try {
+                                    int segLie = Integer.parseInt(coords[0]);
+                                    int segHang = Integer.parseInt(coords[1]);
+                                    int segCeng = Integer.parseInt(coords[2]);
+                                    // 过滤匹配的 层、行、列
+                                    if (segCeng == ceng && segHang == hang && segLie == lie) {
+                                        HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                                        dto.setTestDate(x.getTestDate());
+                                        String tempStr = parts[1].trim();
+                                        if ("NULL".equals(tempStr)) {
+                                            dto.setTemp(0f);
+                                        } else {
+                                            dto.setTemp(Float.parseFloat(tempStr));
+                                        }
+                                        return dto;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    return null;
+                                }
+                                return null;
+                            })
+                            .filter(dto -> dto != null);
+                })
+                .toList();
     }
 
     @Override
     public List<HouseTempRecordDTO> getLayerAvgGasByHouseNo(String houseNo, int ceng) {
-        House house = houseService.getHouseByNo(houseNo);
-        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
-                || ceng < 1 || ceng > house.getZ()) {
-            return List.of();
-        }
-        long seed = seedOf(houseNo, "gas");
-        return randomRecords(house, GAS_MIN, GAS_MAX, seed,
-                cube -> layerAvg(cube[ceng - 1]));
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .map(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    // 收集该层所有气体浓度值
+                    List<Float> temps = Arrays.stream(segments)
+                            .map(seg -> {
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                String[] coords = parts[0].split(":");
+                                if (coords.length < 3) return null;
+                                try {
+                                    int segCeng = Integer.parseInt(coords[2]);
+                                    if (segCeng == ceng) {
+                                        String tempStr = parts[1].trim();
+                                        if ("NULL".equals(tempStr)) return 0f;
+                                        return Float.parseFloat(tempStr);
+                                    }
+                                } catch (NumberFormatException ignored) {
+                                }
+                                return null;
+                            })
+                            .filter(t -> t != null)
+                            .toList();
+                    // 计算该层平均气体浓度
+                    if (temps.isEmpty()) return null;
+                    float avg = (float) temps.stream()
+                            .mapToDouble(f -> f)
+                            .average()
+                            .orElse(0);
+                    HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                    dto.setTestDate(x.getTestDate());
+                    dto.setTemp(avg);
+                    return dto;
+                })
+                .filter(dto -> dto != null)
+                .toList();
     }
 
     @Override
     public List<HouseTempRecordDTO> getAllAvgGasByHouseNo(String houseNo) {
-        House house = houseService.getHouseByNo(houseNo);
-        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null) {
-            return List.of();
-        }
-        long seed = seedOf(houseNo, "gas");
-        return randomRecords(house, GAS_MIN, GAS_MAX, seed, DataServiceImpl::cubeAvg);
+        QueryWrapper<Data> q = new QueryWrapper<Data>();
+        q.eq("HouseNo", houseNo);
+        List<Data> list = list(q);
+
+        return list.stream()
+                .filter(x -> x.getGasStrength() != null)
+                .map(x -> {
+                    // 按 # 分割每条记录
+                    String[] segments = x.getGasStrength().split("#");
+                    // 收集全部气体浓度值
+                    List<Float> temps = Arrays.stream(segments)
+                            .map(seg -> {
+                                String[] parts = seg.split("\\$");
+                                if (parts.length < 2) return null;
+                                try {
+                                    String tempStr = parts[1].trim();
+                                    if ("NULL".equals(tempStr)) return 0f;
+                                    return Float.parseFloat(tempStr);
+                                } catch (NumberFormatException ignored) {
+                                }
+                                return null;
+                            })
+                            .filter(t -> t != null)
+                            .toList();
+                    // 计算全部点的平均气体浓度
+                    if (temps.isEmpty()) return null;
+                    double avg = temps.stream()
+                            .mapToDouble(f -> f)
+                            .average()
+                            .orElse(0);
+                    HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                    dto.setTestDate(x.getTestDate());
+                    dto.setTemp((float) avg);
+                    return dto;
+                })
+                .filter(dto -> dto != null)
+                .toList();
     }
 
     /**

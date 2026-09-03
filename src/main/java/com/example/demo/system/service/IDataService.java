@@ -75,7 +75,7 @@ public interface IDataService extends IService<Data> {
     List<HouseTempRecordDTO> getAllAvgHumidityByHouseNo(String houseNo);
 
     /**
-     * 根据粮房编号和指定点坐标，返回该点的气体浓度记录数组（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号和指定点坐标，返回该点的气体浓度记录数组
      * @param houseNo 粮房编号
      * @param ceng 层坐标（从1开始）
      * @param hang 行坐标（从1开始）
@@ -85,7 +85,7 @@ public interface IDataService extends IService<Data> {
     List<HouseTempRecordDTO> getGasRecordsByHouseNo(String houseNo, int ceng, int hang, int lie);
 
     /**
-     * 根据粮房编号和层坐标，返回该层每个时间点的平均气体浓度（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均气体浓度
      * @param houseNo 粮房编号
      * @param ceng 层坐标（从1开始）
      * @return [{testDate, temp}] 每条记录包含检测日期和该层的平均气体浓度
@@ -93,7 +93,7 @@ public interface IDataService extends IService<Data> {
     List<HouseTempRecordDTO> getLayerAvgGasByHouseNo(String houseNo, int ceng);
 
     /**
-     * 根据粮房编号，返回每个时间点全部气体浓度点的平均值（当前无真实数据，返回随机模拟数据）
+     * 根据粮房编号，返回每个时间点全部气体浓度点的平均值
      * @param houseNo 粮房编号
      * @return [{testDate, temp}] 每条记录包含检测日期和全部点的平均气体浓度
      */
