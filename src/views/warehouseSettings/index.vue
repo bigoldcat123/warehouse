@@ -1,4 +1,6 @@
 <template>
+    <Binner />
+
     <!-- 工具栏 -->
     <div class="flex items-center gap-4 mb-5">
         <button v-if="!currentUser.isGuest()" class="btn-primary" @click="addDialog = true">
