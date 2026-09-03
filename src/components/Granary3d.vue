@@ -19,10 +19,6 @@
           </el-select>
         </div>
         <div class="flex items-center justify-between">
-          <span>自动旋转</span>
-          <el-switch v-model="autoRotate" />
-        </div>
-        <div class="flex items-center justify-between">
           <span>显示层</span>
           <el-select v-model="visibleLayer" size="small" class="w-[120px]">
             <el-option label="全部" value="all" />
@@ -95,7 +91,6 @@ const TILE_OPACITY = 0.5 // 常态透明度
 const cellGeo = new THREE.SphereGeometry(BALL_R, 24, 16)
 
 const containerRef = ref<HTMLDivElement>()
-const autoRotate = ref(true)
 const visibleLayer = ref<number | 'all'>('all')
 
 const points = computed(() => store.points)
@@ -327,8 +322,6 @@ function initScene() {
 
 function animate() {
   animationId = requestAnimationFrame(animate)
-  controls.autoRotate = autoRotate.value
-  controls.autoRotateSpeed = 1.2
   controls.update()
   renderer.render(scene, camera)
 }
