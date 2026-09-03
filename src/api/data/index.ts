@@ -81,6 +81,49 @@ class Data {
             params: { houseNo }
         })
     }
+
+    // 查询指定点湿度记录（按三维坐标 层/行/列；当前为随机模拟数据）
+    humidityRecords(houseNo: string, ceng: number, hang: number, lie: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/humidityRecords`, {
+            params: { houseNo, ceng, hang, lie }
+        })
+    }
+
+    // 查询指定层平均湿度（当前为随机模拟数据）
+    layerAvgHumidity(houseNo: string, ceng: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/layerAvgHumidity`, {
+            params: { houseNo, ceng }
+        })
+    }
+
+    // 查询全部点平均湿度（当前为随机模拟数据）
+    allAvgHumidity(houseNo: string) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/allAvgHumidity`, {
+            params: { houseNo }
+        })
+    }
+
+    // 查询指定点气体浓度记录（按三维坐标 层/行/列；当前为随机模拟数据）
+    gasRecords(houseNo: string, ceng: number, hang: number, lie: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/gasRecords`, {
+            params: { houseNo, ceng, hang, lie }
+        })
+    }
+
+    // 查询指定层平均气体浓度（当前为随机模拟数据）
+    layerAvgGas(houseNo: string, ceng: number) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/layerAvgGas`, {
+            params: { houseNo, ceng }
+        })
+    }
+
+    // 查询全部点平均气体浓度（当前为随机模拟数据）
+    allAvgGas(houseNo: string) {
+        return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/allAvgGas`, {
+            params: { houseNo }
+        })
+    }
+
     // 根据粮房编号获取每个采集时间点的三维温度数组(公开接口, 无需鉴权)
     temperatureCube(houseNo: string) {
         return server.get<ResponseData<type_TemperatureCube>>(`${preFix}/temperatureCube`, {

@@ -2,7 +2,7 @@ import axios from "axios";
 import { useCurrentUserStore } from "@/stores/currentUser";
 import { ElMessage } from 'element-plus'
 import { useRouter } from "vue-router";
-console.log(import.meta.env);
+// console.log(import.meta.env);
 
 
 const SHOW_DEFAULT = "0"; // don't show anything
@@ -48,7 +48,7 @@ server.interceptors.response.use(function (response) {
   //   return Promise.reject(response.data.message)
   // }
 
-  
+
   return response;
 }, function (error) {
   return Promise.reject(error);

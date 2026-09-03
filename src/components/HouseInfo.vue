@@ -44,18 +44,21 @@
         <div class="px-4 pb-4 grid grid-cols-3 gap-2">
             <!-- 3D 图 -->
             <button @click="show_3d_temp" class="action-btn">3D温度图</button>
-            <button @click="show_humidity3d" class="action-btn">3D湿度图</button>
+            <button @click="show_humidity3d" class="action-btn">
+                3D湿度图
+            </button>
             <button @click="show_gas3d" class="action-btn">3D气体浓度</button>
 
             <!-- 剖面图 -->
             <button @click="show_heatmap" class="action-btn">温度剖面图</button>
-            <button @click="show_humidityHeatmap" class="action-btn">湿度剖面图</button>
-            <button @click="show_gasHeatmap" class="action-btn">气体浓度剖面图</button>
+            <button @click="show_humidityHeatmap" class="action-btn">
+                湿度剖面图
+            </button>
+            <button @click="show_gasHeatmap" class="action-btn">
+                气体浓度剖面图
+            </button>
 
             <!-- 曲线图 -->
-            <button class="action-btn">温度曲线图</button>
-
-            <button class="action-btn">湿度曲线图</button>
             <button
                 @click="
                     router.push({
@@ -71,9 +74,11 @@
                 "
                 class="action-btn"
             >
-                气体浓度曲线图
+                温度曲线图
             </button>
 
+            <button class="action-btn">湿度曲线图</button>
+            <button class="action-btn">气体浓度曲线图</button>
 
             <!-- 编辑 -->
             <button
