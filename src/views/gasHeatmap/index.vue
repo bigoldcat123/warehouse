@@ -1,7 +1,7 @@
 <template>
     <PageFrame>
         <template #title>{{ houseName || houseNo || '粮仓气体浓度剖面图' }}</template>
-        <template #subtitle>气体浓度热力图</template>
+        <template #subtitle>气体浓度剖面图</template>
         <template #actions>
             <div @click="$router.push('/house')" class="size-[20px] cursor-pointer"></div>
         </template>
