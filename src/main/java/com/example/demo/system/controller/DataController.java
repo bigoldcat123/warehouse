@@ -154,6 +154,82 @@ public class DataController {
         List<HouseTempRecordDTO> records = dataService.getAllAvgTempByHouseNo(houseNo);
         return R.ok(records);
     }
+
+    /**
+     * 根据粮房编号和指定点坐标，返回该点的湿度记录数组（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     * @param hang 行坐标（从1开始）
+     * @param lie 列坐标（从1开始）
+     */
+    @GetMapping("/humidityRecords")
+    public R getHumidityRecords(@RequestParam String houseNo,
+                                @RequestParam int ceng,
+                                @RequestParam int hang,
+                                @RequestParam int lie) {
+        List<HouseTempRecordDTO> records = dataService.getHumidityRecordsByHouseNo(houseNo, ceng, hang, lie);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均湿度（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     */
+    @GetMapping("/layerAvgHumidity")
+    public R getLayerAvgHumidity(@RequestParam String houseNo,
+                                 @RequestParam int ceng) {
+        List<HouseTempRecordDTO> records = dataService.getLayerAvgHumidityByHouseNo(houseNo, ceng);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号，返回每个时间点全部湿度点的平均值（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     */
+    @GetMapping("/allAvgHumidity")
+    public R getAllAvgHumidity(@RequestParam String houseNo) {
+        List<HouseTempRecordDTO> records = dataService.getAllAvgHumidityByHouseNo(houseNo);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号和指定点坐标，返回该点的气体浓度记录数组（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     * @param hang 行坐标（从1开始）
+     * @param lie 列坐标（从1开始）
+     */
+    @GetMapping("/gasRecords")
+    public R getGasRecords(@RequestParam String houseNo,
+                           @RequestParam int ceng,
+                           @RequestParam int hang,
+                           @RequestParam int lie) {
+        List<HouseTempRecordDTO> records = dataService.getGasRecordsByHouseNo(houseNo, ceng, hang, lie);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号和层坐标，返回该层每个时间点的平均气体浓度（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     * @param ceng 层坐标（从1开始）
+     */
+    @GetMapping("/layerAvgGas")
+    public R getLayerAvgGas(@RequestParam String houseNo,
+                            @RequestParam int ceng) {
+        List<HouseTempRecordDTO> records = dataService.getLayerAvgGasByHouseNo(houseNo, ceng);
+        return R.ok(records);
+    }
+
+    /**
+     * 根据粮房编号，返回每个时间点全部气体浓度点的平均值（当前无真实数据，返回随机模拟数据）
+     * @param houseNo 粮房编号
+     */
+    @GetMapping("/allAvgGas")
+    public R getAllAvgGas(@RequestParam String houseNo) {
+        List<HouseTempRecordDTO> records = dataService.getAllAvgGasByHouseNo(houseNo);
+        return R.ok(records);
+    }
     /**
      * 根据粮房编号，返回每个时间点的三维温度数组 [层][行][列]
      * 源数据按 # 分割记录，按 $ 分割：列:行:层$温度$5

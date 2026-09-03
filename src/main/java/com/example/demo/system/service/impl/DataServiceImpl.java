@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.ToDoubleFunction;
 
 /**
  * <p>
@@ -43,6 +44,18 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
     private IUserAuthService userAuthService;
     @Autowired
     IWarehouseService warehouseService;
+
+    /** 随机模拟序列点数 */
+    private static final int RANDOM_SERIES_COUNT = 24;
+    /** 随机模拟序列时间间隔（小时） */
+    private static final int RANDOM_SERIES_HOUR_STEP = 4;
+    /** 湿度随机模拟范围（%） */
+    private static final double HUMIDITY_MIN = 20.0;
+    private static final double HUMIDITY_MAX = 90.0;
+    /** 气体浓度随机模拟范围（ppm） */
+    private static final double GAS_MIN = 300.0;
+    private static final double GAS_MAX = 3000.0;
+
     @Override
     public List<DataDTO> parseDTO(List<Data> list) {
         List<DataDTO> dataDTOList = new ArrayList<>();
@@ -249,6 +262,178 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
                 })
                 .filter(dto -> dto != null)
                 .toList();
+    }
+
+    // ==================== 湿度 / 气体浓度 折线数据（随机模拟） ====================
+
+    @Override
+    public List<HouseTempRecordDTO> getHumidityRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
+                || ceng < 1 || ceng > house.getZ()
+                || hang < 1 || hang > house.getX()
+                || lie < 1 || lie > house.getY()) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "humidity");
+        return randomRecords(house, HUMIDITY_MIN, HUMIDITY_MAX, seed,
+                cube -> cube[ceng - 1][hang - 1][lie - 1]);
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getLayerAvgHumidityByHouseNo(String houseNo, int ceng) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
+                || ceng < 1 || ceng > house.getZ()) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "humidity");
+        return randomRecords(house, HUMIDITY_MIN, HUMIDITY_MAX, seed,
+                cube -> layerAvg(cube[ceng - 1]));
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getAllAvgHumidityByHouseNo(String houseNo) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "humidity");
+        return randomRecords(house, HUMIDITY_MIN, HUMIDITY_MAX, seed, DataServiceImpl::cubeAvg);
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getGasRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
+                || ceng < 1 || ceng > house.getZ()
+                || hang < 1 || hang > house.getX()
+                || lie < 1 || lie > house.getY()) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "gas");
+        return randomRecords(house, GAS_MIN, GAS_MAX, seed,
+                cube -> cube[ceng - 1][hang - 1][lie - 1]);
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getLayerAvgGasByHouseNo(String houseNo, int ceng) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null
+                || ceng < 1 || ceng > house.getZ()) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "gas");
+        return randomRecords(house, GAS_MIN, GAS_MAX, seed,
+                cube -> layerAvg(cube[ceng - 1]));
+    }
+
+    @Override
+    public List<HouseTempRecordDTO> getAllAvgGasByHouseNo(String houseNo) {
+        House house = houseService.getHouseByNo(houseNo);
+        if (house == null || house.getX() == null || house.getY() == null || house.getZ() == null) {
+            return List.of();
+        }
+        long seed = seedOf(houseNo, "gas");
+        return randomRecords(house, GAS_MIN, GAS_MAX, seed, DataServiceImpl::cubeAvg);
+    }
+
+    /**
+     * 按采集时间生成随机模拟三维数组序列（[层][行][列]），并映射为折线记录
+     * @param house 仓房（取 z/x/y 维度）
+     * @param min 随机最小值（含）
+     * @param max 随机最大值（含）
+     * @param seed 随机种子（同一仓房+同一指标多次请求数值一致）
+     * @param selector 从单个时间点的三维数组取该时间点的值（点位 / 层平均 / 全仓平均）
+     */
+    private List<HouseTempRecordDTO> randomRecords(House house, double min, double max, long seed,
+                                                   ToDoubleFunction<double[][][]> selector) {
+        return buildRandomCubeSeries(house, min, max, seed)
+                .stream()
+                .map(p -> {
+                    HouseTempRecordDTO dto = new HouseTempRecordDTO();
+                    dto.setTestDate(p.time);
+                    dto.setTemp(round1(selector.applyAsDouble(p.cube)));
+                    return dto;
+                })
+                .toList();
+    }
+
+    /**
+     * 生成随机模拟三维数组时间序列：每 RANDOM_SERIES_HOUR_STEP 小时一个点，共 RANDOM_SERIES_COUNT 个点，终点为当前整点
+     */
+    private static List<RandomCubePoint> buildRandomCubeSeries(House house, double min, double max, long seed) {
+        if (house.getX() == null || house.getY() == null || house.getZ() == null) {
+            return List.of();
+        }
+        Random random = new Random(seed);
+        int x = house.getX();
+        int y = house.getY();
+        int z = house.getZ();
+        LocalDateTime end = LocalDateTime.now().withMinute(0).withSecond(0).withNano(0);
+        List<RandomCubePoint> series = new ArrayList<>(RANDOM_SERIES_COUNT);
+        for (int i = 0; i < RANDOM_SERIES_COUNT; i++) {
+            LocalDateTime time = end.minusHours((long) (RANDOM_SERIES_COUNT - 1 - i) * RANDOM_SERIES_HOUR_STEP);
+            double[][][] cube = new double[z][x][y];
+            for (int ceng = 0; ceng < z; ceng++) {
+                for (int hang = 0; hang < x; hang++) {
+                    for (int lie = 0; lie < y; lie++) {
+                        cube[ceng][hang][lie] = min + random.nextDouble() * (max - min);
+                    }
+                }
+            }
+            series.add(new RandomCubePoint(time, cube));
+        }
+        return series;
+    }
+
+    /** 由仓房编号+指标生成稳定随机种子 */
+    private static long seedOf(String houseNo, String metric) {
+        return (long) houseNo.hashCode() * 31L + metric.hashCode();
+    }
+
+    /** 二维数组（一层 行×列）平均值 */
+    private static double layerAvg(double[][] layer) {
+        double sum = 0;
+        int n = 0;
+        for (double[] row : layer) {
+            for (double v : row) {
+                sum += v;
+                n++;
+            }
+        }
+        return n == 0 ? 0 : sum / n;
+    }
+
+    /** 三维数组（全部点）平均值 */
+    private static double cubeAvg(double[][][] cube) {
+        double sum = 0;
+        int n = 0;
+        for (double[][] layer : cube) {
+            for (double[] row : layer) {
+                for (double v : row) {
+                    sum += v;
+                    n++;
+                }
+            }
+        }
+        return n == 0 ? 0 : sum / n;
+    }
+
+    /** 保留 1 位小数 */
+    private static float round1(double v) {
+        return Math.round(v * 10.0) / 10f;
+    }
+
+    /** 随机模拟时间点：采集时间 + 该时刻的三维数组 [层][行][列] */
+    private static final class RandomCubePoint {
+        final LocalDateTime time;
+        final double[][][] cube;
+
+        RandomCubePoint(LocalDateTime time, double[][][] cube) {
+            this.time = time;
+            this.cube = cube;
+        }
     }
 
     @Override
