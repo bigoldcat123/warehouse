@@ -14,13 +14,13 @@
         </div>
         <div class="flex items-center justify-between">
           <span>采集时间</span>
-          <el-select v-model="currentTime" size="small" class="w-[150px]" placeholder="选择时间">
+          <el-select v-model="currentTime" size="small" class="w-[150px]" placeholder="选择时间" @wheel.prevent="onTimeWheel" title="滚轮切换">
             <el-option v-for="t in store.times" :key="t" :label="formatTime(t)" :value="t" />
           </el-select>
         </div>
         <div class="flex items-center justify-between">
           <span>显示层</span>
-          <el-select v-model="visibleLayer" size="small" class="w-[120px]">
+          <el-select v-model="visibleLayer" size="small" class="w-[120px]" @wheel.prevent="onLayerWheel" title="滚轮切换">
             <el-option label="全部" value="all" />
             <el-option v-for="l in store.dimZ" :key="l" :label="`第 ${l} 层`" :value="l - 1" />
           </el-select>
@@ -371,6 +371,20 @@ function onPointerMove(e: PointerEvent) {
 
 function formatTime(t: string) {
   return t.replace('T', ' ')
+}
+function onTimeWheel(e: WheelEvent) {
+  const times = store.times
+  if (!times.length) return
+  const idx = times.indexOf(store.currentTime ?? '')
+  const next = (idx + (e.deltaY > 0 ? 1 : -1) + times.length) % times.length
+  store.selectTime(times[next])
+}
+
+function onLayerWheel(e: WheelEvent) {
+  const opts: Array<number | 'all'> = ['all', ...Array.from({ length: store.dimZ }, (_, i) => i)]
+  const idx = opts.indexOf(visibleLayer.value)
+  const next = (idx + (e.deltaY > 0 ? 1 : -1) + opts.length) % opts.length
+  visibleLayer.value = opts[next]
 }
 
 watch(points, rebuildInstances)
