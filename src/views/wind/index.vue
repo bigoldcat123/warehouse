@@ -18,7 +18,7 @@
         </span>
     </div>
     <div>
-        <div class=" flex flex-wrap gap-x-4 gap-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-4">
             <HouseInfo :key="house.id" v-for="house in list?.records" :house="house" @delete="handle_delete"
                 :isWind="true"
                 @update="(house: type_House) => { current = house; updateDialog = true; }"

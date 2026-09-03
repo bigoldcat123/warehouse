@@ -53,6 +53,9 @@
             <button @click="show_gasHeatmap" class="action-btn">气体浓度剖面图</button>
 
             <!-- 曲线图 -->
+            <button class="action-btn">温度曲线图</button>
+
+            <button class="action-btn">湿度曲线图</button>
             <button
                 @click="
                     router.push({
@@ -70,8 +73,7 @@
             >
                 气体浓度曲线图
             </button>
-            <button class="action-btn">湿度曲线图</button>
-            <button class="action-btn">温度曲线图</button>
+
 
             <!-- 编辑 -->
             <button
@@ -295,7 +297,7 @@ const show_window = () => {
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: all 0.3s ease;
-    width: 300px;
+    width: 100%;
 }
 .house-card:hover {
     transform: translateY(-2px);

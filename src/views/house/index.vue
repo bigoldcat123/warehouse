@@ -40,7 +40,7 @@
     </div>
 
     <!-- 仓房卡片网格 -->
-    <div class="flex flex-wrap gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         <HouseInfo
             :key="house.id"
             v-for="house in list?.records"
