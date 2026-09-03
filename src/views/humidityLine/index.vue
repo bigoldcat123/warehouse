@@ -1,5 +1,5 @@
 <template>
-    <LineChartPage metric="temp" />
+    <LineChartPage metric="humidity" />
 </template>
 
 <script setup lang="ts">

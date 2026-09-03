@@ -1,5 +1,5 @@
 <template>
-    <LineChartPage metric="temp" />
+    <LineChartPage metric="gas" />
 </template>
 
 <script setup lang="ts">

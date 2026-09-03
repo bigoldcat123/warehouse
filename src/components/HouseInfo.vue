@@ -77,8 +77,40 @@
                 温度曲线图
             </button>
 
-            <button class="action-btn">湿度曲线图</button>
-            <button class="action-btn">气体浓度曲线图</button>
+            <button
+                @click="
+                    router.push({
+                        path: '/humidityLine',
+                        query: {
+                            houseNo: house.houseNo,
+                            houseName: house.houseName,
+                            x: house.x,
+                            y: house.y,
+                            z: house.z,
+                        },
+                    })
+                "
+                class="action-btn"
+            >
+                湿度曲线图
+            </button>
+            <button
+                @click="
+                    router.push({
+                        path: '/gasLine',
+                        query: {
+                            houseNo: house.houseNo,
+                            houseName: house.houseName,
+                            x: house.x,
+                            y: house.y,
+                            z: house.z,
+                        },
+                    })
+                "
+                class="action-btn"
+            >
+                气体浓度曲线图
+            </button>
 
             <!-- 编辑 -->
             <button

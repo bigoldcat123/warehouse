@@ -103,21 +103,21 @@ class Data {
         })
     }
 
-    // 查询指定点气体浓度记录（按三维坐标 层/行/列；当前为随机模拟数据）
+    // 查询指定点气体浓度记录（按三维坐标 层/行/列）
     gasRecords(houseNo: string, ceng: number, hang: number, lie: number) {
         return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/gasRecords`, {
             params: { houseNo, ceng, hang, lie }
         })
     }
 
-    // 查询指定层平均气体浓度（当前为随机模拟数据）
+    // 查询指定层平均气体浓度
     layerAvgGas(houseNo: string, ceng: number) {
         return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/layerAvgGas`, {
             params: { houseNo, ceng }
         })
     }
 
-    // 查询全部点平均气体浓度（当前为随机模拟数据）
+    // 查询全部点平均气体浓度
     allAvgGas(houseNo: string) {
         return server.get<ResponseData<type_TempRecord[]>>(`${preFix}/allAvgGas`, {
             params: { houseNo }

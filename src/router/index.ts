@@ -66,6 +66,16 @@ const router = createRouter({
           name:'tempLine',
           component: () => import('@/views/tempLine/index.vue')
         },
+        {
+          path:'/humidityLine',
+          name:'humidityLine',
+          component: () => import('@/views/humidityLine/index.vue')
+        },
+        {
+          path:'/gasLine',
+          name:'gasLine',
+          component: () => import('@/views/gasLine/index.vue')
+        },
       ]
     },
     {
