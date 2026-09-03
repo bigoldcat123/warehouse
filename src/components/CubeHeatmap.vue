@@ -39,13 +39,13 @@
         </div>
         <div class="flex items-center justify-between">
           <span>采集时间</span>
-          <el-select v-model="currentTime" size="small" class="w-[150px]" placeholder="选择时间">
+          <el-select v-model="currentTime" size="small" class="w-[150px]" placeholder="选择时间" @wheel.prevent="onTimeWheel" title="滚轮切换">
             <el-option v-for="t in store.times" :key="t" :label="formatTime(t)" :value="t" />
           </el-select>
         </div>
         <div class="flex items-center justify-between">
           <span>切片方向</span>
-          <el-select v-model="orientation" size="small" class="w-[120px]">
+          <el-select v-model="orientation" size="small" class="w-[120px]" @wheel.prevent="onOrientationWheel" title="滚轮切换">
             <el-option label="水平·XY层" value="xy" />
             <el-option label="垂直·XZ列" value="xz" />
             <el-option label="垂直·YZ行" value="yz" />
@@ -53,7 +53,7 @@
         </div>
         <div class="flex items-center justify-between">
           <span>切片位置</span>
-          <el-select v-model="sliceIndex" size="small" class="w-[120px]">
+          <el-select v-model="sliceIndex" size="small" class="w-[120px]" @wheel.prevent="onSliceWheel" title="滚轮切换">
             <el-option v-for="n in sliceCount" :key="n" :label="`第 ${n} ${sliceUnit}`" :value="n - 1" />
           </el-select>
         </div>
@@ -140,6 +140,27 @@ watch(
 
 function formatTime(t: string) {
   return t.replace('T', ' ')
+}
+function onTimeWheel(e: WheelEvent) {
+  const times = store.times
+  if (!times.length) return
+  const idx = times.indexOf(store.currentTime ?? '')
+  const next = (idx + (e.deltaY > 0 ? 1 : -1) + times.length) % times.length
+  store.selectTime(times[next])
+}
+
+function onOrientationWheel(e: WheelEvent) {
+  const opts: CubeSliceOrientation[] = ['xy', 'xz', 'yz']
+  const idx = opts.indexOf(orientation.value)
+  const next = (idx + (e.deltaY > 0 ? 1 : -1) + opts.length) % opts.length
+  orientation.value = opts[next]
+}
+
+function onSliceWheel(e: WheelEvent) {
+  const opts = Array.from({ length: sliceCount.value }, (_, i) => i)
+  const idx = opts.indexOf(sliceIndex.value)
+  const next = (idx + (e.deltaY > 0 ? 1 : -1) + opts.length) % opts.length
+  sliceIndex.value = opts[next]
 }
 
 /* ---------------- 纯 canvas 绘制 ---------------- */
