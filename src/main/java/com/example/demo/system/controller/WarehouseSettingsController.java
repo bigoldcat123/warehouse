@@ -10,6 +10,9 @@ import com.example.demo.system.service.IWarehouseSettingsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -34,15 +37,52 @@ public class WarehouseSettingsController {
      * @param current 当前页（从1开始）
      * @param size 每页条数
      * @param houseNo 仓房编号（可选，精确匹配）
+     * @param warehouseID 仓库ID（可选，过滤该仓库下的仓房设置）
      */
     @GetMapping
-    public R list(Integer current, Integer size, String houseNo) {
+    public R list(Integer current, Integer size, String houseNo, Integer warehouseID) {
         QueryWrapper<WarehouseSettings> queryWrapper = new QueryWrapper<>();
         if (houseNo != null && !houseNo.isEmpty()) {
             queryWrapper.eq("house_no", houseNo);
         }
+        if (warehouseID != null) {
+            List<String> houseNos = houseService.list(
+                            new QueryWrapper<House>().eq("warehouseID", warehouseID))
+                    .stream()
+                    .map(House::getHouseNo)
+                    .toList();
+            if (houseNos.isEmpty()) {
+                return R.ok(new Page<>(current, size));
+            }
+            queryWrapper.in("house_no", houseNos);
+        }
         Page<WarehouseSettings> page = warehouseSettingsService.page(new Page<>(current, size), queryWrapper);
         return R.ok(page);
+    }
+
+    /**
+     * 查询指定仓库下尚未设置基础信息的仓房列表
+     * （house 与 warehouse_settings 为一对一关系，已设置的仓房会被过滤）
+     * @param warehouseId 仓库ID
+     * @return 未设置的仓房列表
+     */
+    @GetMapping("/unset/{warehouseId}")
+    public R listUnset(@PathVariable Integer warehouseId) {
+        QueryWrapper<House> houseQuery = new QueryWrapper<>();
+        houseQuery.eq("warehouseID", warehouseId);
+        List<House> houses = houseService.list(houseQuery);
+        if (houses.isEmpty()) {
+            return R.ok(Collections.emptyList());
+        }
+        List<String> setHouseNos = warehouseSettingsService
+                .listObjs(new QueryWrapper<WarehouseSettings>().select("house_no"))
+                .stream()
+                .map(Object::toString)
+                .toList();
+        List<House> unset = houses.stream()
+                .filter(h -> !setHouseNos.contains(h.getHouseNo()))
+                .toList();
+        return R.ok(unset);
     }
 
     /**
