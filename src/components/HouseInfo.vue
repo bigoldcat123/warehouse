@@ -41,66 +41,18 @@
         </div>
 
         <!-- 操作按钮区 -->
-        <div class="px-4 pb-4 grid grid-cols-2 gap-2">
-            <!-- <button
-                v-if="isWind"
-                class="action-btn"
-                @click="show_tongfeng_water"
-            >
-                通风水势图
-            </button>
-            <button
-                style="display: none"
-                v-if="isWind"
-                class="action-btn"
-                @click="show_tongfeng_window"
-            >
-                通风窗口图
-            </button>
-
-            <button v-if="!isWind" class="action-btn" @click="show_yuntu">
-                云图
-            </button>
-            <button v-if="!isWind" class="action-btn" @click="show_quxian">
-                曲线
-            </button>
-            <button v-if="!isWind" class="action-btn" @click="show_3D">
-                3D图
-            </button>
-            <button v-if="!isWind" class="action-btn" @click="show_shuishi">
-                水势图
-            </button>
-            <button
-                style="display: none"
-                v-if="!isWind"
-                class="action-btn"
-                @click="show_window"
-            >
-                窗口图
-            </button>
-            <button
-                v-if="!isWind && house.has_kt"
-                @click="router.push('/wsss?houseno=' + house.houseNo)"
-                class="action-btn"
-            >
-                光伏
-            </button>
-
-            <button @click="show_dynamic_yuntu" class="action-btn">
-                动态云图
-            </button>
-            <button @click="show_3d" class="action-btn">动态3D图</button>
-            -->
-            <button @click="show_heatmap" class="action-btn">温度剖面图</button>
+        <div class="px-4 pb-4 grid grid-cols-3 gap-2">
+            <!-- 3D 图 -->
             <button @click="show_3d_temp" class="action-btn">3D温度图</button>
-
-            <button @click="show_humidityHeatmap" class="action-btn">湿度剖面图</button>
-            <button @click="show_humidity3d" class="action-btn">
-                3D湿度图
-            </button>
-
-            <button @click="show_gasHeatmap" class="action-btn">气体浓度剖面图</button>
+            <button @click="show_humidity3d" class="action-btn">3D湿度图</button>
             <button @click="show_gas3d" class="action-btn">3D气体浓度</button>
+
+            <!-- 剖面图 -->
+            <button @click="show_heatmap" class="action-btn">温度剖面图</button>
+            <button @click="show_humidityHeatmap" class="action-btn">湿度剖面图</button>
+            <button @click="show_gasHeatmap" class="action-btn">气体浓度剖面图</button>
+
+            <!-- 曲线图 -->
             <button
                 @click="
                     router.push({
@@ -118,16 +70,10 @@
             >
                 气体浓度曲线图
             </button>
-            <button
-                class="action-btn"
-            >
-                湿度曲线图
-            </button>
-            <button
-                class="action-btn"
-            >
-                温度曲线图
-            </button>
+            <button class="action-btn">湿度曲线图</button>
+            <button class="action-btn">温度曲线图</button>
+
+            <!-- 编辑 -->
             <button
                 v-if="!isWind && !currentUser.isGuest()"
                 @click="emit('update', house)"
