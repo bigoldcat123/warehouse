@@ -36,9 +36,9 @@ export interface CubeMetricConfig {
 }
 
 export const CUBE_METRICS: Record<CubeKind, CubeMetricConfig> = {
-  temperature: { kind: 'temperature', min: 10, max: 40, unit: '℃', label: '温度', title: '3D粮仓温度展示', subtitle: '3D温度云图' },
-  humidity: { kind: 'humidity', min: 20, max: 90, unit: '%', label: '湿度', title: '3D粮仓湿度展示', subtitle: '3D湿度云图' },
-  gas: { kind: 'gas', min: 300, max: 3000, unit: 'ppm', label: '气体浓度', title: '3D粮仓气体浓度展示', subtitle: '3D浓度云图' },
+  temperature: { kind: 'temperature', min: 10, max: 40, unit: '℃', label: '温度', title: '3D粮仓温度展示', subtitle: '3D温度图' },
+  humidity: { kind: 'humidity', min: 20, max: 90, unit: '%', label: '湿度', title: '3D粮仓湿度展示', subtitle: '3D湿度图' },
+  gas: { kind: 'gas', min: 300, max: 3000, unit: 'ppm', label: '气体浓度', title: '3D粮仓气体浓度展示', subtitle: '3D气体浓度' },
 }
 
 /**
