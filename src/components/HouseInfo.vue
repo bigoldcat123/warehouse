@@ -116,7 +116,17 @@
                 "
                 class="action-btn"
             >
-                气体浓度
+                气体浓度曲线图
+            </button>
+            <button
+                class="action-btn"
+            >
+                湿度曲线图
+            </button>
+            <button
+                class="action-btn"
+            >
+                温度曲线图
             </button>
             <button
                 v-if="!isWind && !currentUser.isGuest()"
