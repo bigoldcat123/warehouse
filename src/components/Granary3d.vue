@@ -25,6 +25,10 @@
             <el-option v-for="l in store.dimZ" :key="l" :label="`第 ${l} 层`" :value="l - 1" />
           </el-select>
         </div>
+        <div class="flex items-center justify-between">
+          <span>自动旋转</span>
+          <el-switch v-model="autoRotate" size="small" />
+        </div>
       </div>
 
       <div class="mt-3 pt-3 border-t border-[#2a4a6a] text-xs space-y-1 text-[#9fb8cc]">
@@ -92,6 +96,7 @@ const cellGeo = new THREE.SphereGeometry(BALL_R, 24, 16)
 
 const containerRef = ref<HTMLDivElement>()
 const visibleLayer = ref<number | 'all'>('all')
+const autoRotate = ref(false) // 自动旋转, 默认关闭
 
 const points = computed(() => store.points)
 
@@ -295,6 +300,8 @@ function initScene() {
   controls.enableDamping = true
   controls.dampingFactor = 0.08
   controls.maxDistance = 120
+  controls.autoRotateSpeed = 1.5
+  controls.autoRotate = autoRotate.value
   controls.target.set(0, ROOM_H / 2, 0)
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.45))
@@ -389,6 +396,9 @@ function onLayerWheel(e: WheelEvent) {
 
 watch(points, rebuildInstances)
 watch(visibleLayer, rebuildInstances)
+watch(autoRotate, (v) => {
+  if (controls) controls.autoRotate = v
+})
 watch(() => props.houseNo, (no) => store.fetchCube(no), { immediate: true })
 
 onMounted(() => {
