@@ -27,6 +27,14 @@ public class ReceiverDataController {
     IReceiverDataService receiverDataService;
 
     /**
+     * 查询仓房所有 TestDate，返回去重、升序的时间数组。
+     */
+    @GetMapping("/testDates")
+    public R getTestDates(@RequestParam("houseNo") String houseNo) {
+        return handleQuery(() -> receiverDataService.getTestDates(houseNo));
+    }
+
+    /**
      * 查询温度二维数据，返回结构为 [串][层]。
      */
     @GetMapping("/temperature")
@@ -34,7 +42,7 @@ public class ReceiverDataController {
             @RequestParam("houseNo") String houseNo,
             @RequestParam("testDate")
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime testDate) {
-        return queryMatrix(() -> receiverDataService.getTemperatureMatrix(houseNo, testDate));
+        return handleQuery(() -> receiverDataService.getTemperatureMatrix(houseNo, testDate));
     }
 
     /**
@@ -45,7 +53,7 @@ public class ReceiverDataController {
             @RequestParam("houseNo") String houseNo,
             @RequestParam("testDate")
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime testDate) {
-        return queryMatrix(() -> receiverDataService.getHumidityMatrix(houseNo, testDate));
+        return handleQuery(() -> receiverDataService.getHumidityMatrix(houseNo, testDate));
     }
 
     /**
@@ -56,10 +64,10 @@ public class ReceiverDataController {
             @RequestParam("houseNo") String houseNo,
             @RequestParam("testDate")
             @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime testDate) {
-        return queryMatrix(() -> receiverDataService.getPh3Matrix(houseNo, testDate));
+        return handleQuery(() -> receiverDataService.getPh3Matrix(houseNo, testDate));
     }
 
-    private R queryMatrix(MatrixQuery query) {
+    private R handleQuery(ReceiverDataQuery query) {
         try {
             return R.ok(query.execute());
         } catch (IllegalArgumentException e) {
@@ -68,7 +76,7 @@ public class ReceiverDataController {
     }
 
     @FunctionalInterface
-    private interface MatrixQuery {
+    private interface ReceiverDataQuery {
         Object execute();
     }
 }

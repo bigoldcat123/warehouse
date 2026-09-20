@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -26,8 +27,25 @@ import java.util.function.Function;
 @Service
 public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, ReceiverData> implements IReceiverDataService {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
     IPointDefineService pointDefineService;
+
+    @Override
+    public List<String> getTestDates(String houseNo) {
+        validateHouseNo(houseNo);
+        QueryWrapper<ReceiverData> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("DISTINCT TestDate")
+                .eq("HouseNo", houseNo)
+                .isNotNull("TestDate")
+                .orderByAsc("TestDate");
+        return list(queryWrapper).stream()
+                .map(ReceiverData::getTestDate)
+                .map(DATE_TIME_FORMATTER::format)
+                .toList();
+    }
 
     @Override
     public List<List<Double>> getTemperatureMatrix(String houseNo, LocalDateTime testDate) {
@@ -50,9 +68,7 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
             String dateColumn,
             Function<ReceiverData, String> dataGetter,
             String dataName) {
-        if (houseNo == null || houseNo.isBlank()) {
-            throw new IllegalArgumentException("仓房编号不能为空");
-        }
+        validateHouseNo(houseNo);
         PointDefine pointDefine = pointDefineService.getById(houseNo);
         if (pointDefine == null) {
             throw new IllegalArgumentException("没有该仓房的测点定义");
@@ -76,6 +92,12 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
             throw new IllegalArgumentException(dataName + "数据为空");
         }
         return parseMatrix(rawData, stringCount, layerCount, dataName);
+    }
+
+    private void validateHouseNo(String houseNo) {
+        if (houseNo == null || houseNo.isBlank()) {
+            throw new IllegalArgumentException("仓房编号不能为空");
+        }
     }
 
     private int parseDimension(String value, String fieldName) {

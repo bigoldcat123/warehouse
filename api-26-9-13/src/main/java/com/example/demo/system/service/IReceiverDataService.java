@@ -17,6 +17,11 @@ import java.util.List;
 public interface IReceiverDataService extends IService<ReceiverData> {
 
     /**
+     * 查询仓房所有 TestDate，去重后按时间升序排列。
+     */
+    List<String> getTestDates(String houseNo);
+
+    /**
      * 查询温度二维数据，数组结构为 [串][层]。
      */
     List<List<Double>> getTemperatureMatrix(String houseNo, LocalDateTime testDate);
