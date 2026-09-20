@@ -13,7 +13,16 @@
           <p>SELECTED WAREHOUSE</p>
           <h2>仓房信息</h2>
         </div>
-        <span class="status-dot">UI 示例数据</span>
+        <div class="house-panel__tools">
+          <span class="status-dot">UI 示例数据</span>
+          <button
+            type="button"
+            class="house-panel__close"
+            aria-label="关闭仓房信息"
+            title="关闭"
+            @click="selectedHouse = undefined"
+          >×</button>
+        </div>
       </div>
 
       <dl class="house-details">
@@ -870,6 +879,34 @@ onBeforeUnmount(() => {
   margin-top: 4px;
   font-size: 20px;
   font-weight: 600;
+}
+
+.house-panel__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.house-panel__close {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  color: #c9dadd;
+  background: rgb(113 145 153 / 12%);
+  border: 1px solid rgb(190 216 219 / 20%);
+  border-radius: 50%;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.house-panel__close:hover {
+  color: #fff;
+  background: rgb(181 91 82 / 42%);
+  border-color: rgb(230 147 137 / 54%);
 }
 
 .status-dot {
