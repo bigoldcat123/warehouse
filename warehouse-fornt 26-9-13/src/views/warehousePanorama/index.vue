@@ -379,7 +379,7 @@ function addThirdArea() {
 
   cursor += towerGap
   const linkedBuildingX = cursor + towerWidth / 2
-  const thirdTower = createRectangularBuilding(towerWidth, 4.4, 8.4)
+  const thirdTower = createRectangularBuilding(towerWidth, 4.4, 10.2)
   thirdTower.position.set(linkedBuildingX, 0.18, THIRD_AREA_Z)
   area.add(thirdTower)
   cursor += towerWidth + towerGap
@@ -411,10 +411,17 @@ function addFourthArea(linkedBuildingX: number) {
     + (GROUPS.reduce((total, count) => total + count, 0) - GROUPS.length) * HOUSE_GAP
     + (GROUPS.length - 1) * GROUP_GAP
   const emptyThreeHousesWidth = HOUSE_WIDTH * 3 + HOUSE_GAP * 2
+  const leftSideReduction = 5
   const fourthRowRightEdge = standardRowWidth / 2
-  const buildingWidth = standardRowWidth - emptyThreeHousesWidth
+  const buildingWidth = standardRowWidth - emptyThreeHousesWidth - leftSideReduction
   const buildingCenterX = fourthRowRightEdge - buildingWidth / 2
-  const recessWidth = buildingWidth * 0.55
+  const towerWidth = 3.2
+  const columnsPerSide = 5
+  const siloGapX = 0.7
+  const rowWidth = columnsPerSide * 2 * SMALL_SILO_DIAMETER
+    + towerWidth
+    + columnsPerSide * 2 * siloGapX
+  const recessWidth = rowWidth + 0.8
   const recessCenterX = linkedBuildingX - buildingCenterX
   const buildingCenterZ = FOURTH_AREA_Z
 
@@ -422,11 +429,6 @@ function addFourthArea(linkedBuildingX: number) {
   uHouse.position.set(buildingCenterX, 0.18, buildingCenterZ)
   area.add(uHouse)
 
-  const towerWidth = 3.2
-  const columnsPerSide = 5
-  const rowWidth = recessWidth
-  const siloGapX = (rowWidth - columnsPerSide * 2 * SMALL_SILO_DIAMETER - towerWidth)
-    / (columnsPerSide * 2)
   let cursor = linkedBuildingX - rowWidth / 2
   let houseNumber = 41
 
