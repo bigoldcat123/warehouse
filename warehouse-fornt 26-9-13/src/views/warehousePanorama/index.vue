@@ -29,10 +29,28 @@ const HOUSE_DEPTH = 7.5
 const HOUSE_HEIGHT = 3.8
 const SILO_DIAMETER = 5.4
 const SILO_HEIGHT = 7
+const SMALL_SILO_DIAMETER = 2.1
 const GROUPS = [4, 2, 2, 2, 2]
 const HOUSE_GAP = 1.15
 const COMPACT_HOUSE_GAP = 0.7
 const GROUP_GAP = 3.8
+const THIRD_AREA_Z = 8
+const U_HOUSE_DEPTH = 14
+const FOURTH_AREA_Z = 24
+const FOURTH_TOWER_Z = FOURTH_AREA_Z - U_HOUSE_DEPTH / 4
+const ROOF_GRAY = '#858f92'
+const ROOF_WHITE = '#e3e7e4'
+const ROOF_BLUE = '#3977ad'
+
+function squareRoofColor(houseNumber: number) {
+  const isWhite = (houseNumber >= 9 && houseNumber <= 12)
+    || (houseNumber >= 21 && houseNumber <= 24)
+  if (isWhite) return ROOF_WHITE
+  if (houseNumber === 19 || houseNumber === 20 || houseNumber === 39 || houseNumber === 40) {
+    return ROOF_BLUE
+  }
+  return ROOF_GRAY
+}
 
 function createRoundedRoof(
   width: number,
@@ -58,14 +76,14 @@ function createRoundedRoof(
   return roof
 }
 
-function createHouse(index: number) {
+function createHouse(index: number, roofColor = ROOF_GRAY) {
   const house = new THREE.Group()
   const wallMaterial = new THREE.MeshStandardMaterial({
     color: index < 4 ? '#d8e2e8' : '#cbd9df',
     roughness: 0.72,
   })
   const trimMaterial = new THREE.MeshStandardMaterial({ color: '#78909c', roughness: 0.6 })
-  const roofMaterial = new THREE.MeshStandardMaterial({ color: '#436578', roughness: 0.78 })
+  const roofMaterial = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.78 })
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(HOUSE_WIDTH, HOUSE_HEIGHT, HOUSE_DEPTH),
@@ -91,13 +109,13 @@ function createHouse(index: number) {
   return house
 }
 
-function createCombinedHouse(count: number, startNumber: number) {
+function createCombinedHouse(count: number, startNumber: number, roofColor = ROOF_GRAY) {
   const house = new THREE.Group()
   const totalWidth = count * HOUSE_WIDTH + (count - 1) * HOUSE_GAP
   const bayWidth = totalWidth / count
   const wallMaterial = new THREE.MeshStandardMaterial({ color: '#cbd9df', roughness: 0.72 })
   const trimMaterial = new THREE.MeshStandardMaterial({ color: '#6f858f', roughness: 0.6 })
-  const roofMaterial = new THREE.MeshStandardMaterial({ color: '#436578', roughness: 0.78 })
+  const roofMaterial = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.78 })
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(totalWidth, HOUSE_HEIGHT, HOUSE_DEPTH),
@@ -167,7 +185,7 @@ function createSilo() {
 
 function createSmallSilo() {
   const silo = new THREE.Group()
-  const radius = 1.15
+  const radius = SMALL_SILO_DIAMETER / 2
   const height = 3.3
   const wallMaterial = new THREE.MeshStandardMaterial({ color: '#d5ddd7', roughness: 0.68 })
   const roofMaterial = new THREE.MeshStandardMaterial({ color: '#6c8182', roughness: 0.76 })
@@ -186,15 +204,54 @@ function createSmallSilo() {
   return silo
 }
 
-function createUShapedHouse(outerWidth: number) {
+function createRectangularBuilding(
+  width: number,
+  depth: number,
+  height: number,
+) {
   const building = new THREE.Group()
-  const outerDepth = 14
-  const sectionWidth = outerWidth / 3
+  const wallMaterial = new THREE.MeshStandardMaterial({ color: '#aebdc0', roughness: 0.68 })
+  const roofMaterial = new THREE.MeshStandardMaterial({ color: ROOF_GRAY, roughness: 0.72 })
+  const windowMaterial = new THREE.MeshStandardMaterial({
+    color: '#51717e',
+    emissive: '#18343f',
+    emissiveIntensity: 0.35,
+    roughness: 0.3,
+  })
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), wallMaterial)
+  body.position.y = height / 2
+  body.castShadow = true
+  body.receiveShadow = true
+  building.add(body)
+
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(width + 0.25, 0.22, depth + 0.25), roofMaterial)
+  roof.position.y = height + 0.11
+  roof.castShadow = true
+  building.add(roof)
+
+  const levels = height > 7 ? [2.1, 4.6, 6.8] : [1.7, 3.7]
+  levels.forEach((y) => {
+    const frontWindow = new THREE.Mesh(new THREE.BoxGeometry(width * 0.5, 0.7, 0.12), windowMaterial)
+    frontWindow.position.set(0, y, depth / 2 + 0.07)
+    building.add(frontWindow)
+  })
+
+  return building
+}
+
+function createUShapedHouse(outerWidth: number, recessWidth: number, recessCenterX: number) {
+  const building = new THREE.Group()
+  const outerDepth = U_HOUSE_DEPTH
   const recessDepth = outerDepth / 2
   const backDepth = outerDepth - recessDepth
+  const recessLeft = recessCenterX - recessWidth / 2
+  const recessRight = recessCenterX + recessWidth / 2
+  const leftWidth = recessLeft + outerWidth / 2
+  const rightWidth = outerWidth / 2 - recessRight
   const height = 2.2
   const wallMaterial = new THREE.MeshStandardMaterial({ color: '#c8d3d0', roughness: 0.76 })
-  const roofMaterial = new THREE.MeshStandardMaterial({ color: '#465f68', roughness: 0.74 })
+  const roofMaterial = new THREE.MeshStandardMaterial({ color: ROOF_BLUE, roughness: 0.74 })
 
   const addSection = (width: number, depth: number, x: number, z: number) => {
     const walls = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), wallMaterial)
@@ -208,10 +265,10 @@ function createUShapedHouse(outerWidth: number) {
     building.add(roof)
   }
 
-  // 左侧实体、中央凹槽、右侧实体宽度为 1:1:1，凹槽深度为建筑纵深的一半。
+  // 后部横梁连接两侧实体；中央凹槽可独立调宽、偏移，深度为建筑纵深的一半。
   addSection(outerWidth, backDepth, 0, outerDepth / 2 - backDepth / 2)
-  addSection(sectionWidth, recessDepth, -outerWidth / 2 + sectionWidth / 2, -outerDepth / 2 + recessDepth / 2)
-  addSection(sectionWidth, recessDepth, outerWidth / 2 - sectionWidth / 2, -outerDepth / 2 + recessDepth / 2)
+  addSection(leftWidth, recessDepth, -outerWidth / 2 + leftWidth / 2, -outerDepth / 2 + recessDepth / 2)
+  addSection(rightWidth, recessDepth, outerWidth / 2 - rightWidth / 2, -outerDepth / 2 + recessDepth / 2)
 
   return building
 }
@@ -236,7 +293,7 @@ function addWarehouseRow(
   GROUPS.forEach((count, groupIndex) => {
     if (groupIndex >= combineFromGroup) {
       const combinedWidth = count * HOUSE_WIDTH + (count - 1) * HOUSE_GAP
-      const combinedHouse = createCombinedHouse(count, houseNumber)
+      const combinedHouse = createCombinedHouse(count, houseNumber, squareRoofColor(houseNumber))
       combinedHouse.position.set(cursor + combinedWidth / 2, 0.18, z)
       houses.add(combinedHouse)
       cursor += combinedWidth
@@ -247,7 +304,7 @@ function addWarehouseRow(
 
     const internalGap = compactGroups.includes(groupIndex) ? COMPACT_HOUSE_GAP : HOUSE_GAP
     for (let i = 0; i < count; i += 1) {
-      const house = createHouse(houseNumber - startNumber)
+      const house = createHouse(houseNumber - startNumber, squareRoofColor(houseNumber))
       house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, z)
       house.userData.houseNumber = houseNumber
       houses.add(house)
@@ -264,19 +321,22 @@ function addWarehouseRow(
 function addWarehouseAreas() {
   addWarehouseRow(-22, 1, 3, [1, 2])
   addWarehouseRow(-6, 13, 2, [1])
-  addThirdArea()
-  addFourthArea()
+  const linkedBuildingX = addThirdArea()
+  addFourthArea(linkedBuildingX)
+  addSkybridge(linkedBuildingX)
 }
 
 function addThirdArea() {
-  if (!scene) return
+  if (!scene) return 0
 
   const area = new THREE.Group()
   const firstGroupWidth = HOUSE_WIDTH * 4 + HOUSE_GAP * 3
   const cylinderPairWidth = SILO_DIAMETER * 2 + HOUSE_GAP
   const squarePairWidth = HOUSE_WIDTH * 2 + HOUSE_GAP
   const bridgeGap = firstGroupWidth - cylinderPairWidth - squarePairWidth
-  const eightSilosWidth = SILO_DIAMETER * 8 + HOUSE_GAP * 7
+  const towerWidth = 4.5
+  const towerGap = 0.9
+  const eightSilosWidth = SILO_DIAMETER * 8 + HOUSE_GAP * 6 + towerGap * 2 + towerWidth
   const totalWidth = firstGroupWidth + GROUP_GAP + eightSilosWidth + GROUP_GAP + squarePairWidth
   let cursor = -totalWidth / 2
   let houseNumber = 25
@@ -298,35 +358,52 @@ function addThirdArea() {
 
   cursor += cylinderPairWidth + bridgeGap
   for (let i = 0; i < 2; i += 1) {
-    const house = createHouse(4 + i)
-    house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, 8)
+    const house = createHouse(4 + i, squareRoofColor(houseNumber))
+    house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, THIRD_AREA_Z)
     house.userData.houseNumber = houseNumber
     area.add(house)
     cursor += HOUSE_WIDTH + (i === 0 ? HOUSE_GAP : 0)
     houseNumber += 1
   }
 
-  // 第二段：八个圆柱仓单排。
+  // 第二段：四个圆柱仓、高楼、四个圆柱仓单排。
   cursor += GROUP_GAP
-  for (let i = 0; i < 8; i += 1) {
+  for (let i = 0; i < 4; i += 1) {
     const silo = createSilo()
-    silo.position.set(cursor + SILO_DIAMETER / 2, 0.18, 8)
+    silo.position.set(cursor + SILO_DIAMETER / 2, 0.18, THIRD_AREA_Z)
     silo.userData.houseNumber = houseNumber
     area.add(silo)
-    cursor += SILO_DIAMETER + (i < 7 ? HOUSE_GAP : 0)
+    cursor += SILO_DIAMETER + (i < 3 ? HOUSE_GAP : 0)
+    houseNumber += 1
+  }
+
+  cursor += towerGap
+  const linkedBuildingX = cursor + towerWidth / 2
+  const thirdTower = createRectangularBuilding(towerWidth, 4.4, 8.4)
+  thirdTower.position.set(linkedBuildingX, 0.18, THIRD_AREA_Z)
+  area.add(thirdTower)
+  cursor += towerWidth + towerGap
+
+  for (let i = 0; i < 4; i += 1) {
+    const silo = createSilo()
+    silo.position.set(cursor + SILO_DIAMETER / 2, 0.18, THIRD_AREA_Z)
+    silo.userData.houseNumber = houseNumber
+    area.add(silo)
+    cursor += SILO_DIAMETER + (i < 3 ? HOUSE_GAP : 0)
     houseNumber += 1
   }
 
   // 第三段：两个方仓。
   cursor += GROUP_GAP
-  const combinedHouse = createCombinedHouse(2, houseNumber)
-  combinedHouse.position.set(cursor + squarePairWidth / 2, 0.18, 8)
+  const combinedHouse = createCombinedHouse(2, houseNumber, squareRoofColor(houseNumber))
+  combinedHouse.position.set(cursor + squarePairWidth / 2, 0.18, THIRD_AREA_Z)
   area.add(combinedHouse)
 
   scene.add(area)
+  return linkedBuildingX
 }
 
-function addFourthArea() {
+function addFourthArea(linkedBuildingX: number) {
   if (!scene) return
 
   const area = new THREE.Group()
@@ -334,33 +411,81 @@ function addFourthArea() {
     + (GROUPS.reduce((total, count) => total + count, 0) - GROUPS.length) * HOUSE_GAP
     + (GROUPS.length - 1) * GROUP_GAP
   const emptyThreeHousesWidth = HOUSE_WIDTH * 3 + HOUSE_GAP * 2
+  const fourthRowRightEdge = standardRowWidth / 2
   const buildingWidth = standardRowWidth - emptyThreeHousesWidth
-  const buildingCenterX = -standardRowWidth / 2 + emptyThreeHousesWidth + buildingWidth / 2
-  const buildingCenterZ = 24
+  const buildingCenterX = fourthRowRightEdge - buildingWidth / 2
+  const recessWidth = buildingWidth * 0.55
+  const recessCenterX = linkedBuildingX - buildingCenterX
+  const buildingCenterZ = FOURTH_AREA_Z
 
-  const uHouse = createUShapedHouse(buildingWidth)
+  const uHouse = createUShapedHouse(buildingWidth, recessWidth, recessCenterX)
   uHouse.position.set(buildingCenterX, 0.18, buildingCenterZ)
   area.add(uHouse)
 
-  const siloDiameter = 2.3
-  const columns = 10
-  const recessWidth = buildingWidth / 3
+  const towerWidth = 3.2
+  const columnsPerSide = 5
   const rowWidth = recessWidth
-  const siloGapX = (rowWidth - columns * siloDiameter) / (columns - 1)
-  const startX = buildingCenterX - rowWidth / 2 + siloDiameter / 2
+  const siloGapX = (rowWidth - columnsPerSide * 2 * SMALL_SILO_DIAMETER - towerWidth)
+    / (columnsPerSide * 2)
+  let cursor = linkedBuildingX - rowWidth / 2
+  let houseNumber = 41
 
-  for (let column = 0; column < columns; column += 1) {
+  for (let column = 0; column < columnsPerSide; column += 1) {
     const silo = createSmallSilo()
     silo.position.set(
-      startX + column * (siloDiameter + siloGapX),
+      cursor + SMALL_SILO_DIAMETER / 2,
       0.2,
-      buildingCenterZ - 3.5,
+      FOURTH_TOWER_Z,
     )
-    silo.userData.houseNumber = 41 + column
+    silo.userData.houseNumber = houseNumber
     area.add(silo)
+    cursor += SMALL_SILO_DIAMETER + (column < columnsPerSide - 1 ? siloGapX : 0)
+    houseNumber += 1
+  }
+
+  cursor += siloGapX
+  const fourthTower = createRectangularBuilding(towerWidth, 4.2, 5.2)
+  fourthTower.position.set(linkedBuildingX, 0.18, FOURTH_TOWER_Z)
+  area.add(fourthTower)
+  cursor += towerWidth + siloGapX
+
+  for (let column = 0; column < columnsPerSide; column += 1) {
+    const silo = createSmallSilo()
+    silo.position.set(cursor + SMALL_SILO_DIAMETER / 2, 0.2, FOURTH_TOWER_Z)
+    silo.userData.houseNumber = houseNumber
+    area.add(silo)
+    cursor += SMALL_SILO_DIAMETER + (column < columnsPerSide - 1 ? siloGapX : 0)
+    houseNumber += 1
   }
 
   scene.add(area)
+}
+
+function addSkybridge(x: number) {
+  if (!scene) return
+
+  const thirdTowerEdge = THIRD_AREA_Z + 4.4 / 2
+  const fourthTowerEdge = FOURTH_TOWER_Z - 4.2 / 2
+  const bridgeDepth = fourthTowerEdge - thirdTowerEdge
+  const bridge = new THREE.Group()
+  const glassMaterial = new THREE.MeshStandardMaterial({
+    color: '#91aeb8',
+    transparent: true,
+    opacity: 0.82,
+    roughness: 0.25,
+  })
+  const roofMaterial = new THREE.MeshStandardMaterial({ color: ROOF_BLUE, roughness: 0.58 })
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2, 1.1, bridgeDepth), glassMaterial)
+  body.position.set(x, 4.15, thirdTowerEdge + bridgeDepth / 2)
+  body.castShadow = true
+  scene.add(body)
+
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(2.25, 0.18, bridgeDepth + 0.2), roofMaterial)
+  roof.position.set(x, 4.79, thirdTowerEdge + bridgeDepth / 2)
+  roof.castShadow = true
+  bridge.add(roof)
+  scene.add(bridge)
 }
 
 function addSite() {
