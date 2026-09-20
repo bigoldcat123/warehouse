@@ -1,7 +1,7 @@
 <template>
     <PageFrame>
-        <template #title>{{ houseName || houseNo || CUBE_METRICS.humidity.title }}</template>
-        <template #subtitle>{{ CUBE_METRICS.humidity.subtitle }}</template>
+        <template #title>{{ houseName || houseNo || SENSOR_METRICS.humidity.title }}</template>
+        <template #subtitle>{{ SENSOR_METRICS.humidity.subtitle }}</template>
         <template #actions>
             <div @click="$router.push('/house')" class="size-[20px] cursor-pointer"></div>
         </template>
@@ -15,7 +15,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import PageFrame from '@/components/common/PageFrame.vue'
 import Granary3d from '@/components/Granary3d.vue'
-import { CUBE_METRICS } from '@/stores/cube'
+import { SENSOR_METRICS } from '@/features/receiverData3d/config'
 
 const route = useRoute()
 // 仓房编号（从仓房卡片进入时由 query 携带，如 /humidity3d?houseNo=HH001&houseName=xx）

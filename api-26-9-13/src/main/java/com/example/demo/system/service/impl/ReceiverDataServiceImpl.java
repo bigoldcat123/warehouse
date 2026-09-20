@@ -49,23 +49,22 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
 
     @Override
     public List<List<Double>> getTemperatureMatrix(String houseNo, LocalDateTime testDate) {
-        return getMatrix(houseNo, testDate, "TestDate_THW", ReceiverData::getTempData, "温度");
+        return getMatrix(houseNo, testDate, ReceiverData::getTempData, "温度");
     }
 
     @Override
     public List<List<Double>> getHumidityMatrix(String houseNo, LocalDateTime testDate) {
-        return getMatrix(houseNo, testDate, "TestDate_THW", ReceiverData::getHumiData, "湿度");
+        return getMatrix(houseNo, testDate, ReceiverData::getHumiData, "湿度");
     }
 
     @Override
     public List<List<Double>> getPh3Matrix(String houseNo, LocalDateTime testDate) {
-        return getMatrix(houseNo, testDate, "TestDate", ReceiverData::getTemperatureSet, "PH3");
+        return getMatrix(houseNo, testDate, ReceiverData::getTemperatureSet, "PH3");
     }
 
     private List<List<Double>> getMatrix(
             String houseNo,
             LocalDateTime testDate,
-            String dateColumn,
             Function<ReceiverData, String> dataGetter,
             String dataName) {
         validateHouseNo(houseNo);
@@ -79,7 +78,7 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
 
         QueryWrapper<ReceiverData> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("HouseNo", houseNo)
-                .eq(dateColumn, testDate)
+                .eq("TestDate", testDate)
                 .orderByDesc("ID")
                 .last("LIMIT 1");
         ReceiverData receiverData = getOne(queryWrapper, false);
@@ -118,12 +117,6 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
             int layerCount,
             String dataName) {
         String[] values = rawData.trim().split("\\s*,\\s*");
-        int expectedCount = stringCount * layerCount;
-        if (values.length != expectedCount) {
-            throw new IllegalArgumentException(
-                    dataName + "数据点数量错误，应为 " + expectedCount + " 个，实际为 " + values.length + " 个");
-        }
-
         List<List<Double>> matrix = new ArrayList<>(stringCount);
         int index = 0;
         try {

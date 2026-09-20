@@ -1,372 +1,426 @@
 <template>
-  <div class="w-full h-full bg-[#0b1b2b] relative overflow-hidden select-none">
-    <!-- three.js 画布 -->
-    <div ref="containerRef" class="w-full h-full"></div>
+  <div class="sensor-scene">
+    <div ref="containerRef" class="sensor-scene__canvas"></div>
 
-    <!-- 控制面板 -->
-    <div class="absolute top-4 left-4 w-[260px] rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] text-[#d6e4f0] p-4 shadow-lg backdrop-blur">
-      <div class="text-base font-bold mb-3 text-[#7ec3ff]">{{ cfg.title }}</div>
+    <section class="control-panel">
+      <h2>{{ cfg.title }}</h2>
 
-      <div class="space-y-2 text-sm">
-        <div class="flex items-center justify-between">
-          <span>粮仓编号</span>
-          <span class="text-[#7ec3ff]">{{ houseNo || '--' }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span>采集时间</span>
-          <el-select v-model="currentTime" size="small" class="w-[150px]" placeholder="选择时间" @wheel.prevent="onTimeWheel" title="滚轮切换">
-            <el-option v-for="t in store.times" :key="t" :label="formatTime(t)" :value="t" />
-          </el-select>
-        </div>
-        <div class="flex items-center justify-between">
-          <span>显示层</span>
-          <el-select v-model="visibleLayer" size="small" class="w-[120px]" @wheel.prevent="onLayerWheel" title="滚轮切换">
-            <el-option label="全部" value="all" />
-            <el-option v-for="l in store.dimZ" :key="l" :label="`第 ${l} 层`" :value="l - 1" />
-          </el-select>
-        </div>
-        <div class="flex items-center justify-between">
-          <span>自动旋转</span>
-          <el-switch v-model="autoRotate" size="small" />
-        </div>
+      <div class="control-row">
+        <span>仓房编号</span>
+        <strong>{{ houseNo || '--' }}</strong>
+      </div>
+      <div class="control-row">
+        <span>测试时间</span>
+        <el-select
+          v-model="selectedTime"
+          size="small"
+          placeholder="选择时间"
+          class="time-select"
+          @wheel.prevent="switchTime"
+        >
+          <el-option v-for="time in testDates" :key="time" :label="time" :value="time" />
+        </el-select>
+      </div>
+      <div class="control-row">
+        <span>显示层</span>
+        <el-select v-model="visibleLayer" size="small" class="layer-select">
+          <el-option label="全部" value="all" />
+          <el-option
+            v-for="layer in layerCount"
+            :key="layer"
+            :label="`第 ${layer} 层`"
+            :value="layer - 1"
+          />
+        </el-select>
+      </div>
+      <div class="control-row">
+        <span>自动旋转</span>
+        <el-switch v-model="autoRotate" size="small" />
       </div>
 
-      <div class="mt-3 pt-3 border-t border-[#2a4a6a] text-xs space-y-1 text-[#9fb8cc]">
-        <div class="flex justify-between"><span>维度 X/Y/Z</span><span>{{ store.dimX }} × {{ store.dimY }} × {{ store.dimZ }}</span></div>
-        <div class="flex justify-between"><span>测点总数</span><span>{{ stats.count }}</span></div>
-        <div class="flex justify-between"><span>平均{{ cfg.label }}</span><span>{{ stats.avg }} {{ cfg.unit }}</span></div>
-        <div class="flex justify-between"><span>最高{{ cfg.label }}</span><span class="text-[#ff7a59]">{{ stats.max }} {{ cfg.unit }}</span></div>
-        <div class="flex justify-between"><span>最低{{ cfg.label }}</span><span class="text-[#59b7ff]">{{ stats.min }} {{ cfg.unit }}</span></div>
+      <div class="statistics">
+        <div><span>排列</span><strong>{{ stringCount }} 串 × {{ layerCount }} 层</strong></div>
+        <div><span>测点总数</span><strong>{{ stats.count }}</strong></div>
+        <div><span>平均{{ cfg.label }}</span><strong>{{ stats.avg }} {{ cfg.unit }}</strong></div>
+        <div><span>最大{{ cfg.label }}</span><strong class="value-high">{{ stats.max }} {{ cfg.unit }}</strong></div>
+        <div><span>最小{{ cfg.label }}</span><strong class="value-low">{{ stats.min }} {{ cfg.unit }}</strong></div>
       </div>
-    </div>
-
-    <!-- 色标 -->
-    <div class="absolute bottom-6 right-6 rounded-lg bg-[#10243a]/90 border border-[#2a4a6a] px-4 py-3 text-xs text-[#d6e4f0]">
-      <div class="mb-1">{{ cfg.label }}({{ cfg.unit }})</div>
-      <div class="flex items-center gap-2">
-        <span>{{ cfg.min }}</span>
-        <div class="w-[160px] h-[10px] rounded" :style="{ background: legendGradient }"></div>
-        <span>{{ cfg.max }}</span>
+    </section>
+<!--
+    <section class="layout-guide">
+      <span>传感器布局</span>
+      <strong>{{ stringCount || '--' }} 串</strong>
+      <small>1–5 为固定位置，6–7 为七串仓房附加位置</small>
+    </section>
+-->
+    <section class="legend">
+      <span>{{ cfg.label }}（{{ cfg.unit }}）</span>
+      <div class="legend__scale">
+        <small>{{ colorRange.min }}</small>
+        <i :style="{ background: legendGradient }"></i>
+        <small>{{ colorRange.max }}</small>
       </div>
-    </div>
+    </section>
 
-    <!-- 悬浮提示 -->
     <div
       v-show="tooltip.visible"
-      class="absolute pointer-events-none z-10 rounded bg-[#0a1626]/95 border border-[#3a6a9a] text-[#e8f2fb] text-xs px-3 py-2 shadow"
-      :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
+      class="sensor-tooltip"
+      :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }"
     >
-      <div>坐标：X{{ tooltip.px }} · Y{{ tooltip.py }} · Z{{ tooltip.pz }}</div>
-      <div>{{ cfg.label }}：<span class="font-bold" :style="{ color: tooltip.color }">{{ tooltip.value }} {{ cfg.unit }}</span></div>
+      <span>第 {{ tooltip.stringNo }} 串 · 第 {{ tooltip.layerNo }} 层</span>
+      <strong :style="{ color: tooltip.color }">
+        {{ tooltip.value }} {{ cfg.unit }}
+      </strong>
     </div>
 
-    <!-- 加载/空状态提示 -->
-    <div v-if="store.loading" class="absolute inset-0 z-10 flex items-center justify-center text-sm text-[#7ec3ff] bg-[#0b1b2b]/70">
-      温度数据加载中...
-    </div>
-    <div v-else-if="!houseNo" class="absolute inset-0 z-10 flex items-center justify-center text-sm text-[#9fb8cc] bg-[#0b1b2b]/70">
-      缺少仓房编号，无法加载温度数据
-    </div>
-    <div v-else-if="store.error" class="absolute inset-0 z-10 flex items-center justify-center text-sm text-[#ff7a59] bg-[#0b1b2b]/70">
-      {{ store.error }}
-    </div>
-    <div v-else-if="!store.times.length" class="absolute inset-0 z-10 flex items-center justify-center text-sm text-[#9fb8cc] bg-[#0b1b2b]/70">
-      暂无温度数据
-    </div>
+    <div v-if="loading" class="scene-state">{{ cfg.label }}数据加载中...</div>
+    <div v-else-if="!houseNo" class="scene-state">缺少仓房编号</div>
+    <div v-else-if="error" class="scene-state scene-state--error">{{ error }}</div>
+    <div v-else-if="!testDates.length" class="scene-state">暂无测试时间</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { useCubeStore, CUBE_METRICS, type CubeKind, type SensorPoint } from '@/stores/cube'
+import receiverDataApi, { type SensorMatrix } from '@/api/receiverData'
+import { SENSOR_METRICS, type SensorMetric } from '@/features/receiverData3d/config'
 
-const props = defineProps<{ houseNo: string; metric?: CubeKind }>()
+interface SensorPoint {
+  stringIndex: number
+  layerIndex: number
+  value: number
+}
 
-const store = useCubeStore(props.metric ?? 'temperature')
+const props = withDefaults(defineProps<{
+  houseNo: string
+  metric?: SensorMetric
+}>(), {
+  metric: 'temperature',
+})
 
-const cfg = computed(() => CUBE_METRICS[props.metric ?? 'temperature'])
-const ROOM_W = 16 // 仓房宽(x方向, 固定)
-const ROOM_D = 16 // 仓房深(y方向, 固定)
-const ROOM_H = 9 // 仓房高(z方向, 固定)
-const BALL_R = 0.35 // 测点圆球半径(固定)
-const TILE_OPACITY = 0.5 // 常态透明度
-const cellGeo = new THREE.SphereGeometry(BALL_R, 24, 16)
-
+const cfg = computed(() => SENSOR_METRICS[props.metric])
 const containerRef = ref<HTMLDivElement>()
+const testDates = ref<string[]>([])
+const selectedTime = ref('')
+const matrix = ref<SensorMatrix>([])
+const loadingDates = ref(false)
+const loadingMatrix = ref(false)
+const error = ref('')
 const visibleLayer = ref<number | 'all'>('all')
-const autoRotate = ref(false) // 自动旋转, 默认关闭
+const autoRotate = ref(false)
 
-const points = computed(() => store.points)
+const loading = computed(() => loadingDates.value || loadingMatrix.value)
+const stringCount = computed(() => matrix.value.length)
+const layerCount = computed(() => matrix.value[0]?.length ?? 0)
+const points = computed<SensorPoint[]>(() => matrix.value.flatMap((layers, stringIndex) =>
+  layers.map((value, layerIndex) => ({ stringIndex, layerIndex, value })),
+))
 
-const currentTime = computed<string | undefined>({
-  get: () => store.currentTime ?? undefined,
-  set: (v) => { if (v) store.selectTime(v) },
+const stats = computed(() => {
+  const values = points.value.map((point) => point.value).filter(Number.isFinite)
+  if (!values.length) return { count: 0, avg: '--', max: '--', min: '--' }
+  const sum = values.reduce((total, value) => total + value, 0)
+  return {
+    count: values.length,
+    avg: (sum / values.length).toFixed(1),
+    max: Math.max(...values).toFixed(1),
+    min: Math.min(...values).toFixed(1),
+  }
+})
+
+const colorRange = computed(() => {
+  const values = points.value.map((point) => point.value).filter(Number.isFinite)
+  if (!values.length) return { min: 0, max: 1 }
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  return min === max ? { min: min - 1, max: max + 1 } : { min, max }
+})
+
+const legendGradient = computed(() => {
+  const stops = Array.from({ length: 5 }, (_, index) => {
+    const ratio = index / 4
+    return `#${paletteColor(ratio).getHexString()} ${ratio * 100}%`
+  })
+  return `linear-gradient(to right, ${stops.join(', ')})`
 })
 
 const tooltip = reactive({
   visible: false,
   x: 0,
   y: 0,
-  px: 0,
-  py: 0,
-  pz: 0,
-  value: '0',
+  stringNo: 0,
+  layerNo: 0,
+  value: '0.0',
   color: '#fff',
 })
 
-const stats = computed(() => {
-  if (!points.value.length) return { count: 0, avg: '0', max: '0', min: '0' }
-  let sum = 0
-  let max = -Infinity
-  let min = Infinity
-  for (const p of points.value) {
-    sum += p.value
-    if (p.value > max) max = p.value
-    if (p.value < min) min = p.value
-  }
-  return {
-    count: points.value.length,
-    avg: (sum / points.value.length).toFixed(1),
-    max: max.toFixed(1),
-    min: min.toFixed(1),
-  }
-})
+const STRING_POSITIONS = [
+  { x: -6, z: -4.5 },
+  { x: 6, z: -4.5 },
+  { x: 6, z: 4.5 },
+  { x: -6, z: 4.5 },
+  { x: 0, z: 0 },
+  { x: 0, z: 4.7 },
+  { x: -4, z: 0.2 },
+]
+const ROOM_WIDTH = 18
+const ROOM_DEPTH = 14
+const ROOM_HEIGHT = 10
+const SENSOR_TOP = 8.4
+const SENSOR_BOTTOM = 1.25
 
-const legendGradient = computed(() => {
-  const stops = [0, 0.25, 0.5, 0.75, 1].map((t) => `#${valueColor(t).getHexString()} ${t * 100}%`)
-  return `linear-gradient(to right, ${stops.join(', ')})`
-})
-
-// ---------- three.js ----------
-let renderer: THREE.WebGLRenderer
-let scene: THREE.Scene
-let camera: THREE.PerspectiveCamera
-let controls: OrbitControls
-let instancedMesh: THREE.InstancedMesh | null = null
-let highlightMesh: THREE.Mesh | null = null
-let warehouseGroup: THREE.Group | null = null
-let animationId = 0
+let renderer: THREE.WebGLRenderer | undefined
+let scene: THREE.Scene | undefined
+let camera: THREE.PerspectiveCamera | undefined
+let controls: OrbitControls | undefined
+let sensorGroup: THREE.Group | undefined
+let sensorMesh: THREE.InstancedMesh | undefined
+let highlightMesh: THREE.Mesh | undefined
+let animationFrame = 0
+let matrixRequestId = 0
 const raycaster = new THREE.Raycaster()
 const pointer = new THREE.Vector2()
 const dummy = new THREE.Object3D()
 
-/** 温度值 -> 颜色, t∈[0,1]: 蓝->青->绿->黄->红 */
-function valueColor(t: number): THREE.Color {
-  const clamped = Math.min(1, Math.max(0, t))
+function paletteColor(ratio: number) {
+  const value = Math.min(1, Math.max(0, ratio))
   const stops: Array<[number, THREE.Color]> = [
-    [0, new THREE.Color('#2b6cff')],
-    [0.25, new THREE.Color('#22c3d6')],
-    [0.5, new THREE.Color('#3ecf5a')],
-    [0.75, new THREE.Color('#f2c531')],
-    [1, new THREE.Color('#f0433a')],
+    [0, new THREE.Color('#2864dc')],
+    [0.25, new THREE.Color('#19b9cf')],
+    [0.5, new THREE.Color('#43ca66')],
+    [0.75, new THREE.Color('#f0c83c')],
+    [1, new THREE.Color('#ed4b3e')],
   ]
-  for (let i = 0; i < stops.length - 1; i++) {
-    const [t0, c0] = stops[i]
-    const [t1, c1] = stops[i + 1]
-    if (clamped <= t1) {
-      const k = (clamped - t0) / (t1 - t0)
-      return c0.clone().lerp(c1, k)
+  for (let index = 0; index < stops.length - 1; index++) {
+    const [start, startColor] = stops[index]
+    const [end, endColor] = stops[index + 1]
+    if (value <= end) {
+      return startColor.clone().lerp(endColor, (value - start) / (end - start))
     }
   }
   return stops[stops.length - 1][1].clone()
 }
 
-function colorOf(value: number): THREE.Color {
-  return valueColor((value - cfg.value.min) / (cfg.value.max - cfg.value.min))
+function colorOf(value: number) {
+  const { min, max } = colorRange.value
+  return paletteColor((value - min) / (max - min))
 }
 
-/** 测点位置: 房间均分为 dimX×dimY×dimZ 个格子, 取格子中心, 点数变化时间距自适应 */
-function pointPosition(p: SensorPoint): THREE.Vector3 {
-  return new THREE.Vector3(
-    -ROOM_W / 2 + ((p.x + 0.5) / Math.max(store.dimX, 1)) * ROOM_W,
-    ((p.z + 0.5) / Math.max(store.dimZ, 1)) * ROOM_H,
-    -ROOM_D / 2 + ((p.y + 0.5) / Math.max(store.dimY, 1)) * ROOM_D,
-  )
+function pointPosition(point: Pick<SensorPoint, 'stringIndex' | 'layerIndex'>) {
+  const position = STRING_POSITIONS[point.stringIndex] ?? { x: 0, z: 0 }
+  const layers = Math.max(layerCount.value, 1)
+  const y = layers === 1
+    ? (SENSOR_TOP + SENSOR_BOTTOM) / 2
+    : SENSOR_TOP - (point.layerIndex / (layers - 1)) * (SENSOR_TOP - SENSOR_BOTTOM)
+  return new THREE.Vector3(position.x, y, position.z)
 }
 
-/** 重建测点实例(按显示层过滤) */
-function rebuildInstances() {
-  if (!warehouseGroup) return
-  // 层数变化后, 若已选层越界则回到全部
-  if (typeof visibleLayer.value === 'number' && visibleLayer.value >= store.dimZ) {
-    visibleLayer.value = 'all'
-  }
-  if (instancedMesh) {
-    warehouseGroup.remove(instancedMesh)
-    ;(instancedMesh.material as THREE.Material).dispose()
-  }
+function createStringLabel(stringNo: number) {
+  const canvas = document.createElement('canvas')
+  canvas.width = 180
+  canvas.height = 72
+  const context = canvas.getContext('2d')!
+  context.fillStyle = 'rgba(11, 27, 43, 0.9)'
+  context.strokeStyle = '#7ec3ff'
+  context.lineWidth = 3
+  context.beginPath()
+  context.roundRect(3, 3, 174, 66, 18)
+  context.fill()
+  context.stroke()
+  context.fillStyle = '#edf7ff'
+  context.font = '600 30px sans-serif'
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  context.fillText(`${stringNo}号串`, 90, 37)
 
-  const visible = points.value.filter((p) => visibleLayer.value === 'all' || p.z === visibleLayer.value)
-  const mesh = new THREE.InstancedMesh(
-    cellGeo,
-    new THREE.MeshStandardMaterial({
-      transparent: true,
-      opacity: TILE_OPACITY,
-      roughness: 0.3,
-      metalness: 0.05,
-      depthWrite: false,
-    }),
-    Math.max(visible.length, 1),
-  )
-  if (highlightMesh) highlightMesh.visible = false
-  tooltip.visible = false
-  visible.forEach((p, i) => {
-    dummy.position.copy(pointPosition(p))
-    dummy.updateMatrix()
-    mesh.setMatrixAt(i, dummy.matrix)
-    mesh.setColorAt(i, colorOf(p.value))
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+  }))
+  label.scale.set(2.7, 1.08, 1)
+  label.renderOrder = 10
+  return label
+}
+
+function disposeObject(object: THREE.Object3D) {
+  object.traverse((child) => {
+    if (child instanceof THREE.Sprite) {
+      child.material.map?.dispose()
+      child.material.dispose()
+    }
+    if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments || child instanceof THREE.Line) {
+      child.geometry.dispose()
+      const materials = Array.isArray(child.material) ? child.material : [child.material]
+      materials.forEach((material) => material.dispose())
+    }
   })
-  mesh.instanceMatrix.needsUpdate = true
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
-  mesh.userData.points = visible
-  warehouseGroup.add(mesh)
-  instancedMesh = mesh
 }
 
-/** 重建仓体轮廓/粮堆, 并刷新测点 */
-function rebuildWarehouse() {
+function rebuildSensors() {
   if (!scene) return
-  if (warehouseGroup) {
-    scene.remove(warehouseGroup)
-    warehouseGroup.traverse((obj) => {
-      const o = obj as THREE.Mesh
-      if (o.geometry) o.geometry.dispose()
-      const m = o.material as THREE.Material | THREE.Material[] | undefined
-      if (m) (Array.isArray(m) ? m : [m]).forEach((mm) => mm.dispose())
-    })
+  if (sensorGroup) {
+    scene.remove(sensorGroup)
+    disposeObject(sensorGroup)
   }
-  warehouseGroup = new THREE.Group()
-  scene.add(warehouseGroup)
+  sensorGroup = new THREE.Group()
+  scene.add(sensorGroup)
+  sensorMesh = undefined
+  tooltip.visible = false
+  if (highlightMesh) highlightMesh.visible = false
 
-  const w = ROOM_W
-  const d = ROOM_D
-  const h = ROOM_H
-  const lineMat = new THREE.LineBasicMaterial({ color: 0x5a8ab8 })
+  if (![5, 7].includes(stringCount.value) || !layerCount.value) return
 
-  // 地坪
+  const cableMaterial = new THREE.LineBasicMaterial({ color: '#7894a8', transparent: true, opacity: 0.72 })
+  for (let stringIndex = 0; stringIndex < stringCount.value; stringIndex++) {
+    const position = STRING_POSITIONS[stringIndex]
+    const cableGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(position.x, SENSOR_BOTTOM - 0.35, position.z),
+      new THREE.Vector3(position.x, SENSOR_TOP + 0.45, position.z),
+    ])
+    sensorGroup.add(new THREE.Line(cableGeometry, cableMaterial.clone()))
+    const label = createStringLabel(stringIndex + 1)
+    label.position.set(position.x, SENSOR_TOP + 1.15, position.z)
+    sensorGroup.add(label)
+  }
+
+  const visiblePoints = points.value.filter((point) =>
+    Number.isFinite(point.value)
+    && (visibleLayer.value === 'all' || point.layerIndex === visibleLayer.value),
+  )
+  if (!visiblePoints.length) return
+
+  const geometry = new THREE.SphereGeometry(0.42, 24, 18)
+  const material = new THREE.MeshStandardMaterial({ roughness: 0.28, metalness: 0.08 })
+  sensorMesh = new THREE.InstancedMesh(geometry, material, visiblePoints.length)
+  visiblePoints.forEach((point, index) => {
+    dummy.position.copy(pointPosition(point))
+    dummy.updateMatrix()
+    sensorMesh!.setMatrixAt(index, dummy.matrix)
+    sensorMesh!.setColorAt(index, colorOf(point.value))
+  })
+  sensorMesh.instanceMatrix.needsUpdate = true
+  sensorMesh.instanceColor!.needsUpdate = true
+  sensorMesh.userData.points = visiblePoints
+  sensorGroup.add(sensorMesh)
+}
+
+function createWarehouse() {
+  if (!scene) return
+  const warehouse = new THREE.Group()
   const floor = new THREE.Mesh(
-    new THREE.BoxGeometry(w + 2.5, 0.3, d + 2.5),
-    new THREE.MeshStandardMaterial({ color: 0x1c3247, roughness: 0.9 }),
+    new THREE.BoxGeometry(ROOM_WIDTH + 1.5, 0.3, ROOM_DEPTH + 1.5),
+    new THREE.MeshStandardMaterial({ color: '#1a3448', roughness: 0.88 }),
   )
   floor.position.y = -0.15
-  warehouseGroup.add(floor)
+  warehouse.add(floor)
 
-  // 仓房线框
-  const boxGeo = new THREE.BoxGeometry(w + 1, h + 1, d + 1)
-  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), lineMat)
-  edges.position.y = h / 2
-  warehouseGroup.add(edges)
-  boxGeo.dispose()
+  const shellGeometry = new THREE.BoxGeometry(ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH)
+  const shell = new THREE.Mesh(shellGeometry, new THREE.MeshPhongMaterial({
+    color: '#7aa4bd',
+    transparent: true,
+    opacity: 0.055,
+    side: THREE.BackSide,
+    depthWrite: false,
+  }))
+  shell.position.y = ROOM_HEIGHT / 2
+  warehouse.add(shell)
 
-  // 人字形屋顶
-  const roofH = Math.min(2.5, Math.max(1.2, d * 0.25))
-  const hw = (w + 1) / 2
-  const hd = (d + 1) / 2
-  const y0 = h + 0.5
-  const ridge = y0 + roofH
-  const roofPts = new Float32Array([
-    // 屋脊
-    -hw, ridge, 0, hw, ridge, 0,
-    // 四条坡檐
-    -hw, y0, -hd, -hw, ridge, 0,
-    -hw, y0, hd, -hw, ridge, 0,
-    hw, y0, -hd, hw, ridge, 0,
-    hw, y0, hd, hw, ridge, 0,
-  ])
-  const roofGeo = new THREE.BufferGeometry()
-  roofGeo.setAttribute('position', new THREE.BufferAttribute(roofPts, 3))
-  warehouseGroup.add(new THREE.LineSegments(roofGeo, lineMat))
-
-  rebuildInstances()
+  const outline = new THREE.LineSegments(
+    new THREE.EdgesGeometry(shellGeometry),
+    new THREE.LineBasicMaterial({ color: '#4f7895', transparent: true, opacity: 0.8 }),
+  )
+  outline.position.y = ROOM_HEIGHT / 2
+  warehouse.add(outline)
+  scene.add(warehouse)
 }
 
 function initScene() {
-  const el = containerRef.value!
+  const container = containerRef.value
+  if (!container) return
   renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.setSize(el.clientWidth, el.clientHeight)
-  el.appendChild(renderer.domElement)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setSize(container.clientWidth, container.clientHeight)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
+  container.appendChild(renderer.domElement)
 
   scene = new THREE.Scene()
   scene.background = new THREE.Color('#0b1b2b')
-  scene.fog = new THREE.Fog('#0b1b2b', 60, 140)
+  scene.fog = new THREE.Fog('#0b1b2b', 48, 100)
 
-  camera = new THREE.PerspectiveCamera(50, el.clientWidth / el.clientHeight, 0.1, 500)
-  camera.position.set(16, 14, 18)
+  camera = new THREE.PerspectiveCamera(48, container.clientWidth / container.clientHeight, 0.1, 200)
+  camera.position.set(19, 16, 21)
 
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.dampingFactor = 0.08
-  controls.maxDistance = 120
-  controls.autoRotateSpeed = 1.5
-  controls.autoRotate = autoRotate.value
-  controls.target.set(0, ROOM_H / 2, 0)
+  controls.minDistance = 12
+  controls.maxDistance = 55
+  controls.target.set(0, ROOM_HEIGHT / 2, 0)
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.45))
-  const dir = new THREE.DirectionalLight(0xfff2dd, 1.1)
-  const hemi = new THREE.HemisphereLight(0xbcd8ff, 0x16283a, 0.6)
-  scene.add(hemi)
-  dir.position.set(20, 30, 15)
-  scene.add(dir)
+  scene.add(new THREE.HemisphereLight(0xc9e5ff, 0x132536, 1.1))
+  const light = new THREE.DirectionalLight(0xffffff, 1.25)
+  light.position.set(12, 22, 8)
+  scene.add(light)
 
-  const grid = new THREE.GridHelper(60, 30, 0x2a4a6a, 0x1a3048)
+  const grid = new THREE.GridHelper(48, 24, 0x315875, 0x18354c)
   grid.position.y = -0.01
   scene.add(grid)
-  // 悬停高亮块(不透明, 盖在半透明测点上)
+  createWarehouse()
+
   highlightMesh = new THREE.Mesh(
-    cellGeo,
-    new THREE.MeshStandardMaterial({ roughness: 0.25, metalness: 0.05 }),
+    new THREE.SphereGeometry(0.48, 24, 18),
+    new THREE.MeshStandardMaterial({ roughness: 0.2, emissiveIntensity: 0.42 }),
   )
-  highlightMesh.scale.setScalar(1.06)
   highlightMesh.visible = false
   scene.add(highlightMesh)
-  rebuildWarehouse()
-
+  rebuildSensors()
   animate()
 }
 
 function animate() {
-  animationId = requestAnimationFrame(animate)
+  animationFrame = requestAnimationFrame(animate)
+  if (!renderer || !scene || !camera || !controls) return
   controls.update()
   renderer.render(scene, camera)
 }
 
-function onResize() {
-  const el = containerRef.value
-  if (!el || !renderer || !camera) return
-  camera.aspect = el.clientWidth / el.clientHeight
+function handleResize() {
+  const container = containerRef.value
+  if (!container || !renderer || !camera) return
+  camera.aspect = container.clientWidth / container.clientHeight
   camera.updateProjectionMatrix()
-  renderer.setSize(el.clientWidth, el.clientHeight)
+  renderer.setSize(container.clientWidth, container.clientHeight)
 }
 
-function onPointerMove(e: PointerEvent) {
-  const el = containerRef.value
-  if (!el || !instancedMesh) return
-  const rect = el.getBoundingClientRect()
-  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
-  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+function handlePointerMove(event: PointerEvent) {
+  const container = containerRef.value
+  if (!container || !sensorMesh || !camera) return
+  const rect = container.getBoundingClientRect()
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
   raycaster.setFromCamera(pointer, camera)
-  const hit = raycaster.intersectObject(instancedMesh)[0]
-  if (hit && hit.instanceId !== undefined) {
-    const p = (instancedMesh.userData.points as SensorPoint[])[hit.instanceId]
-    if (p) {
+  const hit = raycaster.intersectObject(sensorMesh)[0]
+  if (hit?.instanceId !== undefined) {
+    const point = (sensorMesh.userData.points as SensorPoint[])[hit.instanceId]
+    if (point) {
+      const color = colorOf(point.value)
       tooltip.visible = true
-      tooltip.x = e.clientX - rect.left + 14
-      tooltip.y = e.clientY - rect.top + 14
-      tooltip.px = p.x + 1
-      tooltip.py = p.y + 1
-      tooltip.pz = p.z + 1
-      tooltip.value = p.value.toFixed(1)
-      tooltip.color = `#${colorOf(p.value).getHexString()}`
+      tooltip.x = event.clientX - rect.left + 14
+      tooltip.y = event.clientY - rect.top + 14
+      tooltip.stringNo = point.stringIndex + 1
+      tooltip.layerNo = point.layerIndex + 1
+      tooltip.value = point.value.toFixed(1)
+      tooltip.color = `#${color.getHexString()}`
       if (highlightMesh) {
-        const c = colorOf(p.value)
-        const m = highlightMesh.material as THREE.MeshStandardMaterial
-        m.color.copy(c)
-        m.emissive.copy(c)
-        m.emissiveIntensity = 0.4
-        highlightMesh.position.copy(pointPosition(p))
+        highlightMesh.position.copy(pointPosition(point))
+        const material = highlightMesh.material as THREE.MeshStandardMaterial
+        material.color.copy(color)
+        material.emissive.copy(color)
         highlightMesh.visible = true
       }
       return
@@ -376,44 +430,267 @@ function onPointerMove(e: PointerEvent) {
   if (highlightMesh) highlightMesh.visible = false
 }
 
-function formatTime(t: string) {
-  return t.replace('T', ' ')
-}
-function onTimeWheel(e: WheelEvent) {
-  const times = store.times
-  if (!times.length) return
-  const idx = times.indexOf(store.currentTime ?? '')
-  const next = (idx + (e.deltaY > 0 ? 1 : -1) + times.length) % times.length
-  store.selectTime(times[next])
+function handlePointerLeave() {
+  tooltip.visible = false
+  if (highlightMesh) highlightMesh.visible = false
 }
 
-function onLayerWheel(e: WheelEvent) {
-  const opts: Array<number | 'all'> = ['all', ...Array.from({ length: store.dimZ }, (_, i) => i)]
-  const idx = opts.indexOf(visibleLayer.value)
-  const next = (idx + (e.deltaY > 0 ? 1 : -1) + opts.length) % opts.length
-  visibleLayer.value = opts[next]
+function switchTime(event: WheelEvent) {
+  if (!testDates.value.length) return
+  const currentIndex = testDates.value.indexOf(selectedTime.value)
+  const direction = event.deltaY > 0 ? 1 : -1
+  const nextIndex = (currentIndex + direction + testDates.value.length) % testDates.value.length
+  selectedTime.value = testDates.value[nextIndex]
 }
 
-watch(points, rebuildInstances)
-watch(visibleLayer, rebuildInstances)
-watch(autoRotate, (v) => {
-  if (controls) controls.autoRotate = v
+async function fetchTestDates() {
+  matrixRequestId++
+  loadingMatrix.value = false
+  matrix.value = []
+  testDates.value = []
+  selectedTime.value = ''
+  error.value = ''
+  if (!props.houseNo) return
+  loadingDates.value = true
+  try {
+    const response = await receiverDataApi.testDates(props.houseNo)
+    testDates.value = response.data.value ?? []
+    selectedTime.value = testDates.value[testDates.value.length - 1] ?? ''
+  } catch (reason) {
+    error.value = String(reason || '测试时间加载失败')
+  } finally {
+    loadingDates.value = false
+  }
+}
+
+async function fetchMatrix() {
+  const houseNo = props.houseNo
+  const testDate = selectedTime.value
+  if (!houseNo || !testDate) {
+    matrix.value = []
+    return
+  }
+  const requestId = ++matrixRequestId
+  loadingMatrix.value = true
+  error.value = ''
+  try {
+    const response = await receiverDataApi[props.metric](houseNo, testDate)
+    if (requestId !== matrixRequestId) return
+    const nextMatrix = response.data.value ?? []
+    if (nextMatrix.length && ![5, 7].includes(nextMatrix.length)) {
+      throw new Error(`传感器串数应为 5 或 7，当前为 ${nextMatrix.length}`)
+    }
+    matrix.value = nextMatrix
+    visibleLayer.value = 'all'
+  } catch (reason) {
+    if (requestId !== matrixRequestId) return
+    matrix.value = []
+    error.value = reason instanceof Error ? reason.message : String(reason || `${cfg.value.label}数据加载失败`)
+  } finally {
+    if (requestId === matrixRequestId) loadingMatrix.value = false
+  }
+}
+
+watch(() => props.houseNo, fetchTestDates, { immediate: true })
+watch([selectedTime, () => props.metric], fetchMatrix)
+watch([points, visibleLayer], rebuildSensors)
+watch(autoRotate, (enabled) => {
+  if (controls) controls.autoRotate = enabled
 })
-watch(() => props.houseNo, (no) => store.fetchCube(no), { immediate: true })
 
 onMounted(() => {
   initScene()
-  rebuildInstances()
-  window.addEventListener('resize', onResize)
-  containerRef.value!.addEventListener('pointermove', onPointerMove)
-  containerRef.value!.addEventListener('pointerleave', () => (tooltip.visible = false))
+  window.addEventListener('resize', handleResize)
+  renderer?.domElement.addEventListener('pointermove', handlePointerMove)
+  renderer?.domElement.addEventListener('pointerleave', handlePointerLeave)
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(animationId)
-  window.removeEventListener('resize', onResize)
+  cancelAnimationFrame(animationFrame)
+  window.removeEventListener('resize', handleResize)
+  renderer?.domElement.removeEventListener('pointermove', handlePointerMove)
+  renderer?.domElement.removeEventListener('pointerleave', handlePointerLeave)
   controls?.dispose()
+  if (scene) disposeObject(scene)
   renderer?.dispose()
   renderer?.domElement.remove()
 })
 </script>
+
+<style scoped>
+.sensor-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #d6e4f0;
+  background: #0b1b2b;
+  user-select: none;
+}
+
+.sensor-scene__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.sensor-scene__canvas :deep(canvas) {
+  cursor: grab;
+}
+
+.sensor-scene__canvas :deep(canvas:active) {
+  cursor: grabbing;
+}
+
+.control-panel,
+.layout-guide,
+.legend {
+  position: absolute;
+  border: 1px solid #2a4a6a;
+  border-radius: 10px;
+  background: rgb(16 36 58 / 92%);
+  box-shadow: 0 14px 36px rgb(2 12 22 / 30%);
+  backdrop-filter: blur(10px);
+}
+
+.control-panel {
+  top: 16px;
+  left: 16px;
+  width: 282px;
+  padding: 16px;
+}
+
+.control-panel h2 {
+  margin: 0 0 14px;
+  color: #7ec3ff;
+  font-size: 16px;
+}
+
+.control-row {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.control-row strong {
+  color: #7ec3ff;
+}
+
+.time-select {
+  width: 170px;
+}
+
+.layer-select {
+  width: 112px;
+}
+
+.statistics {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #2a4a6a;
+}
+
+.statistics div {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  color: #9fb8cc;
+  font-size: 12px;
+}
+
+.statistics strong {
+  color: #e3edf5;
+}
+
+.statistics .value-high {
+  color: #ff7a59;
+}
+
+.statistics .value-low {
+  color: #59b7ff;
+}
+
+.layout-guide {
+  right: 20px;
+  top: 18px;
+  display: grid;
+  width: 200px;
+  padding: 12px 14px;
+  gap: 3px;
+}
+
+.layout-guide span,
+.layout-guide small {
+  color: #8ea9bc;
+  font-size: 11px;
+}
+
+.layout-guide strong {
+  color: #7ec3ff;
+  font-size: 18px;
+}
+
+.legend {
+  right: 20px;
+  bottom: 20px;
+  padding: 11px 14px;
+  font-size: 12px;
+}
+
+.legend__scale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.legend__scale i {
+  width: 160px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.sensor-tooltip {
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  padding: 8px 10px;
+  pointer-events: none;
+  border: 1px solid #3a6a9a;
+  border-radius: 6px;
+  background: rgb(10 22 38 / 96%);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 24%);
+  font-size: 12px;
+}
+
+.sensor-tooltip span {
+  color: #a8bdcc;
+}
+
+.scene-state {
+  position: absolute;
+  z-index: 15;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #9fc8e8;
+  background: rgb(11 27 43 / 72%);
+  font-size: 14px;
+}
+
+.scene-state--error {
+  color: #ff8a70;
+}
+
+@media (max-width: 760px) {
+  .control-panel {
+    width: min(282px, calc(100vw - 32px));
+  }
+
+  .layout-guide {
+    display: none;
+  }
+}
+</style>
