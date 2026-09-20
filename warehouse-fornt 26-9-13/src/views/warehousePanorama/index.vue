@@ -31,6 +31,7 @@ const SILO_DIAMETER = 5.4
 const SILO_HEIGHT = 7
 const GROUPS = [4, 2, 2, 2, 2]
 const HOUSE_GAP = 1.15
+const COMPACT_HOUSE_GAP = 0.7
 const GROUP_GAP = 3.8
 
 function createRoundedRoof(
@@ -215,12 +216,19 @@ function createUShapedHouse(outerWidth: number) {
   return building
 }
 
-function addWarehouseRow(z: number, startNumber: number, combineFromGroup = 3) {
+function addWarehouseRow(
+  z: number,
+  startNumber: number,
+  combineFromGroup = 3,
+  compactGroups: number[] = [],
+) {
   if (!scene) return
 
   const houses = new THREE.Group()
-  const totalWidth = GROUPS.reduce((total, count) => total + count * HOUSE_WIDTH, 0)
-    + (GROUPS.reduce((total, count) => total + count, 0) - GROUPS.length) * HOUSE_GAP
+  const totalWidth = GROUPS.reduce((total, count, groupIndex) => {
+    const internalGap = compactGroups.includes(groupIndex) ? COMPACT_HOUSE_GAP : HOUSE_GAP
+    return total + count * HOUSE_WIDTH + (count - 1) * internalGap
+  }, 0)
     + (GROUPS.length - 1) * GROUP_GAP
   let cursor = -totalWidth / 2
   let houseNumber = startNumber
@@ -237,6 +245,7 @@ function addWarehouseRow(z: number, startNumber: number, combineFromGroup = 3) {
       return
     }
 
+    const internalGap = compactGroups.includes(groupIndex) ? COMPACT_HOUSE_GAP : HOUSE_GAP
     for (let i = 0; i < count; i += 1) {
       const house = createHouse(houseNumber - startNumber)
       house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, z)
@@ -244,7 +253,7 @@ function addWarehouseRow(z: number, startNumber: number, combineFromGroup = 3) {
       houses.add(house)
       cursor += HOUSE_WIDTH
       houseNumber += 1
-      if (i < count - 1) cursor += HOUSE_GAP
+      if (i < count - 1) cursor += internalGap
     }
     if (groupIndex < GROUPS.length - 1) cursor += GROUP_GAP
   })
@@ -253,8 +262,8 @@ function addWarehouseRow(z: number, startNumber: number, combineFromGroup = 3) {
 }
 
 function addWarehouseAreas() {
-  addWarehouseRow(-22, 1)
-  addWarehouseRow(-6, 13, 2)
+  addWarehouseRow(-22, 1, 3, [1, 2])
+  addWarehouseRow(-6, 13, 2, [1])
   addThirdArea()
   addFourthArea()
 }
