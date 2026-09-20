@@ -4,82 +4,110 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 /**
- * <p>
- * 
- * </p>
- *
- * @author czh
- * @since 2024-07-27
+ * 仓房采集数据。
  */
-@Getter
-@Setter
-@TableName("receiver_data")
 @Data
+@TableName("receiver_data")
 public class ReceiverData implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     *  数据id
+     * 数据ID。
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "ID", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 仓房编号
+     * 仓房编号。
      */
     @TableField("HouseNo")
-    private Integer houseNo;
+    private String houseNo;
 
     /**
-     * 采集时间
+     * 采集时间。
      */
     @TableField("TestDate")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime testDate;
 
     /**
-     * 内部温度
+     * 仓内温度。
      */
     @TableField("intemperature")
-    private Float intemperature;
+    private Double inTemperature;
 
     /**
-     * 内部湿度
+     * 仓内湿度。
      */
     @TableField("InHumidity")
-    private Float inHumidity;
+    private Double inHumidity;
 
     /**
-     * 外部温度
+     * 仓外温度。
      */
     @TableField("OutTemperature")
-    private Float outTemperature;
+    private Double outTemperature;
 
     /**
-     * 外部湿度
+     * 仓外湿度。
      */
     @TableField("OutHumidity")
-    private Float outHumidity;
+    private Double outHumidity;
 
     /**
-     * 逗号分隔温度值序列，
+     * PH3 浓度值序列，使用逗号分隔。
      */
     @TableField("TemperatureSet")
     private String temperatureSet;
 
     /**
-     * 水分
+     * 温度值序列。
+     */
+    @TableField("TempData")
+    private String tempData;
+
+    /**
+     * 湿度值序列。
+     */
+    @TableField("HumiData")
+    private String humiData;
+
+    /**
+     * 温湿度及水分数据采集时间。
+     */
+    @TableField("TestDate_THW")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime testDateThw;
+
+    /**
+     * 氧气浓度。
+     */
+    @TableField("OAir")
+    private Integer oAir;
+
+    /**
+     * 二氧化碳浓度。
+     */
+    @TableField("CO2Air")
+    private Integer co2Air;
+
+    /**
+     * 粮食水分。
      */
     @TableField("GrainWater")
-    private Float grainWater;
+    private Double grainWater;
 
-
+    /**
+     * 库区编号。
+     */
+    @TableField("WareHouseNo")
+    private String wareHouseNo;
 }
