@@ -1,4 +1,12 @@
 /// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+    readonly ENV_PANORAMA_HOUSE_NUMBERS: string
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv
+}
 /**
  * new config.
  */

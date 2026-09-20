@@ -6,21 +6,143 @@
       <h1>粮库全景图</h1>
       <span>第四区域 · 凹形建筑与 10 个小圆柱仓</span>
     </header>
+
+    <aside v-if="selectedHouse" class="house-panel">
+      <div class="house-panel__header">
+        <div>
+          <p>SELECTED WAREHOUSE</p>
+          <h2>仓房信息</h2>
+        </div>
+        <span class="status-dot">UI 示例数据</span>
+      </div>
+
+      <dl class="house-details">
+        <div class="house-details__wide">
+          <dt>仓房编号</dt>
+          <dd>{{ selectedHouse.houseNo }}</dd>
+        </div>
+        <div>
+          <dt>熏蒸状态</dt>
+          <dd class="status-safe">未熏蒸</dd>
+        </div>
+        <div>
+          <dt>仓间氧浓度</dt>
+          <dd>20.8%</dd>
+        </div>
+        <div>
+          <dt>仓间 CQ2 浓度</dt>
+          <dd>420 ppm</dd>
+        </div>
+        <div>
+          <dt>仓间 PH3 浓度</dt>
+          <dd>0.00 ppm</dd>
+        </div>
+        <div class="house-details__wide">
+          <dt>采集时间</dt>
+          <dd>2026-09-20 10:00:00</dd>
+        </div>
+      </dl>
+
+      <div class="house-actions">
+        <button type="button" @click="openHouseView('/granary3d')">查看温度图</button>
+        <button type="button" @click="openHouseView('/humidity3d')">查看湿度图</button>
+        <button type="button" @click="openHouseView('/gas3d')">查看气体浓度图</button>
+        <button type="button" @click="openHouseView('/data')">查看数据</button>
+      </div>
+    </aside>
+
+    <div v-else class="select-hint">点击仓房查看信息</div>
   </main>
 </template>
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 const sceneContainer = ref<HTMLDivElement>()
+const router = useRouter()
+const configuredHouseNumbers = (import.meta.env.ENV_PANORAMA_HOUSE_NUMBERS || '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean)
+const selectedHouse = ref<{ modelIndex: number; houseNo: string }>()
+const raycaster = new THREE.Raycaster()
+const pointer = new THREE.Vector2()
+let pointerStart = { x: 0, y: 0 }
 
 let renderer: THREE.WebGLRenderer | undefined
 let scene: THREE.Scene | undefined
 let camera: THREE.PerspectiveCamera | undefined
 let controls: OrbitControls | undefined
 let animationFrame = 0
+
+function selectHouse(modelIndex: number) {
+  selectedHouse.value = {
+    modelIndex,
+    houseNo: configuredHouseNumbers[modelIndex - 1] || '',
+  }
+}
+
+function openHouseView(path: string) {
+  if (!selectedHouse.value) return
+  router.push({
+    path,
+    query: {
+      houseNo: selectedHouse.value.houseNo,
+      houseName: `仓房 ${selectedHouse.value.houseNo}`,
+    },
+  })
+}
+
+function createHouseLabel(modelIndex: number) {
+  const houseNo = configuredHouseNumbers[modelIndex - 1]
+  if (!houseNo) return
+  const canvas = document.createElement('canvas')
+  canvas.width = 256
+  canvas.height = 96
+  const context = canvas.getContext('2d')!
+
+  context.fillStyle = 'rgba(20, 42, 50, 0.9)'
+  context.strokeStyle = 'rgba(205, 229, 232, 0.72)'
+  context.lineWidth = 3
+  context.beginPath()
+  context.roundRect(3, 3, 250, 90, 16)
+  context.fill()
+  context.stroke()
+  context.fillStyle = '#f2f7f6'
+  context.font = '600 38px sans-serif'
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  context.fillText(houseNo, 128, 49)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+  })
+  const label = new THREE.Sprite(material)
+  label.scale.set(4.4, 1.65, 1)
+  label.renderOrder = 20
+  label.userData.houseNumber = modelIndex
+  return label
+}
+
+function addHouseLabel(
+  parent: THREE.Object3D,
+  modelIndex: number,
+  x: number,
+  y: number,
+  z = 0,
+) {
+  const label = createHouseLabel(modelIndex)
+  if (!label) return
+  label.position.set(x, y, z)
+  parent.add(label)
+}
 
 const SITE_WIDTH = 116
 const SITE_DEPTH = 64
@@ -116,6 +238,11 @@ function createCombinedHouse(count: number, startNumber: number, roofColor = ROO
   const wallMaterial = new THREE.MeshStandardMaterial({ color: '#cbd9df', roughness: 0.72 })
   const trimMaterial = new THREE.MeshStandardMaterial({ color: '#6f858f', roughness: 0.6 })
   const roofMaterial = new THREE.MeshStandardMaterial({ color: roofColor, roughness: 0.78 })
+  const hitMaterial = new THREE.MeshBasicMaterial({
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  })
 
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(totalWidth, HOUSE_HEIGHT, HOUSE_DEPTH),
@@ -140,6 +267,15 @@ function createCombinedHouse(count: number, startNumber: number, roofColor = ROO
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.26, 0.2), trimMaterial)
     lintel.position.set(centerX, 2.45, HOUSE_DEPTH / 2 + 0.11)
     house.add(lintel)
+
+    const hitArea = new THREE.Mesh(
+      new THREE.BoxGeometry(bayWidth - 0.12, HOUSE_HEIGHT + 0.6, HOUSE_DEPTH + 0.5),
+      hitMaterial,
+    )
+    hitArea.position.set(centerX, HOUSE_HEIGHT / 2, 0)
+    hitArea.userData.houseNumber = startNumber + bay
+    house.add(hitArea)
+    addHouseLabel(house, startNumber + bay, centerX, HOUSE_HEIGHT + 1.25)
 
     if (bay < count - 1) {
       const divider = new THREE.Mesh(
@@ -307,6 +443,7 @@ function addWarehouseRow(
       const house = createHouse(houseNumber - startNumber, squareRoofColor(houseNumber))
       house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, z)
       house.userData.houseNumber = houseNumber
+      addHouseLabel(house, houseNumber, 0, HOUSE_HEIGHT + 1.25)
       houses.add(house)
       cursor += HOUSE_WIDTH
       houseNumber += 1
@@ -351,6 +488,7 @@ function addThirdArea() {
         row === 0 ? 4.5 : 11.5,
       )
       silo.userData.houseNumber = houseNumber
+      addHouseLabel(silo, houseNumber, 0, SILO_HEIGHT + 1.15)
       area.add(silo)
       houseNumber += 1
     }
@@ -361,6 +499,7 @@ function addThirdArea() {
     const house = createHouse(4 + i, squareRoofColor(houseNumber))
     house.position.set(cursor + HOUSE_WIDTH / 2, 0.18, THIRD_AREA_Z)
     house.userData.houseNumber = houseNumber
+    addHouseLabel(house, houseNumber, 0, HOUSE_HEIGHT + 1.25)
     area.add(house)
     cursor += HOUSE_WIDTH + (i === 0 ? HOUSE_GAP : 0)
     houseNumber += 1
@@ -372,6 +511,7 @@ function addThirdArea() {
     const silo = createSilo()
     silo.position.set(cursor + SILO_DIAMETER / 2, 0.18, THIRD_AREA_Z)
     silo.userData.houseNumber = houseNumber
+    addHouseLabel(silo, houseNumber, 0, SILO_HEIGHT + 1.15)
     area.add(silo)
     cursor += SILO_DIAMETER + (i < 3 ? HOUSE_GAP : 0)
     houseNumber += 1
@@ -388,6 +528,7 @@ function addThirdArea() {
     const silo = createSilo()
     silo.position.set(cursor + SILO_DIAMETER / 2, 0.18, THIRD_AREA_Z)
     silo.userData.houseNumber = houseNumber
+    addHouseLabel(silo, houseNumber, 0, SILO_HEIGHT + 1.15)
     area.add(silo)
     cursor += SILO_DIAMETER + (i < 3 ? HOUSE_GAP : 0)
     houseNumber += 1
@@ -440,6 +581,7 @@ function addFourthArea(linkedBuildingX: number) {
       FOURTH_TOWER_Z,
     )
     silo.userData.houseNumber = houseNumber
+    addHouseLabel(silo, houseNumber, 0, 4.25)
     area.add(silo)
     cursor += SMALL_SILO_DIAMETER + (column < columnsPerSide - 1 ? siloGapX : 0)
     houseNumber += 1
@@ -455,6 +597,7 @@ function addFourthArea(linkedBuildingX: number) {
     const silo = createSmallSilo()
     silo.position.set(cursor + SMALL_SILO_DIAMETER / 2, 0.2, FOURTH_TOWER_Z)
     silo.userData.houseNumber = houseNumber
+    addHouseLabel(silo, houseNumber, 0, 4.25)
     area.add(silo)
     cursor += SMALL_SILO_DIAMETER + (column < columnsPerSide - 1 ? siloGapX : 0)
     houseNumber += 1
@@ -517,6 +660,34 @@ function addSite() {
   }
 }
 
+function handleCanvasPointerDown(event: PointerEvent) {
+  pointerStart = { x: event.clientX, y: event.clientY }
+}
+
+function handleCanvasPointerUp(event: PointerEvent) {
+  if (!renderer || !scene || !camera) return
+  const moved = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y)
+  if (moved > 6) return
+
+  const rect = renderer.domElement.getBoundingClientRect()
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+  raycaster.setFromCamera(pointer, camera)
+
+  const intersections = raycaster.intersectObjects(scene.children, true)
+  for (const intersection of intersections) {
+    let object: THREE.Object3D | null = intersection.object
+    while (object && object !== scene) {
+      const houseNumber = object.userData.houseNumber
+      if (typeof houseNumber === 'number') {
+        selectHouse(houseNumber)
+        return
+      }
+      object = object.parent
+    }
+  }
+}
+
 function initScene() {
   const container = sceneContainer.value
   if (!container) return
@@ -535,6 +706,8 @@ function initScene() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   renderer.outputColorSpace = THREE.SRGBColorSpace
   container.appendChild(renderer.domElement)
+  renderer.domElement.addEventListener('pointerdown', handleCanvasPointerDown)
+  renderer.domElement.addEventListener('pointerup', handleCanvasPointerUp)
 
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
@@ -581,8 +754,15 @@ onMounted(() => {
 onBeforeUnmount(() => {
   cancelAnimationFrame(animationFrame)
   window.removeEventListener('resize', handleResize)
+  renderer?.domElement.removeEventListener('pointerdown', handleCanvasPointerDown)
+  renderer?.domElement.removeEventListener('pointerup', handleCanvasPointerUp)
   controls?.dispose()
   scene?.traverse((object) => {
+    if (object instanceof THREE.Sprite) {
+      object.material.map?.dispose()
+      object.material.dispose()
+      return
+    }
     if (!(object instanceof THREE.Mesh)) return
     object.geometry.dispose()
     const materials = Array.isArray(object.material) ? object.material : [object.material]
@@ -605,6 +785,14 @@ onBeforeUnmount(() => {
 .scene-container {
   width: 100%;
   height: 100%;
+}
+
+.scene-container :deep(canvas) {
+  cursor: grab;
+}
+
+.scene-container :deep(canvas:active) {
+  cursor: grabbing;
 }
 
 .page-heading {
@@ -642,5 +830,143 @@ onBeforeUnmount(() => {
   margin-top: 4px;
   color: #cfdbd7;
   font-size: 12px;
+}
+
+.house-panel {
+  position: absolute;
+  top: 28px;
+  right: 30px;
+  width: min(380px, calc(100vw - 32px));
+  padding: 20px;
+  color: #eef5f5;
+  background: linear-gradient(145deg, rgb(23 43 50 / 94%), rgb(31 57 65 / 90%));
+  border: 1px solid rgb(184 211 214 / 28%);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgb(12 27 32 / 28%);
+  backdrop-filter: blur(12px);
+}
+
+.house-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgb(207 225 224 / 16%);
+}
+
+.house-panel__header p,
+.house-panel__header h2 {
+  margin: 0;
+}
+
+.house-panel__header p {
+  color: #78b5d7;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+
+.house-panel__header h2 {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.status-dot {
+  padding: 4px 8px;
+  color: #a8c7d5;
+  background: rgb(76 124 143 / 20%);
+  border: 1px solid rgb(118 170 191 / 24%);
+  border-radius: 999px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.house-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 14px 0;
+  overflow: hidden;
+  background: rgb(195 218 220 / 12%);
+  border: 1px solid rgb(195 218 220 / 12%);
+  border-radius: 9px;
+}
+
+.house-details > div {
+  padding: 11px 12px;
+  background: rgb(29 52 59 / 96%);
+}
+
+.house-details__wide {
+  grid-column: 1 / -1;
+}
+
+.house-details dt {
+  margin-bottom: 4px;
+  color: #91a9ae;
+  font-size: 11px;
+}
+
+.house-details dd {
+  margin: 0;
+  color: #f2f6f5;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.house-details dd.status-safe {
+  color: #84d3a3;
+}
+
+.house-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.house-actions button {
+  min-height: 38px;
+  padding: 8px 10px;
+  color: #dcebef;
+  background: rgb(55 112 143 / 28%);
+  border: 1px solid rgb(91 157 191 / 38%);
+  border-radius: 7px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.house-actions button:hover {
+  background: rgb(55 126 164 / 48%);
+  border-color: rgb(121 188 222 / 64%);
+  transform: translateY(-1px);
+}
+
+.select-hint {
+  position: absolute;
+  right: 30px;
+  bottom: 26px;
+  padding: 9px 13px;
+  color: #e5eeee;
+  background: rgb(25 47 54 / 76%);
+  border: 1px solid rgb(207 225 224 / 18%);
+  border-radius: 999px;
+  font-size: 12px;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 720px) {
+  .page-heading {
+    top: 16px;
+    left: 16px;
+  }
+
+  .house-panel {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+  }
 }
 </style>
