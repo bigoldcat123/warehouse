@@ -1,7 +1,6 @@
 package com.example.demo.system.service.impl;
 
 import com.example.demo.common.Utils;
-import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.DTO.DataDetailDTO;
 import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.Data;
@@ -52,39 +51,6 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
     /** 湿度随机模拟范围（%） */
     private static final double HUMIDITY_MIN = 20.0;
     private static final double HUMIDITY_MAX = 90.0;
-
-    @Override
-    public List<DataDTO> parseDTO(List<Data> list) {
-        List<DataDTO> dataDTOList = new ArrayList<>();
-        list.forEach(data -> {
-            DataDTO dataDTO = new DataDTO();
-            House house = houseService.getHouseByNo(data.getHouseNo());
-            dataDTO.setId(data.getId());
-            dataDTO.setHouseNo(data.getHouseNo());
-            dataDTO.setInTemperature(Utils.is_valid_temperature(data.getInTemperature()) ? data.getInTemperature().toString() : "");
-            dataDTO.setInHumidity(Utils.is_valid_humidity(data.getInHumidity())? data.getInHumidity().toString() : "");
-            dataDTO.setTestDate(data.getTestDate());
-            String[] temps_1 = data.getTemperatureSet().split("#");
-            String[] temps=get_temps(temps_1,house);
-            dataDTO.setHouse_type(house.getHouseType());
-            List<List<List<String>>> layers = parseLayers(temps, house);
-            dataDTO.setHouseName(house.getHouseName());
-            dataDTO.setLayerTemplate(layers);
-            dataDTO.setTemperatures(List.of(temps));
-            dataDTOList.add(dataDTO);
-//            if(house==null){
-////                dataDTO.setHouse_type("无此仓房");
-////                dataDTO.setHouseName("无此仓房");
-////                dataDTO.setTemperatures(List.of(temps));
-////                dataDTO.setLayerTemplate(null);
-////                dataDTOList.add(dataDTO);
-//            }else {
-//
-//            }
-        });
-
-        return dataDTOList;
-    }
 
     @Override
     public DataDetailDTO getDataDetail(Integer id) {

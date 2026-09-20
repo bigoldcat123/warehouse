@@ -4,17 +4,15 @@ const preFix = 'data'
 export type type_Data = {
             id : number,
             HouseNo : string,
-            houseNo : string,// 与上面的HouseNo 是同一个东西
+             houseNo : string,// 与上面的HouseNo 是同一个东西
              houseName : string,
              house_type:string,
-             inTemperature : number,
-             inHumidity : number,
-             maxTemperature : number,
-             minTemperature : number,
-             avgTemperature : number,
              layerMax : string,
              layerMin : string,
              layerAvg : string,
+             housePh3 : string,
+             oAir : number,
+             co2Air : number,
              testDate : string
 }
 

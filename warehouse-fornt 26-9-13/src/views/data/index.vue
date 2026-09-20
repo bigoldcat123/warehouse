@@ -39,14 +39,12 @@
                     <th class="text-left">仓房编号</th>
                     <th class="text-left">仓房名</th>
                     <th class="text-left">仓房类型</th>
-                    <th class="text-center">仓温</th>
-                    <th class="text-center">仓湿</th>
-                    <th class="text-center">高温</th>
-                    <th class="text-center">低温</th>
-                    <th class="text-center">均温</th>
-                    <th class="text-center">层高</th>
-                    <th class="text-center">层底</th>
-                    <th class="text-center">层均</th>
+                    <th class="text-center">仓间 PH3</th>
+                    <th class="text-center">仓间 O₂</th>
+                    <th class="text-center">仓间 CO₂</th>
+                    <th class="text-center">层 PH3 最高</th>
+                    <th class="text-center">层 PH3 最低</th>
+                    <th class="text-center">层 PH3 平均</th>
                     <th class="text-left">时间</th>
                     <th class="text-center">操作</th>
                 </tr>
@@ -59,19 +57,13 @@
                         <span class="type-tag">{{ row.house_type || '--' }}</span>
                     </td>
                     <td class="text-center">
-                        <span class="temp-badge temp-badge--orange">{{ row.inTemperature != null ? row.inTemperature + '°C' : '--' }}</span>
+                        <span class="temp-badge temp-badge--orange">{{ row.housePh3 != null ? row.housePh3 + ' ppm' : '--' }}</span>
                     </td>
                     <td class="text-center">
-                        <span class="temp-badge temp-badge--cyan">{{ row.inHumidity != null ? row.inHumidity + '%' : '--' }}</span>
+                        <span class="temp-badge temp-badge--green">{{ row.oAir != null ? row.oAir + '%' : '--' }}</span>
                     </td>
                     <td class="text-center">
-                        <span class="temp-badge temp-badge--red">{{ row.maxTemperature != null ? row.maxTemperature + '°C' : '--' }}</span>
-                    </td>
-                    <td class="text-center">
-                        <span class="temp-badge temp-badge--blue">{{ row.minTemperature != null ? row.minTemperature + '°C' : '--' }}</span>
-                    </td>
-                    <td class="text-center">
-                        <span class="temp-badge temp-badge--green">{{ row.avgTemperature != null ? row.avgTemperature + '°C' : '--' }}</span>
+                        <span class="temp-badge temp-badge--cyan">{{ row.co2Air != null ? row.co2Air + ' ppm' : '--' }}</span>
                     </td>
                     <td class="text-center">
                         <span class="layer-badge">{{ row.layerMax || '--' }}</span>
@@ -87,8 +79,7 @@
                         <button class="action-btn action-btn--primary" @click="() => $router.push({
                             path: '/data/detail',
                             query: {
-                                id: row.id, maxTemperature: row.maxTemperature, minTemperature: row.minTemperature,
-                                avgTemperature: row.avgTemperature, layerAvg: row.layerAvg, house_type: row.house_type
+                                id: row.id, layerAvg: row.layerAvg, house_type: row.house_type
                             }
                         })">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +90,7 @@
                     </td>
                 </tr>
                 <tr v-if="!list?.records || list.records.length === 0">
-                    <td colspan="13" class="text-center text-[#b0d0f0] py-10">
+                    <td colspan="11" class="text-center text-[#b0d0f0] py-10">
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>

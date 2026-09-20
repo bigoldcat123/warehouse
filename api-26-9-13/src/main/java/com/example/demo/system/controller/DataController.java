@@ -7,25 +7,19 @@ import com.example.demo.common.R;
 import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.DTO.DataDetailDTO;
 import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
-import com.example.demo.system.entity.PO.Data;
 import com.example.demo.system.entity.PO.House;
+import com.example.demo.system.entity.PO.ReceiverData;
 import com.example.demo.system.entity.PO.Warehouse;
 import com.example.demo.system.entity.query.DataQuery;
 import com.example.demo.system.service.IDataService;
 import com.example.demo.system.service.IHouseService;
+import com.example.demo.system.service.IReceiverDataService;
 import com.example.demo.system.service.IWarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
-
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * <p>
@@ -44,13 +38,15 @@ public class DataController {
     @Autowired
     IDataService dataService;
     @Autowired
+    IReceiverDataService receiverDataService;
+    @Autowired
     IHouseService houseService;
     @Autowired
     IWarehouseService warehouseService;
     @PostMapping("{current}/{size}")
     public R data(@RequestBody(required = false) DataQuery query,@PathVariable Integer current,@PathVariable Integer size) {
 
-        QueryWrapper<Data> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<ReceiverData> queryWrapper = new QueryWrapper<>();
         QueryWrapper<House> houseQueryWrapper = new QueryWrapper<>();
         CurrentUser details = (CurrentUser) SecurityContextHolder.getContext().getAuthentication().getDetails();
 
@@ -101,8 +97,9 @@ public class DataController {
             }
         }
         queryWrapper.in("HouseNo",houseService.list().stream().map(House::getHouseNo).toList());
-        Page<Data> page = dataService.page(new Page<>(current, size), queryWrapper);
-        List<DataDTO> list_dto = dataService.parseDTO(page.getRecords());
+        queryWrapper.orderByDesc("TestDate");
+        Page<ReceiverData> page = receiverDataService.page(new Page<>(current, size), queryWrapper);
+        List<DataDTO> list_dto = receiverDataService.parseDataDTO(page.getRecords());
         Page<DataDTO> dataDTOPage = new Page<>();
         dataDTOPage.setRecords(list_dto);
         dataDTOPage.setTotal(page.getTotal());

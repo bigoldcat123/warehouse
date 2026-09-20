@@ -1,9 +1,12 @@
 package com.example.demo.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.PO.ReceiverData;
 import com.example.demo.system.entity.PO.PointDefine;
+import com.example.demo.system.entity.PO.House;
 import com.example.demo.system.mapper.ReceiverDataMapper;
+import com.example.demo.system.service.IHouseService;
 import com.example.demo.system.service.IPointDefineService;
 import com.example.demo.system.service.IReceiverDataService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -32,6 +36,13 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
 
     @Autowired
     IPointDefineService pointDefineService;
+    @Autowired
+    IHouseService houseService;
+
+    @Override
+    public List<DataDTO> parseDataDTO(List<ReceiverData> records) {
+        return records.stream().map(this::toDataDTO).toList();
+    }
 
     @Override
     public List<String> getTestDates(String houseNo) {
@@ -97,6 +108,89 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
         if (houseNo == null || houseNo.isBlank()) {
             throw new IllegalArgumentException("仓房编号不能为空");
         }
+    }
+
+    private DataDTO toDataDTO(ReceiverData receiverData) {
+        DataDTO dto = new DataDTO();
+        dto.setId(receiverData.getId());
+        dto.setHouseNo(receiverData.getHouseNo());
+        dto.setTestDate(receiverData.getTestDate());
+        dto.setOAir(receiverData.getOAir());
+        dto.setCo2Air(receiverData.getCo2Air());
+
+        House house = houseService.getHouseByNo(receiverData.getHouseNo());
+        if (house != null) {
+            dto.setHouseName(house.getHouseName());
+            dto.setHouse_type(house.getHouseType());
+        }
+
+        String rawPh3 = receiverData.getTemperatureSet();
+        if (rawPh3 == null || rawPh3.isBlank()) {
+            setIncompleteLayerStats(dto);
+            return dto;
+        }
+        String[] values = rawPh3.trim().split("\\s*,\\s*");
+        dto.setHousePh3(values[values.length - 1]);
+
+        PointDefine pointDefine = pointDefineService.getById(receiverData.getHouseNo());
+        Integer stringCount = tryParseDimension(pointDefine == null ? null : pointDefine.getLength());
+        Integer layerCount = tryParseDimension(pointDefine == null ? null : pointDefine.getWidth());
+        if (stringCount == null || layerCount == null) {
+            setIncompleteLayerStats(dto);
+            return dto;
+        }
+        setPh3LayerStats(dto, values, stringCount, layerCount);
+        return dto;
+    }
+
+    private void setPh3LayerStats(DataDTO dto, String[] values, int stringCount, int layerCount) {
+        DecimalFormat decimalFormat = new DecimalFormat("#.0");
+        StringBuilder layerMax = new StringBuilder();
+        StringBuilder layerMin = new StringBuilder();
+        StringBuilder layerAvg = new StringBuilder();
+        int sensorValueCount = Math.min(stringCount * layerCount, Math.max(0, values.length - 1));
+
+        for (int layerIndex = 0; layerIndex < layerCount; layerIndex++) {
+            List<Double> layerValues = new ArrayList<>();
+            for (int stringIndex = 0; stringIndex < stringCount; stringIndex++) {
+                int valueIndex = stringIndex * layerCount + layerIndex;
+                if (valueIndex >= sensorValueCount) continue;
+                try {
+                    layerValues.add(Double.parseDouble(values[valueIndex]));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            if (layerValues.isEmpty()) {
+                layerMax.append("-- |");
+                layerMin.append("-- |");
+                layerAvg.append("-- |");
+                continue;
+            }
+            double max = layerValues.stream().mapToDouble(Double::doubleValue).max().orElse(0);
+            double min = layerValues.stream().mapToDouble(Double::doubleValue).min().orElse(0);
+            double avg = layerValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            layerMax.append(decimalFormat.format(max)).append(" |");
+            layerMin.append(decimalFormat.format(min)).append(" |");
+            layerAvg.append(decimalFormat.format(avg)).append(" |");
+        }
+        dto.setLayerMax(layerMax.toString());
+        dto.setLayerMin(layerMin.toString());
+        dto.setLayerAvg(layerAvg.toString());
+    }
+
+    private Integer tryParseDimension(String value) {
+        try {
+            int dimension = Integer.parseInt(value);
+            return dimension > 0 ? dimension : null;
+        } catch (NumberFormatException | NullPointerException e) {
+            return null;
+        }
+    }
+
+    private void setIncompleteLayerStats(DataDTO dto) {
+        dto.setLayerMax("数据不全");
+        dto.setLayerMin("数据不全");
+        dto.setLayerAvg("数据不全");
     }
 
     private int parseDimension(String value, String fieldName) {

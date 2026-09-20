@@ -1,12 +1,10 @@
 package com.example.demo.system.entity.DTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 public class DataDTO {
@@ -16,62 +14,38 @@ public class DataDTO {
 
     private String house_type;
 
-    private String inTemperature;
-    private String inHumidity;
-    private String maxTemperature;
-    private String minTemperature;
-    private String avgTemperature;
+    /**
+     * 各层 PH3 最大值，格式保持为“值 |值 |”。
+     */
     private String layerMax;
+
+    /**
+     * 各层 PH3 最小值，格式保持为“值 |值 |”。
+     */
     private String layerMin;
+
+    /**
+     * 各层 PH3 平均值，格式保持为“值 |值 |”。
+     */
     private String layerAvg;
+
+    /**
+     * 仓间 PH3，取 TemperatureSet 的最后一个数字。
+     */
+    private String housePh3;
+
+    /**
+     * 仓间氧气浓度。
+     */
+    @JsonProperty("oAir")
+    private Integer oAir;
+
+    /**
+     * 仓间二氧化碳浓度。
+     */
+    @JsonProperty("co2Air")
+    private Integer co2Air;
+
     @JsonFormat(pattern = "yy-MM-dd")
     private LocalDateTime testDate;
-
-    public void setTemperatures(List<String> temps) {
-        DecimalFormat df = new DecimalFormat("#.0");
-        List<Float> list = new ArrayList<>(temps.stream().map(Float::parseFloat).filter(x -> x > -40.0 && x < 80.0).toList());
-        list.sort(Float::compareTo);
-
-        if (!list.isEmpty()) {
-            setMinTemperature((df.format(list.get(0))));
-            setMaxTemperature((df.format(list.get(list.size() - 1))));
-        }
-
-        Float s = 0f;
-        for (Float t : list) {
-            s += (t);
-        }
-        setAvgTemperature(df.format(s / list.size()));
-    }
-
-    public static void main(String[] args) {
-
-        StringBuilder builder = new StringBuilder();
-        for (int i = 1; i < 289; i++) {
-            builder.append(i).append(",");
-        }
-        System.out.println(builder.toString());
-    }
-    public void setLayerTemplate(List<List<List<String>>> lists) {
-        if(lists == null) {
-            setLayerMax("数据不全");
-            setLayerMin("数据不全");
-            setLayerAvg("数据不全");
-            return;
-        }
-        StringBuilder max = new StringBuilder();
-        StringBuilder min = new StringBuilder();
-        StringBuilder avg = new StringBuilder();
-        for (List<List<String> >list : lists) {
-            List<String> list1 = new ArrayList<>();
-            list.forEach(list1::addAll);
-            setTemperatures(list1);
-            max.append(maxTemperature).append(" |");
-            min.append(minTemperature).append(" |");
-            avg.append(avgTemperature).append(" |");
-        }
-        setLayerMax(max.toString());
-        setLayerMin(min.toString());
-        setLayerAvg(avg.toString());
-    }
 }
