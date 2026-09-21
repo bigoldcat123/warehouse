@@ -25,7 +25,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @ToString
-@TableName("warehouse_settings")
+@TableName("caozuo_set")
 public class WarehouseSettings implements Serializable {
 
     private static final long serialVersionUID = 1L;

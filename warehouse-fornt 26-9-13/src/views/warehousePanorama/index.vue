@@ -4,7 +4,7 @@
     <header class="page-heading">
       <p>WAREHOUSE PANORAMA</p>
       <h1>粮库全景图</h1>
-      <span>第四区域 · 凹形建筑与 10 个小圆柱仓</span>
+      <span class="warehouse-name">当前仓库：{{ currentWarehouseName }}</span>
     </header>
     <InfoSidePanel />
   </main>
@@ -16,9 +16,13 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import InfoSidePanel from '@/features/warehousePanorama/components/InfoSidePanel'
 import { useWarehousePanoramaStore } from '@/features/warehousePanorama/store'
+import { useCurrentUserStore } from '@/stores/currentUser'
+import warehouseApi from '@/api/warehouse'
 
 const sceneContainer = ref<HTMLDivElement>()
 const panoramaStore = useWarehousePanoramaStore()
+const currentUserStore = useCurrentUserStore()
+const currentWarehouseName = ref('加载中...')
 const raycaster = new THREE.Raycaster()
 const pointer = new THREE.Vector2()
 let pointerStart = { x: 0, y: 0 }
@@ -28,6 +32,28 @@ let scene: THREE.Scene | undefined
 let camera: THREE.PerspectiveCamera | undefined
 let controls: OrbitControls | undefined
 let animationFrame = 0
+
+async function loadCurrentWarehouseName() {
+  const companyID = currentUserStore.getUserDetail()?.companyID
+  if (companyID === -1) {
+    currentWarehouseName.value = '总公司'
+    return
+  }
+  if (companyID === undefined || companyID === null) {
+    currentWarehouseName.value = '--'
+    return
+  }
+  try {
+    const response = await warehouseApi.belongKv()
+    const warehouses = response.data?.value as Array<{ key: number; value: string }> | undefined
+    currentWarehouseName.value = warehouses?.find(item => Number(item.key) === Number(companyID))?.value
+      || `仓库 ${companyID}`
+  } catch {
+    currentWarehouseName.value = `仓库 ${companyID}`
+  }
+}
+
+loadCurrentWarehouseName()
 
 function createHouseLabel(modelIndex: number) {
   const houseNo = panoramaStore.getHouseNo(modelIndex)
@@ -763,6 +789,12 @@ onBeforeUnmount(() => {
   margin-top: 4px;
   color: #cfdbd7;
   font-size: 12px;
+}
+
+.page-heading .warehouse-name {
+  color: #e7d19e;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 @media (max-width: 720px) {
