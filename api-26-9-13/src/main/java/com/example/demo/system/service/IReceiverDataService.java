@@ -3,6 +3,7 @@ package com.example.demo.system.service;
 import com.example.demo.system.entity.PO.ReceiverData;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.system.entity.DTO.DataDTO;
+import com.example.demo.system.entity.DTO.DataDetailDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,11 @@ public interface IReceiverDataService extends IService<ReceiverData> {
      * 将采集记录转换为数据列表 DTO，并计算各层 PH3 统计值。
      */
     List<DataDTO> parseDataDTO(List<ReceiverData> records);
+
+    /**
+     * 根据采集记录 ID 获取详情。
+     */
+    DataDetailDTO getDataDetail(Integer id);
 
     /**
      * 查询仓房所有 TestDate，去重后按时间升序排列。

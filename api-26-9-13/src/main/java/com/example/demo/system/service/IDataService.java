@@ -1,6 +1,5 @@
 package com.example.demo.system.service;
 
-import com.example.demo.system.entity.DTO.DataDetailDTO;
 import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.Data;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -18,8 +17,6 @@ import java.util.Map;
  * @since 2024-07-28
  */
 public interface IDataService extends IService<Data> {
-
-    DataDetailDTO getDataDetail(Integer id);
 
     /**
      * 根据粮房编号和指定点坐标，返回该点的温度记录数组

@@ -17,28 +17,19 @@ export type type_Data = {
 }
 
 export type type_Data_Detail = {
-       houseNo:string,
-
-       houseName:string,
-
-       wareHouseName:string,
-
-       breed:string;
-
-       water:string;
-
-       keeper:string;
-
-       inTemperature:string;
-
-       outTemperature:string;
-
-       inHumidity:string;
-
-       outHumidity:string;
-       entryTime:string;
-       list:Array<Array<Array<string>>>,
-       testTime:string
+       houseNo: string,
+       houseName: string,
+       wareHouseName: string,
+       grainName: string | null,
+       grainWater: number | null,
+       dateOfIn: string | null,
+       keeperName: string | null,
+       housePh3: string | null,
+       oAir: number | null,
+       co2Air: number | null,
+       testTime: string,
+       ph3Matrix: number[][],
+       temperatureMatrix: number[][]
 }
 
 // 三维温度数组: key 为采集时间(ISO-8601, 升序), value 为 [层 z][行 x][列 y] 的字符串温度(1 位小数)

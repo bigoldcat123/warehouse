@@ -2,13 +2,18 @@ package com.example.demo.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.system.entity.DTO.DataDTO;
+import com.example.demo.system.entity.DTO.DataDetailDTO;
+import com.example.demo.system.entity.PO.HouseInfor;
 import com.example.demo.system.entity.PO.ReceiverData;
 import com.example.demo.system.entity.PO.PointDefine;
 import com.example.demo.system.entity.PO.House;
+import com.example.demo.system.entity.PO.Warehouse;
 import com.example.demo.system.mapper.ReceiverDataMapper;
+import com.example.demo.system.service.IHouseInforService;
 import com.example.demo.system.service.IHouseService;
 import com.example.demo.system.service.IPointDefineService;
 import com.example.demo.system.service.IReceiverDataService;
+import com.example.demo.system.service.IWarehouseService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,10 +43,58 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
     IPointDefineService pointDefineService;
     @Autowired
     IHouseService houseService;
+    @Autowired
+    IHouseInforService houseInforService;
+    @Autowired
+    IWarehouseService warehouseService;
 
     @Override
     public List<DataDTO> parseDataDTO(List<ReceiverData> records) {
         return records.stream().map(this::toDataDTO).toList();
+    }
+
+    @Override
+    public DataDetailDTO getDataDetail(Integer id) {
+        ReceiverData receiverData = getById(id);
+        if (receiverData == null) {
+            return null;
+        }
+
+        DataDetailDTO dto = new DataDetailDTO();
+        dto.setHouseNo(receiverData.getHouseNo());
+        dto.setTestTime(receiverData.getTestDate());
+        dto.setOAir(receiverData.getOAir());
+        dto.setCo2Air(receiverData.getCo2Air());
+        dto.setHousePh3(getLastValue(receiverData.getTemperatureSet()));
+
+        House house = houseService.getHouseByNo(receiverData.getHouseNo());
+        if (house != null) {
+            dto.setHouseName(house.getHouseName());
+            Warehouse warehouse = warehouseService.getById(house.getWarehouseID());
+            if (warehouse != null) {
+                dto.setWareHouseName(warehouse.getWarehouseName());
+            }
+        }
+
+        HouseInfor houseInfor = houseInforService.getLatestByHouseNo(receiverData.getHouseNo());
+        if (houseInfor != null) {
+            dto.setGrainName(houseInfor.getGrainName());
+            dto.setGrainWater(houseInfor.getGrainWater());
+            dto.setDateOfIn(houseInfor.getDateOfIn());
+            dto.setKeeperName(houseInfor.getKeeperName());
+        }
+
+        PointDefine pointDefine = pointDefineService.getById(receiverData.getHouseNo());
+        if (pointDefine == null) {
+            throw new IllegalArgumentException("没有该仓房的测点定义");
+        }
+        int stringCount = parseDimension(pointDefine.getLength(), "Length");
+        int layerCount = parseDimension(pointDefine.getWidth(), "Width");
+        dto.setPh3Matrix(parseOptionalMatrix(
+                receiverData.getTemperatureSet(), stringCount, layerCount, "PH3"));
+        dto.setTemperatureMatrix(parseOptionalMatrix(
+                receiverData.getTempData(), stringCount, layerCount, "温度"));
+        return dto;
     }
 
     @Override
@@ -108,6 +161,25 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
         if (houseNo == null || houseNo.isBlank()) {
             throw new IllegalArgumentException("仓房编号不能为空");
         }
+    }
+
+    private String getLastValue(String rawData) {
+        if (rawData == null || rawData.isBlank()) {
+            return null;
+        }
+        String[] values = rawData.trim().split("\\s*,\\s*");
+        return values[values.length - 1];
+    }
+
+    private List<List<Double>> parseOptionalMatrix(
+            String rawData,
+            int stringCount,
+            int layerCount,
+            String dataName) {
+        if (rawData == null || rawData.isBlank()) {
+            return List.of();
+        }
+        return parseMatrix(rawData, stringCount, layerCount, dataName);
     }
 
     private DataDTO toDataDTO(ReceiverData receiverData) {

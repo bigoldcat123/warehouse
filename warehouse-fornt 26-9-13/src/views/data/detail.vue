@@ -1,287 +1,221 @@
 <template>
     <div class="detail-page">
-        <!-- 标题栏 -->
         <div class="detail-header">
             <svg class="w-6 h-6 text-[#64b5f6] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-white text-xl font-bold">
-                {{ detail?.wareHouseName }}-{{ detail?.houseNo }}({{ detail?.houseName }})
+            <span class="detail-title">
+                {{ detail?.wareHouseName || '--' }}-{{ detail?.houseNo || '--' }}({{ detail?.houseName || '--' }})
             </span>
-            <button class="back-btn" @click="$router.go(-1)">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                返回
-            </button>
+            <button class="back-btn" @click="$router.go(-1)">返回</button>
         </div>
 
-        <!-- 信息标签区 -->
-        <div class="info-tags">
-            <div class="info-tag">
-                <span class="info-tag__label">品种</span>
-                <span class="info-tag__value">{{ detail?.breed || '--' }}</span>
-            </div>
-            <div class="info-tag">
-                <span class="info-tag__label">水分</span>
-                <span class="info-tag__value">{{ detail?.water || '--' }}</span>
-            </div>
-            <div class="info-tag">
-                <span class="info-tag__label">入库时间</span>
-                <span class="info-tag__value">{{ detail?.entryTime || '--' }}</span>
-            </div>
-            <div class="info-tag">
-                <span class="info-tag__label">保管</span>
-                <span class="info-tag__value">{{ detail?.keeper || '--' }}</span>
-            </div>
-            <div class="info-tag info-tag--temp">
-                <span class="info-tag__label">仓温</span>
-                <span class="info-tag__value">{{ detail?.inTemperature || '--' }}°C</span>
-            </div>
-            <div class="info-tag info-tag--temp">
-                <span class="info-tag__label">外温</span>
-                <span class="info-tag__value">{{ detail?.outTemperature || '--' }}°C</span>
-            </div>
-            <div class="info-tag info-tag--humidity">
-                <span class="info-tag__label">仓湿</span>
-                <span class="info-tag__value">{{ detail?.inHumidity || '--' }}%</span>
-            </div>
-            <div class="info-tag info-tag--humidity">
-                <span class="info-tag__label">外湿</span>
-                <span class="info-tag__value">{{ detail?.outHumidity || '--' }}%</span>
-            </div>
-            <div class="info-tag info-tag--hot">
-                <span class="info-tag__label">高温</span>
-                <span class="info-tag__value">{{ $route.query.maxTemperature || '--' }}°C</span>
-            </div>
-            <div class="info-tag info-tag--cold">
-                <span class="info-tag__label">低温</span>
-                <span class="info-tag__value">{{ $route.query.minTemperature || '--' }}°C</span>
-            </div>
-            <div class="info-tag info-tag--avg">
-                <span class="info-tag__label">均温</span>
-                <span class="info-tag__value">{{ $route.query.avgTemperature || '--' }}°C</span>
-            </div>
-            <div class="info-tag" v-for="(item, key) in ($route.query.layerAvg as unknown as string || '').split('|').filter(x => x)" :key="key" >
-                <span class="info-tag__label">{{ (key + 1) + ' 层' }}</span>
-                <span class="info-tag__value">{{ item }}</span>
-            </div>
-            <div class="info-tag info-tag--time">
-                <span class="info-tag__label">检测时间</span>
-                <span class="info-tag__value">{{ detail?.testTime || '--' }}</span>
+        <div v-if="detail" class="info-tags">
+            <div v-for="item in infoItems" :key="item.label" class="info-tag" :class="item.className">
+                <span class="info-tag__label">{{ item.label }}</span>
+                <span class="info-tag__value">{{ item.value }}</span>
             </div>
         </div>
 
-        <!-- 数据矩阵 -->
-        <div class="matrix-container">
-            <div class="matrix-item" v-for="(item, key) in detail?.list" :key="key">
-                <!-- 表头 -->
-                <div class="matrix-row matrix-row--header">
-                    <span class="matrix-cell matrix-cell--label">
-                        {{ route.query.house_type == '平房仓' ? (key + 1) + ' 层' : '点位' }}
-                    </span>
-                    <span class="matrix-cell matrix-cell--index" v-for="(i, kk) in item[0]" :key="kk">
-                        {{ kk + 1 }}
-                    </span>
+        <div v-if="detail" class="matrix-container">
+            <section v-for="table in matrixTables" :key="table.title" class="matrix-card">
+                <h2 class="matrix-title">{{ table.title }}</h2>
+                <div v-if="table.rows.length" class="table-scroll">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>串号 / 层数</th>
+                                <th v-for="layer in table.layerCount" :key="layer">第 {{ layer }} 层</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(row, stringIndex) in table.rows" :key="stringIndex">
+                                <th>第 {{ stringIndex + 1 }} 串</th>
+                                <td v-for="layer in table.layerCount" :key="layer">
+                                    {{ formatSensorValue(row[layer - 1], table.unit) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <!-- 数据行 -->
-                <div class="matrix-row" v-for="(x, keyx) in item" :key="keyx">
-                    <span class="matrix-cell matrix-cell--index">{{ keyx + 1 }}</span>
-                    <span class="matrix-cell matrix-cell--data" v-for="(y, yi) in x" :key="yi"
-                        :class="getTempClass(y)">
-                        {{ cal_temperature(y) }}
-                    </span>
-                </div>
-            </div>
+                <div v-else class="empty-data">暂无数据</div>
+            </section>
         </div>
     </div>
 </template>
-<script setup lang="ts">
-import data, { type type_Data_Detail } from '@/api/data';
-import { ref } from 'vue'
-import { useRoute } from 'vue-router';
-const route = useRoute()
 
+<script setup lang="ts">
+import data, { type type_Data_Detail } from '@/api/data'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 const detail = ref<type_Data_Detail>()
-data.getDetil(route.query.id as unknown as number).then(res => {
+
+data.getDetil(Number(route.query.id)).then(res => {
     detail.value = res.data.value
 })
 
-function cal_temperature(num: string) {
-    const n = Number(num)
-    if (n && n >= -40 && n <= 80) {
-        return num
-    } else {
-        return "-"
-    }
+const displayValue = (value: unknown, unit = '') => {
+    if (value === null || value === undefined || value === '') return '--'
+    return `${value}${unit}`
 }
 
-function is_ok(num: string) {
-    const n = Number(num)
-    if (n && n >= -40 && n <= 80) {
-        return true
-    } else {
-        return false
-    }
-}
+const infoItems = computed(() => [
+    { label: '品种', value: displayValue(detail.value?.grainName) },
+    { label: '水分', value: displayValue(detail.value?.grainWater, '%') },
+    { label: '入库时间', value: displayValue(detail.value?.dateOfIn) },
+    { label: '保管', value: displayValue(detail.value?.keeperName) },
+    { label: 'PH3', value: displayValue(detail.value?.housePh3, ' ppm'), className: 'info-tag--gas' },
+    { label: 'O₂', value: displayValue(detail.value?.oAir, '%'), className: 'info-tag--gas' },
+    { label: 'CO₂', value: displayValue(detail.value?.co2Air, ' ppm'), className: 'info-tag--gas' },
+    { label: '检测时间', value: displayValue(detail.value?.testTime), className: 'info-tag--time' }
+])
 
-function getTempClass(num: string) {
-    const n = Number(num)
-    if (!n || n < -40 || n > 80) return 'temp--invalid'
-    if (n >= 35) return 'temp--hot'
-    if (n <= 10) return 'temp--cold'
-    return 'temp--normal'
+const matrixTables = computed(() => [
+    {
+        title: 'PH3 浓度表',
+        rows: detail.value?.ph3Matrix ?? [],
+        layerCount: Math.max(0, ...(detail.value?.ph3Matrix ?? []).map(row => row.length)),
+        unit: ' ppm'
+    },
+    {
+        title: '温度表',
+        rows: detail.value?.temperatureMatrix ?? [],
+        layerCount: Math.max(0, ...(detail.value?.temperatureMatrix ?? []).map(row => row.length)),
+        unit: '℃'
+    }
+])
+
+const formatSensorValue = (value: number | undefined, unit: string) => {
+    return value === undefined || value === null || Number.isNaN(value) ? '--' : `${value}${unit}`
 }
 </script>
+
 <style scoped>
 .detail-page {
     min-height: 100%;
     padding-bottom: 20px;
 }
 
-/* 标题栏 */
 .detail-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #2968a8 0%, #1a3a5c 100%);
-    border-radius: 8px;
     margin-bottom: 16px;
+    background: linear-gradient(135deg, #2968a8 0%, #1a3a5c 100%);
     border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.back-btn {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #b0d0f0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.back-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
 }
 
-/* 信息标签区 */
+.detail-title {
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.back-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    color: #b0d0f0;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 .info-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
+
 .info-tag {
     display: flex;
+    min-width: 120px;
     flex-direction: column;
     gap: 2px;
     padding: 8px 14px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 8px;
-    min-width: 100px;
 }
-.info-tag__label {
-    font-size: 11px;
-    color: #b0d0f0;
-    font-weight: 500;
-}
-.info-tag__value {
-    font-size: 14px;
-    color: white;
-    font-weight: 600;
-}
-.info-tag--temp {
-    background: rgba(251, 140, 0, 0.15);
-    border-color: rgba(251, 140, 0, 0.3);
-}
-.info-tag--humidity {
-    background: rgba(0, 188, 212, 0.15);
+
+.info-tag--gas {
+    background: rgba(0, 188, 212, 0.12);
     border-color: rgba(0, 188, 212, 0.3);
 }
-.info-tag--hot {
-    background: rgba(229, 57, 53, 0.15);
-    border-color: rgba(229, 57, 53, 0.3);
-}
-.info-tag--hot .info-tag__value { color: #EF9A9A; }
-.info-tag--cold {
-    background: rgba(30, 136, 229, 0.15);
-    border-color: rgba(30, 136, 229, 0.3);
-}
-.info-tag--cold .info-tag__value { color: #90CAF9; }
-.info-tag--avg {
-    background: rgba(67, 160, 71, 0.15);
-    border-color: rgba(67, 160, 71, 0.3);
-}
-.info-tag--avg .info-tag__value { color: #A5D6A7; }
+
 .info-tag--time {
     background: rgba(156, 39, 176, 0.15);
     border-color: rgba(156, 39, 176, 0.3);
 }
 
-/* 数据矩阵 */
-.matrix-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: center;
+.info-tag__label {
+    color: #b0d0f0;
+    font-size: 11px;
+    font-weight: 500;
 }
-.matrix-item {
+
+.info-tag__value {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.matrix-container {
+    display: grid;
+    gap: 18px;
+}
+
+.matrix-card {
+    overflow: hidden;
     background: rgba(0, 0, 0, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    overflow: hidden;
-}
-.matrix-row {
-    display: flex;
-}
-.matrix-row--header {
-    background: linear-gradient(135deg, #2968a8 0%, #1e5f8a 100%);
-}
-.matrix-cell {
-    padding: 8px 12px;
-    font-size: 13px;
-    text-align: center;
-    min-width: 80px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-.matrix-cell--label {
-    background: rgba(30, 136, 229, 0.3);
-    color: white;
-    font-weight: 600;
-    min-width: 80px;
-    text-align: left;
-}
-.matrix-cell--index {
-    background: rgba(255, 255, 255, 0.06);
-    color: #b0d0f0;
-    font-weight: 500;
-    min-width: 80px;
-}
-.matrix-row--header .matrix-cell--index {
-    background: transparent;
-    color: white;
-    font-weight: 600;
-}
-.matrix-cell--data {
-    background: #1e4a6e;
-    color: white;
-    font-weight: 500;
-}
-.matrix-cell--data:hover {
-    background: rgba(30, 136, 229, 0.3);
 }
 
-/* 温度值颜色 */
-.temp--normal { color: #A5D6A7; }
-.temp--hot { color: #EF9A9A; background: rgba(229, 57, 53, 0.2) !important; }
-.temp--cold { color: #90CAF9; background: rgba(30, 136, 229, 0.2) !important; }
-.temp--invalid { color: rgba(255, 255, 255, 0.3); }
+.matrix-title {
+    padding: 12px 16px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2968a8 0%, #1e5f8a 100%);
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.matrix-table th,
+.matrix-table td {
+    min-width: 100px;
+    padding: 10px 12px;
+    color: white;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.matrix-table thead th,
+.matrix-table tbody th {
+    color: #d4ecff;
+    background: rgba(30, 136, 229, 0.2);
+}
+
+.matrix-table td {
+    background: #1e4a6e;
+}
+
+.empty-data {
+    padding: 28px;
+    color: #b0d0f0;
+    text-align: center;
+}
 </style>

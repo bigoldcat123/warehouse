@@ -110,8 +110,12 @@ public class DataController {
 
     @GetMapping("{id}")
     public R dataDetail(@PathVariable Integer id) {
-       DataDetailDTO d =  dataService.getDataDetail(id);
-       return R.ok(d);
+       try {
+           DataDetailDTO detail = receiverDataService.getDataDetail(id);
+           return detail == null ? R.errorShow("没有此条记录") : R.ok(detail);
+       } catch (IllegalArgumentException e) {
+           return R.errorShow(e.getMessage());
+       }
     }
 
     /**

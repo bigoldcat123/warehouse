@@ -1,12 +1,8 @@
 package com.example.demo.system.service.impl;
 
-import com.example.demo.common.Utils;
-import com.example.demo.system.entity.DTO.DataDetailDTO;
 import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.Data;
-import com.example.demo.system.entity.PO.Entry;
 import com.example.demo.system.entity.PO.House;
-import com.example.demo.system.entity.PO.Warehouse;
 import com.example.demo.system.mapper.DataMapper;
 import com.example.demo.system.service.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -37,12 +33,6 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
 
     @Autowired
     private IHouseService houseService;
-    @Autowired
-    private IEntryService entryService;
-    @Autowired
-    private IUserAuthService userAuthService;
-    @Autowired
-    IWarehouseService warehouseService;
 
     /** 随机模拟序列点数 */
     private static final int RANDOM_SERIES_COUNT = 24;
@@ -51,49 +41,6 @@ public class DataServiceImpl extends ServiceImpl<DataMapper, Data> implements ID
     /** 湿度随机模拟范围（%） */
     private static final double HUMIDITY_MIN = 20.0;
     private static final double HUMIDITY_MAX = 90.0;
-
-    @Override
-    public DataDetailDTO getDataDetail(Integer id) {
-        Data data = baseMapper.selectById(id);
-        House house = houseService.getHouseByNo(data.getHouseNo());
-        DataDetailDTO dataDetailDTO = new DataDetailDTO();
-        if(house == null) {
-            return dataDetailDTO;
-        }
-        dataDetailDTO.setHouseName(house.getHouseName());
-        dataDetailDTO.setHouseNo(house.getHouseNo());
-
-        Warehouse warehouse = warehouseService.getById(house.getWarehouseID());
-        dataDetailDTO.setWareHouseName(warehouse.getWarehouseName());
-
-        dataDetailDTO.setTestTime(data.getTestDate());
-
-        dataDetailDTO.setInHumidity(Utils.is_valid_humidity(data.getInHumidity())? String.format("%.1f",data.getInHumidity()):"");
-        dataDetailDTO.setInTemperature(Utils.is_valid_temperature(data.getInTemperature()) ? String.format("%.1f",data.getInTemperature()) : "");
-        dataDetailDTO.setOutHumidity(Utils.is_valid_humidity(data.getOutHumidity())? String.format("%.1f",data.getOutHumidity()) : "");
-        dataDetailDTO.setOutTemperature(Utils.is_valid_temperature(data.getOutTemperature()) ? String.format("%.1f",data.getOutTemperature()) : "");
-
-        Entry entry =  entryService.getNewest(houseService.getHouseByNo(data.getHouseNo()).getId());
-        if (entry != null) {
-            dataDetailDTO.setKeeper(userAuthService.getById(entry.getStockman()).getUsername());
-            dataDetailDTO.setBreed(entry.getBreed());
-            dataDetailDTO.setWater(String.format("%.1f",entry.getWater()));
-            dataDetailDTO.setEntryTime(entry.getEntryTime().getYear() + "-" + entry.getEntryTime().getMonthValue() + "-" + entry.getEntryTime().getDayOfMonth());
-        }else  {
-            dataDetailDTO.setKeeper("no entry");
-            dataDetailDTO.setBreed("no entry");
-            dataDetailDTO.setWater("no entry");
-            dataDetailDTO.setEntryTime("no entry");
-        }
-
-
-//        dataDetailDTO.setListAuto(List.of(data.getTemperatureSet().split(",")).stream().map(x -> Float.parseFloat(x)).toList(),house);
-//        dataDetailDTO.setList(parseLayers(data.getTemperatureSet().split(","),house));
-        String[] temps=get_temps(data.getTemperatureSet().split("#"),house);
-
-        dataDetailDTO.setList(parseLayers(temps,house));
-        return dataDetailDTO;
-    }
 
     @Override
     public List<HouseTempRecordDTO> getTempRecordsByHouseNo(String houseNo, int ceng, int hang, int lie) {

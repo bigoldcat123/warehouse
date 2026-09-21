@@ -79,7 +79,7 @@
                         <button class="action-btn action-btn--primary" @click="() => $router.push({
                             path: '/data/detail',
                             query: {
-                                id: row.id, layerAvg: row.layerAvg, house_type: row.house_type
+                                id: row.id
                             }
                         })">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
