@@ -105,7 +105,7 @@
 
             <!-- 编辑 -->
             <button
-                v-if="!isWind && !currentUser.isGuest()"
+                v-if="!isWind"
                 @click="emit('update', house)"
                 class="action-btn"
             >

@@ -12,12 +12,12 @@
                 报警级别
             </div>
             <div class="filter-section__options">
-                <label class="pill-toggle" :class="{ 'pill-toggle--active': levels.includes('一般报警'), 'pill-toggle--disabled': !user.getPriv()?.includes('1') }">
-                    <input type="checkbox" value="一般报警" v-model="levels" :disabled="!user.getPriv()?.includes('1')" class="pill-toggle__input" />
+                <label class="pill-toggle" :class="{ 'pill-toggle--active': levels.includes('一般报警') }">
+                    <input type="checkbox" value="一般报警" v-model="levels" class="pill-toggle__input" />
                     <span class="pill-toggle__text">一般报警</span>
                 </label>
-                <label class="pill-toggle" :class="{ 'pill-toggle--active': levels.includes('严重报警'), 'pill-toggle--danger': levels.includes('严重报警'), 'pill-toggle--disabled': !user.getPriv()?.includes('2') }">
-                    <input type="checkbox" value="严重报警" v-model="levels" :disabled="!user.getPriv()?.includes('2')" class="pill-toggle__input" />
+                <label class="pill-toggle" :class="{ 'pill-toggle--active': levels.includes('严重报警'), 'pill-toggle--danger': levels.includes('严重报警') }">
+                    <input type="checkbox" value="严重报警" v-model="levels" class="pill-toggle__input" />
                     <span class="pill-toggle__text">严重报警</span>
                 </label>
             </div>
@@ -121,9 +121,8 @@
                                 </svg>
                                 查看
                             </button>
-                            <button v-else-if="!user.isGuest()" :disabled="!user.getPriv()?.includes('3')"
+                            <button v-else
                                 class="action-btn action-btn--success"
-                                :class="{ 'action-btn--disabled': !user.getPriv()?.includes('3') }"
                                 @click="handleDialog = true; currentid = row.id">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

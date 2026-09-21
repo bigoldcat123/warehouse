@@ -45,6 +45,7 @@ public class UserAuthController {
         if (one != null) {
             return R.errorShow("用户名存在");
         }
+        userAuth.setPriv(UserAuth.FULL_PRIVILEGES);
         userAuth.setPassword(userAuth.getSafePassword());
         boolean save = userAuthService.save(userAuth);
         if (save) {
@@ -56,6 +57,7 @@ public class UserAuthController {
 
     @PutMapping
     public R update (@RequestBody UserAuth userAuth) {
+        userAuth.setPriv(UserAuth.FULL_PRIVILEGES);
         if(userAuth.getPassword() != null && !userAuth.getPassword().isEmpty()){
             userAuth.setPassword(userAuth.getSafePassword());
         }else {

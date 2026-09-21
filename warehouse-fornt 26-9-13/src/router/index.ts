@@ -178,7 +178,6 @@ const router = createRouter({
     return {top:0}
   }
 })
-const adminRoutes = ['/warehouse','/user']
 router.beforeEach((to, from, next) => {
   const currentUser = useCurrentUserStore()
   if (whiteList.includes(to.path)) {
@@ -189,9 +188,6 @@ router.beforeEach((to, from, next) => {
     } else if (to.name == 'login' && currentUser.isLogin()) {
       next({ name: 'warehousePanorama' })
     } else {
-      if(currentUser.getUserDetail()?.username != 'admin' &&  adminRoutes.includes(to.path)){
-        next({ name: 'warehousePanorama' })
-      }
       next()
     }
   }

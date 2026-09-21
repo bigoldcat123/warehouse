@@ -22,18 +22,8 @@ export const useCurrentUserStore = defineStore('currentUser', () => {
   function getUserDetail() {
     return currentUser.value?.detail
   }
-  function isSuperAdmin() {
-    return currentUser.value?.detail.username == 'admin'
-  }
-  function isGuest() {
-    return currentUser.value?.detail.username === 'guest'
-  }
   function isMainComp() {
     return currentUser.value?.detail.companyID === '-1'
   }
-  function getPriv() {
-    return currentUser.value?.detail.priv.split(',')
-  }
-
-  return { isLogin, setValue, logout, getToken,getUserDetail,getPriv,isMainComp,isSuperAdmin,isGuest}
+  return { isLogin, setValue, logout, getToken, getUserDetail, isMainComp }
 })

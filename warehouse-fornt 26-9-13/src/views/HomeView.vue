@@ -26,7 +26,6 @@ import { useCurrentWareHouse } from '@/stores/currentWareHouse';
 const router = useRouter()
 const currentWareHouse = useCurrentWareHouse()
 const currentUser = useCurrentUserStore()
-const SPECIAL_NAME = import.meta.env.ENV_SPECIAL_USER;
 const kv = ref<any[]>([{
     value: '分公司',
     key: -1
@@ -54,7 +53,7 @@ const v = ref(false)
             </div>
             <el-menu class="sidebar-menu" :default-active="'/house'" :router="true"
                 background-color="transparent" text-color="#b0d0f0" active-text-color="#ffffff">
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == SPECIAL_NAME" index="/panel">
+                <el-menu-item index="/warehousePanorama">
                     <el-icon>
                         <ArrowLeft />
                     </el-icon>
@@ -120,7 +119,7 @@ const v = ref(false)
                     </el-icon>
                     <span>仓房入库管理</span>
                 </el-menu-item>
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'" index="/warehouse">
+                <el-menu-item index="/warehouse">
                     <el-icon>
                         <Box />
                     </el-icon>
@@ -128,7 +127,7 @@ const v = ref(false)
                 </el-menu-item>
 
 
-                <el-menu-item v-if="currentUser.getUserDetail()?.username == 'admin'" index="/user">
+                <el-menu-item index="/user">
                     <el-icon>
                         <Avatar />
                     </el-icon>
@@ -159,7 +158,7 @@ const v = ref(false)
                     </span>
                     <span class="text-[#b0d0f0] text-sm">您好！</span>
 
-                    <button v-if="!currentUser.isGuest()" class="topbar__btn topbar__btn--primary" @click="v = true">
+                    <button class="topbar__btn topbar__btn--primary" @click="v = true">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>

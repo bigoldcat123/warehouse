@@ -20,7 +20,6 @@
                     <th class="text-left">所属公司</th>
                     <th class="text-left">职位</th>
                     <th class="text-left">手机号</th>
-                    <th class="text-left">权利</th>
                     <th class="text-center">操作</th>
                 </tr>
             </thead>
@@ -32,15 +31,6 @@
                     <td class="text-[#b0d0f0]">{{ kv.filter(x => x.key == row.companyID)[0]?.value || '--' }}</td>
                     <td class="text-[#b0d0f0]">{{ row.position || '--' }}</td>
                     <td class="text-[#b0d0f0]">{{ row.phone || '--' }}</td>
-                    <td>
-                        <div class="flex flex-wrap gap-1">
-                            <template v-if="row.priv && row.priv.length > 0">
-                                <span v-for="item in row.priv.split(',')" :key="item" class="priv-badge"
-                                    :class="privColorClass(item)">{{ privList[Number(item)] }}</span>
-                            </template>
-                            <span v-else class="text-[#b0d0f0] text-xs">--</span>
-                        </div>
-                    </td>
                     <td class="text-center">
                         <div class="flex items-center justify-center gap-2">
                             <button class="action-btn action-btn--primary"
@@ -67,7 +57,7 @@
                     </td>
                 </tr>
                 <tr v-if="!list?.records || list.records.length === 0">
-                    <td colspan="8" class="text-center text-[#b0d0f0] py-10">
+                    <td colspan="7" class="text-center text-[#b0d0f0] py-10">
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -107,15 +97,15 @@
         </button>
     </div>
 
-    <AddDialog :priv-list="privList" :kv="kv" :dialog-visible="addDialog" @refresh="fetchData"
+    <AddDialog :kv="kv" :dialog-visible="addDialog" @refresh="fetchData"
         @close="addDialog = false">
     </AddDialog>
-    <UpdateDialog :priv-list="privList" :kv="kv" :current="current!" :dialog-visible="updateDialog" @refresh="fetchData"
+    <UpdateDialog :kv="kv" :current="current!" :dialog-visible="updateDialog" @refresh="fetchData"
         @close="updateDialog = false"></UpdateDialog>
 </template>
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import user, { type type_User, privList } from '@/api/user';
+import user, { type type_User } from '@/api/user';
 import warehouse from '@/api/warehouse';
 import AddDialog from './AddDialog.vue';
 import UpdateDialog from './UpdateDialog.vue';
@@ -144,17 +134,6 @@ const pageList = computed(() => {
     pages.push(total)
     return pages
 })
-
-// 权利徽章颜色映射
-const privColorClass = (item: string) => {
-    const map: Record<string, string> = {
-        '0': 'priv-badge--success',
-        '1': 'priv-badge--primary',
-        '2': 'priv-badge--danger',
-        '3': 'priv-badge--warning',
-    }
-    return map[item] || ''
-}
 
 function fetchData() {
     user.list(currentpage.value, size.value).then(res => {

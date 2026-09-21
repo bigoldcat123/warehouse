@@ -47,18 +47,6 @@
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="ruleForm.phone" placeholder="请输入手机号" class="dark-input" />
         </el-form-item>
-        <el-form-item label="权利">
-          <div class="priv-chips">
-            <div v-for="(item, key) in privList" :key="key" @click="add_del_Priv(Number(key))" class="priv-chip"
-              :class="[
-                privLChecked.includes(Number(key)) ? 'priv-chip--active' : '',
-                privChipColor(Number(key))
-              ]">
-              {{ item }}
-            </div>
-          </div>
-        </el-form-item>
-
         <el-form-item>
           <div class="flex items-center gap-3">
             <button type="button" class="btn-primary" @click="submitForm(ruleFormRef)">
@@ -86,8 +74,7 @@ import { onUpdated, reactive, ref } from 'vue'
 import user, { type type_User } from '@/api/user';
 const prop = defineProps<{
   dialogVisible: boolean,
-  kv: any[],
-  privList: string[]
+  kv: any[]
 }>()
 const emit = defineEmits<{
   (event: 'close'): void,
@@ -97,25 +84,9 @@ const visiable = ref(false)
 onUpdated(() => {
   visiable.value = prop.dialogVisible
 })
-const privLChecked = ref<number[]>([])
 const handleClose = (done: () => void) => {
   emit('close')
 }
-const add_del_Priv = (key: number) => {
-  privLChecked.value.includes(key) ? privLChecked.value.splice(privLChecked.value.indexOf(key), 1) : privLChecked.value.push(key)
-}
-
-// 权利芯片颜色映射
-const privChipColor = (key: number) => {
-  const map: Record<number, string> = {
-    0: 'priv-chip--success',
-    1: 'priv-chip--primary',
-    2: 'priv-chip--danger',
-    3: 'priv-chip--warning',
-  }
-  return map[key] || ''
-}
-
 const ruleFormRef = ref<FormInstance>()
 
 const validate = (rule: any, value: any, callback: any) => {
@@ -141,8 +112,7 @@ const ruleForm = reactive<any>({
   sex: '',
   companyID: '-1',
   position: '',
-  phone: '',
-  priv: null,
+  phone: ''
 })
 
 const rules = reactive<FormRules<typeof ruleForm>>({
@@ -161,7 +131,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
   formEl.validate((valid) => {
     if (valid) {
       console.log('submit!')
-      ruleForm.priv = privLChecked.value.join(',')
       user.add(ruleForm).then(res => {
         emit('refresh')
         emit('close')
@@ -172,7 +141,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
         ruleForm.companyID = '-1'
         ruleForm.position = ''
         ruleForm.phone = ''
-        privLChecked.value = []
       })
     } else {
       console.log('error submit!')

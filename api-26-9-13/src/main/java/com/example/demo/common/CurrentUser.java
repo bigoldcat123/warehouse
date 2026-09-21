@@ -42,7 +42,7 @@ public class CurrentUser {
         currentUser.setCompanyID("0");
         currentUser.setPosition("1");
         currentUser.setPhone("1388888888");
-        currentUser.setPriv("1");
+        currentUser.setPriv("0,1,2,3");
         return currentUser;
     }
 
@@ -52,7 +52,7 @@ public class CurrentUser {
         currentUser.setName(username);
         currentUser.setUsername(username);
         currentUser.setCompanyID("-1");
-        currentUser.setPriv("guest");
+        currentUser.setPriv("0,1,2,3");
         return currentUser;
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <!-- 工具栏 -->
     <div class="flex items-center gap-4 mb-5">
-        <button v-if="!currentUser.isGuest()" class="btn-primary" @click="addDialog = true">
+        <button class="btn-primary" @click="addDialog = true">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -24,7 +24,7 @@
                     <td class="text-white">{{ row.warehouseNo }}</td>
                     <td class="text-white">{{ row.warehouseName }}</td>
                     <td class="text-center">
-                        <div v-if="!currentUser.isGuest()" class="flex items-center justify-center gap-2">
+                        <div class="flex items-center justify-center gap-2">
                             <button class="action-btn action-btn--primary"
                                 @click="() => { current = row; updateDialog = true; }">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

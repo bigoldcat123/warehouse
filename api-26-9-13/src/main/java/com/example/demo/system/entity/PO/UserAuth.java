@@ -25,12 +25,7 @@ public class UserAuth implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-//    const privList = ['所有数据','一般报警','严重严重报警','报警核准']
-
-    public static final String ALL_DATA = "0";
-    public static final String COMMON_ISSUE = "1";
-    public static final String SERIOUS_ISSUE = "2";
-    public static final String ALARM_RATIFY = "3";
+    public static final String FULL_PRIVILEGES = "0,1,2,3";
     /**
      * 主键
      */
@@ -87,7 +82,7 @@ public class UserAuth implements Serializable {
         currentUser.setCompanyID(companyID);
         currentUser.setPosition(position);
         currentUser.setPhone(phone);
-        currentUser.setPriv(priv);
+        currentUser.setPriv(FULL_PRIVILEGES);
 
         return currentUser;
     }

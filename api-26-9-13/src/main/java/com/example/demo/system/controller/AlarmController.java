@@ -9,14 +9,12 @@ import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.alibaba.excel.write.style.row.SimpleRowHeightStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.demo.common.CurrentUser;
 import com.example.demo.common.R;
 import com.example.demo.system.entity.DTO.AlarmArgDTO;
 import com.example.demo.system.entity.DTO.AlarmArgExcelDTO;
 import com.example.demo.system.entity.DTO.AlarmExcelDTO;
 import com.example.demo.system.entity.PO.Alarm;
 import com.example.demo.system.entity.PO.House;
-import com.example.demo.system.entity.PO.UserAuth;
 import com.example.demo.system.entity.PO.StoreName;
 import com.example.demo.system.entity.query.AlarmQuery;
 import com.example.demo.system.service.IAlarmService;
@@ -204,15 +202,6 @@ public class AlarmController {
 
     public void checkPower(QueryWrapper<Alarm> queryWrapper) {
         AlarmQuery.LEVEL_BUFFER.clear();
-        List<String> power = List.of(CurrentUser.get().getPriv().split(","));
-        if(!power.contains(UserAuth.COMMON_ISSUE)){
-            queryWrapper.ne("alert_level",Alarm.LEVEL_COMMON);
-            AlarmQuery.LEVEL_BUFFER .add(Alarm.LEVEL_COMMON);
-        }
-        if(!power.contains(UserAuth.SERIOUS_ISSUE)){
-            queryWrapper.ne("alert_level",Alarm.LEVEL_SERIOUS);
-            AlarmQuery.LEVEL_BUFFER .add(Alarm.LEVEL_SERIOUS);
-        }
     }
     @GetMapping("/arg/{current}/{size}")
     public R arg( @PathVariable int current, @PathVariable int size) {
