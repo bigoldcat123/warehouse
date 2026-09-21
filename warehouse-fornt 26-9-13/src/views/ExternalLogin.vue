@@ -46,7 +46,7 @@ if (!token) {
         }
     }
     currentUser.setValue(guestUser)
-    router.replace('/house')
+    router.replace('/warehousePanorama')
 }
 </script>
 

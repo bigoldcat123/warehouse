@@ -8,7 +8,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      redirect:'/house',
+      redirect:'/warehousePanorama',
       component: HomeView,
       children:[
         {
@@ -187,10 +187,10 @@ router.beforeEach((to, from, next) => {
     if (to.name !== 'login' && !currentUser.isLogin()) {
       next({ name: 'login' })
     } else if (to.name == 'login' && currentUser.isLogin()) {
-      next({ name: 'house' })
+      next({ name: 'warehousePanorama' })
     } else {
       if(currentUser.getUserDetail()?.username != 'admin' &&  adminRoutes.includes(to.path)){
-        next({ name: 'house' })
+        next({ name: 'warehousePanorama' })
       }
       next()
     }

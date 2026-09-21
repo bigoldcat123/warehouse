@@ -120,11 +120,7 @@ const submitForm = (formEl: FormInstance | undefined) => {
                 .then((res) => {
                     currentUser.setValue(res.data.value);
 
-                    if (currentUser.getUserDetail()?.username == "jlfgs") {
-                      router.push("/panel");
-                    }else {
-                      router.push("/house");
-                    }
+                    router.push("/warehousePanorama");
                 })
                 .catch((err) => {
                     console.log(err);

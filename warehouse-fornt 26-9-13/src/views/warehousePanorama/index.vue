@@ -6,6 +6,16 @@
       <h1>粮库全景图</h1>
       <span class="warehouse-name">当前仓库：{{ currentWarehouseName }}</span>
     </header>
+    <nav class="system-actions" aria-label="系统操作">
+      <button type="button" @click="router.push('/warehouseSettings')">
+        <span>⚙</span>
+        后台管理
+      </button>
+      <button type="button" class="system-actions__logout" @click="logout">
+        <span>↪</span>
+        退出系统
+      </button>
+    </nav>
     <InfoSidePanel />
   </main>
 </template>
@@ -17,11 +27,16 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import InfoSidePanel from '@/features/warehousePanorama/components/InfoSidePanel'
 import { useWarehousePanoramaStore } from '@/features/warehousePanorama/store'
 import { useCurrentUserStore } from '@/stores/currentUser'
+import { useCurrentWareHouse } from '@/stores/currentWareHouse'
 import warehouseApi from '@/api/warehouse'
+import authApi from '@/api/auth'
+import { useRouter } from 'vue-router'
 
 const sceneContainer = ref<HTMLDivElement>()
 const panoramaStore = useWarehousePanoramaStore()
 const currentUserStore = useCurrentUserStore()
+const currentWarehouseStore = useCurrentWareHouse()
+const router = useRouter()
 const currentWarehouseName = ref('加载中...')
 const raycaster = new THREE.Raycaster()
 const pointer = new THREE.Vector2()
@@ -54,6 +69,17 @@ async function loadCurrentWarehouseName() {
 }
 
 loadCurrentWarehouseName()
+
+async function logout() {
+  try {
+    await authApi.logout()
+  } finally {
+    currentUserStore.logout()
+    currentWarehouseStore.clear()
+    panoramaStore.clearSelection()
+    router.push('/login')
+  }
+}
 
 function createHouseLabel(modelIndex: number) {
   const houseNo = panoramaStore.getHouseNo(modelIndex)
@@ -797,9 +823,67 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
+.system-actions {
+  position: absolute;
+  bottom: 28px;
+  left: 34px;
+  z-index: 30;
+  display: grid;
+  width: 150px;
+  gap: 8px;
+  padding: 11px;
+  background: rgb(30 50 56 / 84%);
+  border: 1px solid rgb(184 211 214 / 24%);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgb(12 27 32 / 30%);
+  backdrop-filter: blur(8px);
+}
+
+.system-actions button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  color: #d9e7e7;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgb(117 151 158 / 14%);
+  border: 1px solid rgb(190 216 219 / 18%);
+  border-radius: 6px;
+  transition: 160ms ease;
+}
+
+.system-actions button:hover {
+  color: #ffffff;
+  background: rgb(78 135 163 / 42%);
+  border-color: rgb(132 190 218 / 45%);
+}
+
+.system-actions button span {
+  width: 17px;
+  color: #8cc4dc;
+  font-size: 17px;
+  text-align: center;
+}
+
+.system-actions .system-actions__logout:hover {
+  background: rgb(181 91 82 / 42%);
+  border-color: rgb(230 147 137 / 54%);
+}
+
+.system-actions .system-actions__logout span {
+  color: #e39a91;
+}
+
 @media (max-width: 720px) {
   .page-heading {
     top: 16px;
+    left: 16px;
+  }
+
+  .system-actions {
+    bottom: 16px;
     left: 16px;
   }
 }
