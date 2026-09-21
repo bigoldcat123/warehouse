@@ -1,6 +1,13 @@
 import server from '..'
 
 const preFix = 'data'
+
+const formatServerDateTime = (value?: string | null) => {
+    if (!value) return null
+    const normalized = value.replace('T', ' ')
+    return normalized.length === 16 ? `${normalized}:00` : normalized
+}
+
 export type type_Data = {
             id : number,
             HouseNo : string,
@@ -44,7 +51,12 @@ export type type_TempRecord = {
 
 class Data {
     list(from?:string | null,to?:string| null,houseName?:string| null,warehouseName?:string| null,current?:number,size?:number) {
-        return server.post<ResponseData<Page<type_Data>>>(preFix + `/${current}/${size}`,{from,to,houseName,warehouseName})
+        return server.post<ResponseData<Page<type_Data>>>(preFix + `/${current}/${size}`, {
+            from: formatServerDateTime(from),
+            to: formatServerDateTime(to),
+            houseName,
+            warehouseName
+        })
     }
     getDetil(id:number) {
         return server.get<ResponseData<type_Data_Detail>>(`${preFix}/${id}`)
