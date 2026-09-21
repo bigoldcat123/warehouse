@@ -54,20 +54,16 @@
 
                 <!-- 模式1：按点 -->
                 <template v-if="mode === 'point'">
-                    <div class="control-title">选择测温点</div>
-                    <div class="control-desc">层/行/列坐标均为从 1 开始的整数</div>
+                    <div class="control-title">选择传感器点</div>
+                    <div class="control-desc">按照最新测点定义，选择串号和层数</div>
 
                     <div class="field">
-                        <label>层 (z, 1~{{ dimZ }})</label>
-                        <el-input-number v-model="pointInput.z" :min="1" :max="dimZ" controls-position="right" />
+                        <label>串号 (1~{{ stringCount }})</label>
+                        <el-input-number v-model="pointInput.stringNo" :min="1" :max="stringCount" controls-position="right" />
                     </div>
                     <div class="field">
-                        <label>行 (x, 1~{{ dimX }})</label>
-                        <el-input-number v-model="pointInput.x" :min="1" :max="dimX" controls-position="right" />
-                    </div>
-                    <div class="field">
-                        <label>列 (y, 1~{{ dimY }})</label>
-                        <el-input-number v-model="pointInput.y" :min="1" :max="dimY" controls-position="right" />
+                        <label>层数 (1~{{ layerCount }})</label>
+                        <el-input-number v-model="pointInput.layerNo" :min="1" :max="layerCount" controls-position="right" />
                     </div>
 
                     <button class="add-btn" :disabled="adding" @click="addPoint">
@@ -79,7 +75,7 @@
                         <div class="tag-list">
                             <span v-for="p in points" :key="p.key" class="tag">
                                 <span class="tag__dot" :style="{ background: colorOf(p.key) }"></span>
-                                层{{ p.z }}-行{{ p.x }}-列{{ p.y }}
+                                第{{ p.stringNo }}串-第{{ p.layerNo }}层
                                 <button class="tag__close" @click="removePoint(p.key)">×</button>
                             </span>
                         </div>
@@ -90,11 +86,11 @@
                 <!-- 模式2：按层 -->
                 <template v-else-if="mode === 'layer'">
                     <div class="control-title">选择层</div>
-                    <div class="control-desc">每添加一层，显示该层所有测温点的平均折线</div>
+                    <div class="control-desc">每添加一层，显示该层所有串传感器的平均折线</div>
 
                     <div class="field">
-                        <label>层 (1~{{ dimZ }})</label>
-                        <el-input-number v-model="layerInput" :min="1" :max="dimZ" controls-position="right" />
+                        <label>层 (1~{{ layerCount }})</label>
+                        <el-input-number v-model="layerInput" :min="1" :max="layerCount" controls-position="right" />
                     </div>
 
                     <button class="add-btn" :disabled="adding" @click="addLayer">
@@ -144,23 +140,19 @@ import { useRoute } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
 import type { AxiosResponse } from 'axios'
-import dataApi from '@/api/data'
+import receiverDataApi, { type SensorMatrix } from '@/api/receiverData'
 import type { type_TempRecord } from '@/api/data'
 
 // ========= 指标配置 =========
 export type MetricKey = 'temp' | 'humidity' | 'gas'
 
-type PointApi = (houseNo: string, ceng: number, hang: number, lie: number) => Promise<AxiosResponse<ResponseData<type_TempRecord[]>>>
-type LayerAvgApi = (houseNo: string, ceng: number) => Promise<AxiosResponse<ResponseData<type_TempRecord[]>>>
-type AllAvgApi = (houseNo: string) => Promise<AxiosResponse<ResponseData<type_TempRecord[]>>>
+type MatrixApi = (houseNo: string, testDate: string) => Promise<AxiosResponse<ResponseData<SensorMatrix>>>
 
 interface LineMetricConfig {
     title: string
     missingTip: string
     yName: string
-    pointApi: PointApi
-    layerApi: LayerAvgApi
-    avgApi: AllAvgApi
+    matrixApi: MatrixApi
 }
 
 const LINE_METRICS: Record<MetricKey, LineMetricConfig> = {
@@ -168,25 +160,19 @@ const LINE_METRICS: Record<MetricKey, LineMetricConfig> = {
         title: '温度折线图',
         missingTip: '缺少仓房信息，请从仓房卡片上的「温度曲线图」按钮进入',
         yName: '温度 (℃)',
-        pointApi: (houseNo, ceng, hang, lie) => dataApi.tempRecords(houseNo, ceng, hang, lie),
-        layerApi: (houseNo, ceng) => dataApi.layerAvgTemp(houseNo, ceng),
-        avgApi: (houseNo) => dataApi.allAvgTemp(houseNo),
+        matrixApi: (houseNo, testDate) => receiverDataApi.temperature(houseNo, testDate),
     },
     humidity: {
         title: '湿度折线图',
         missingTip: '缺少仓房信息，请从仓房卡片上的「湿度曲线图」按钮进入',
         yName: '湿度 (%)',
-        pointApi: (houseNo, ceng, hang, lie) => dataApi.humidityRecords(houseNo, ceng, hang, lie),
-        layerApi: (houseNo, ceng) => dataApi.layerAvgHumidity(houseNo, ceng),
-        avgApi: (houseNo) => dataApi.allAvgHumidity(houseNo),
+        matrixApi: (houseNo, testDate) => receiverDataApi.humidity(houseNo, testDate),
     },
     gas: {
-        title: '气体浓度折线图',
-        missingTip: '缺少仓房信息，请从仓房卡片上的「气体浓度曲线图」按钮进入',
-        yName: '气体浓度 (ppm)',
-        pointApi: (houseNo, ceng, hang, lie) => dataApi.gasRecords(houseNo, ceng, hang, lie),
-        layerApi: (houseNo, ceng) => dataApi.layerAvgGas(houseNo, ceng),
-        avgApi: (houseNo) => dataApi.allAvgGas(houseNo),
+        title: 'PH3 浓度折线图',
+        missingTip: '缺少仓房信息，请从仓房卡片上的「PH3曲线图」按钮进入',
+        yName: 'PH3 浓度 (ppm)',
+        matrixApi: (houseNo, testDate) => receiverDataApi.ph3(houseNo, testDate),
     },
 }
 
@@ -197,9 +183,8 @@ const cfg = computed(() => LINE_METRICS[props.metric])
 const route = useRoute()
 const houseNo = computed(() => (route.query.houseNo as string) || '')
 const houseName = computed(() => (route.query.houseName as string) || '')
-const dimX = computed(() => Math.max(1, Number(route.query.x) || 1)) // 行数上限
-const dimY = computed(() => Math.max(1, Number(route.query.y) || 1)) // 列数上限
-const dimZ = computed(() => Math.max(1, Number(route.query.z) || 1)) // 层数上限
+const stringCount = ref(1)
+const layerCount = ref(1)
 
 // ========= 模式 =========
 type Mode = 'point' | 'layer' | 'avg'
@@ -211,27 +196,67 @@ const modes: Array<{ key: Mode; label: string }> = [
 const mode = ref<Mode>('point')
 
 // ========= 模式1：按点 =========
-const pointInput = ref({ x: 1, y: 1, z: 1 })
-type PointItem = { key: string; x: number; y: number; z: number; data: type_TempRecord[] }
+const pointInput = ref({ stringNo: 1, layerNo: 1 })
+type PointItem = { key: string; stringNo: number; layerNo: number; data: type_TempRecord[] }
 const points = ref<PointItem[]>([])
 
-const pointKey = (x: number, y: number, z: number) => `${z}-${x}-${y}`
+type MatrixSnapshot = { testDate: string; matrix: SensorMatrix }
+const snapshots = ref<MatrixSnapshot[]>([])
+let datasetPromise: Promise<void> | null = null
+
+const pointKey = (stringNo: number, layerNo: number) => `${stringNo}-${layerNo}`
+
+async function ensureDataset() {
+    if (datasetPromise) return datasetPromise
+    datasetPromise = (async () => {
+        const datesResponse = await receiverDataApi.testDates(houseNo.value)
+        const testDates = datesResponse.data?.value ?? []
+        const results = await Promise.allSettled(
+            testDates.map(async testDate => {
+                const response = await cfg.value.matrixApi(houseNo.value, testDate)
+                return { testDate, matrix: response.data?.value ?? [] }
+            }),
+        )
+        snapshots.value = results
+            .filter((result): result is PromiseFulfilledResult<MatrixSnapshot> => result.status === 'fulfilled')
+            .map(result => result.value)
+            .filter(snapshot => snapshot.matrix.length > 0)
+
+        stringCount.value = Math.max(1, ...snapshots.value.map(snapshot => snapshot.matrix.length))
+        layerCount.value = Math.max(
+            1,
+            ...snapshots.value.flatMap(snapshot => snapshot.matrix.map(row => row.length)),
+        )
+    })().catch(error => {
+        datasetPromise = null
+        throw error
+    })
+    return datasetPromise
+}
+
+function average(values: number[]) {
+    if (!values.length) return null
+    return values.reduce((sum, value) => sum + value, 0) / values.length
+}
 
 async function addPoint() {
     if (!houseNo.value) return
-    const { x, y, z } = pointInput.value
-    const key = pointKey(x, y, z)
+    const { stringNo, layerNo } = pointInput.value
+    const key = pointKey(stringNo, layerNo)
     if (points.value.some(p => p.key === key)) {
         ElMessage.warning('该点已添加')
         return
     }
     adding.value = true
     try {
-        const res = await cfg.value.pointApi(houseNo.value, z, x, y)
-        const data: type_TempRecord[] = res.data?.value ?? []
-        points.value.push({ key, x, y, z, data })
+        await ensureDataset()
+        const data = snapshots.value.flatMap(snapshot => {
+            const value = snapshot.matrix[stringNo - 1]?.[layerNo - 1]
+            return Number.isFinite(value) ? [{ testDate: snapshot.testDate, temp: value }] : []
+        })
+        points.value.push({ key, stringNo, layerNo, data })
         if (!data.length) {
-            ElMessage.info(`层${z}-行${x}-列${y} 暂无数据`)
+            ElMessage.info(`第${stringNo}串-第${layerNo}层 暂无数据`)
         }
     } catch (e: any) {
         ElMessage.error(e?.message || '查询失败')
@@ -263,8 +288,14 @@ async function addLayer() {
     }
     adding.value = true
     try {
-        const res = await cfg.value.layerApi(houseNo.value, z)
-        const data: type_TempRecord[] = res.data?.value ?? []
+        await ensureDataset()
+        const data = snapshots.value.flatMap(snapshot => {
+            const values = snapshot.matrix
+                .map(row => row[z - 1])
+                .filter((value): value is number => Number.isFinite(value))
+            const value = average(values)
+            return value === null ? [] : [{ testDate: snapshot.testDate, temp: value }]
+        })
         layers.value.push({ key, z, data })
         if (!data.length) {
             ElMessage.info(`第 ${z} 层暂无数据`)
@@ -290,8 +321,12 @@ async function fetchAvg() {
     if (!houseNo.value) return
     adding.value = true
     try {
-        const res = await cfg.value.avgApi(houseNo.value)
-        avgData.value = res.data?.value ?? []
+        await ensureDataset()
+        avgData.value = snapshots.value.flatMap(snapshot => {
+            const values = snapshot.matrix.flat().filter(Number.isFinite)
+            const value = average(values)
+            return value === null ? [] : [{ testDate: snapshot.testDate, temp: value }]
+        })
         avgLoaded.value = true
         if (!avgData.value.length) {
             ElMessage.info('暂无数据')
@@ -309,15 +344,17 @@ const adding = ref(false)
 // 日期范围过滤（格式：YYYY-MM-DD HH:mm:ss；为 null 表示不过滤）
 const dateRange = ref<[string, string] | null>(null)
 
-// 按时间区间过滤温度记录
+const parseTime = (value: string) => new Date(value.replace(' ', 'T')).getTime()
+
+// 按时间区间过滤采集记录
 function filterData(data: type_TempRecord[]): type_TempRecord[] {
     if (!dateRange.value || dateRange.value.length !== 2) return data
     const [startStr, endStr] = dateRange.value
-    const start = new Date(startStr).getTime()
-    const end = new Date(endStr).getTime()
+    const start = parseTime(startStr)
+    const end = parseTime(endStr)
     if (Number.isNaN(start) || Number.isNaN(end)) return data
     return data.filter(d => {
-        const t = new Date(d.testDate).getTime()
+        const t = parseTime(d.testDate)
         return t >= start && t <= end
     })
 }
@@ -354,7 +391,7 @@ const emptyTip = computed(() => {
 function buildSeries(): any[] {
     if (mode.value === 'point') {
         return points.value.map(p => ({
-            name: `层${p.z}-行${p.x}-列${p.y}`,
+            name: `第${p.stringNo}串-第${p.layerNo}层`,
             type: 'line',
             smooth: true,
             showSymbol: true,
@@ -466,6 +503,9 @@ function handleResize() {
 onMounted(() => {
     // 仅在有 houseNo 时才初始化图表
     if (!houseNo.value) return
+    ensureDataset().catch((error: any) => {
+        ElMessage.error(error?.message || '采集数据加载失败')
+    })
     // 延迟到下一个 tick，确保 DOM 布局完成、容器有真实尺寸
     nextTick(() => {
         ensureChart()

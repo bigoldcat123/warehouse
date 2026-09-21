@@ -66,9 +66,6 @@
                         query: {
                             houseNo: house.houseNo,
                             houseName: house.houseName,
-                            x: house.x,
-                            y: house.y,
-                            z: house.z,
                         },
                     })
                 "
@@ -84,9 +81,6 @@
                         query: {
                             houseNo: house.houseNo,
                             houseName: house.houseName,
-                            x: house.x,
-                            y: house.y,
-                            z: house.z,
                         },
                     })
                 "
@@ -101,15 +95,12 @@
                         query: {
                             houseNo: house.houseNo,
                             houseName: house.houseName,
-                            x: house.x,
-                            y: house.y,
-                            z: house.z,
                         },
                     })
                 "
                 class="action-btn"
             >
-                气体浓度曲线图
+                PH3曲线图
             </button>
 
             <!-- 编辑 -->
