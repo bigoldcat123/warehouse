@@ -50,12 +50,12 @@
             <button @click="show_gas3d" class="action-btn">3D气体浓度</button>
 
             <!-- 剖面图 -->
-            <button @click="show_heatmap" class="action-btn">温度剖面图</button>
+            <button @click="show_heatmap" class="action-btn">温度热力图</button>
             <button @click="show_humidityHeatmap" class="action-btn">
-                湿度剖面图
+                湿度热力图
             </button>
             <button @click="show_gasHeatmap" class="action-btn">
-                气体浓度剖面图
+                PH3热力图
             </button>
 
             <!-- 曲线图 -->
