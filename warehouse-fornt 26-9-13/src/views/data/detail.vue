@@ -61,16 +61,55 @@ const displayValue = (value: unknown, unit = '') => {
     return `${value}${unit}`
 }
 
-const infoItems = computed(() => [
-    { label: '品种', value: displayValue(detail.value?.grainName) },
-    { label: '水分', value: displayValue(detail.value?.grainWater, '%') },
-    { label: '入库时间', value: displayValue(detail.value?.dateOfIn) },
-    { label: '保管', value: displayValue(detail.value?.keeperName) },
-    { label: 'PH3', value: displayValue(detail.value?.housePh3, ' ppm'), className: 'info-tag--gas' },
-    { label: 'O₂', value: displayValue(detail.value?.oAir, '%'), className: 'info-tag--gas' },
-    { label: 'CO₂', value: displayValue(detail.value?.co2Air, ' ppm'), className: 'info-tag--gas' },
-    { label: '检测时间', value: displayValue(detail.value?.testTime), className: 'info-tag--time' }
-])
+const temperatureStats = computed(() => {
+    const matrix = detail.value?.temperatureMatrix ?? []
+    const allValues = matrix.flat().filter(Number.isFinite)
+    const layerCount = Math.max(0, ...matrix.map(row => row.length))
+    const layerAverages = Array.from({ length: layerCount }, (_, layerIndex) => {
+        const values = matrix
+            .map(row => row[layerIndex])
+            .filter((value): value is number => Number.isFinite(value))
+        return average(values)
+    })
+
+    return {
+        maximum: allValues.length ? Math.max(...allValues) : null,
+        minimum: allValues.length ? Math.min(...allValues) : null,
+        average: average(allValues),
+        layerAverages
+    }
+})
+
+const average = (values: number[]) => {
+    if (!values.length) return null
+    return values.reduce((total, value) => total + value, 0) / values.length
+}
+
+const formatTemperature = (value: number | null) => {
+    return value === null ? '--' : `${value.toFixed(1)}℃`
+}
+
+const infoItems = computed(() => {
+    const stats = temperatureStats.value
+    return [
+        { label: '品种', value: displayValue(detail.value?.grainName) },
+        { label: '水分', value: displayValue(detail.value?.grainWater, '%') },
+        { label: '入库时间', value: displayValue(detail.value?.dateOfIn) },
+        { label: '保管', value: displayValue(detail.value?.keeperName) },
+        { label: 'PH3', value: displayValue(detail.value?.housePh3, ' ppm'), className: 'info-tag--gas' },
+        { label: 'O₂', value: displayValue(detail.value?.oAir, '%'), className: 'info-tag--gas' },
+        { label: 'CO₂', value: displayValue(detail.value?.co2Air, ' ppm'), className: 'info-tag--gas' },
+        { label: '高温', value: formatTemperature(stats.maximum), className: 'info-tag--hot' },
+        { label: '低温', value: formatTemperature(stats.minimum), className: 'info-tag--cold' },
+        { label: '均温', value: formatTemperature(stats.average), className: 'info-tag--average' },
+        ...stats.layerAverages.map((value, index) => ({
+            label: `第 ${index + 1} 层均温`,
+            value: formatTemperature(value),
+            className: 'info-tag--layer'
+        })),
+        { label: '检测时间', value: displayValue(detail.value?.testTime), className: 'info-tag--time' }
+    ]
+})
 
 const matrixTables = computed(() => [
     {
@@ -146,6 +185,22 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
 .info-tag--gas {
     background: rgba(0, 188, 212, 0.12);
     border-color: rgba(0, 188, 212, 0.3);
+}
+
+.info-tag--hot {
+    background: rgba(229, 57, 53, 0.15);
+    border-color: rgba(229, 57, 53, 0.3);
+}
+
+.info-tag--cold {
+    background: rgba(30, 136, 229, 0.15);
+    border-color: rgba(30, 136, 229, 0.3);
+}
+
+.info-tag--average,
+.info-tag--layer {
+    background: rgba(67, 160, 71, 0.15);
+    border-color: rgba(67, 160, 71, 0.3);
 }
 
 .info-tag--time {
