@@ -38,7 +38,7 @@ if (!token) {
             id: 'guest',
             name: '访客',
             sex: '',
-            companyID: -1,
+            companyID: '-1',
             position: '访客',
             phone: '',
             priv: '',

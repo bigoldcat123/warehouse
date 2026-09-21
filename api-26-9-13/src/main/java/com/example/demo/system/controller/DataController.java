@@ -9,12 +9,12 @@ import com.example.demo.system.entity.DTO.DataDetailDTO;
 import com.example.demo.system.entity.DTO.HouseTempRecordDTO;
 import com.example.demo.system.entity.PO.House;
 import com.example.demo.system.entity.PO.ReceiverData;
-import com.example.demo.system.entity.PO.Warehouse;
+import com.example.demo.system.entity.PO.StoreName;
 import com.example.demo.system.entity.query.DataQuery;
 import com.example.demo.system.service.IDataService;
 import com.example.demo.system.service.IHouseService;
 import com.example.demo.system.service.IReceiverDataService;
-import com.example.demo.system.service.IWarehouseService;
+import com.example.demo.system.service.IStoreNameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +42,7 @@ public class DataController {
     @Autowired
     IHouseService houseService;
     @Autowired
-    IWarehouseService warehouseService;
+    IStoreNameService storeNameService;
     @PostMapping("{current}/{size}")
     public R data(@RequestBody(required = false) DataQuery query,@PathVariable Integer current,@PathVariable Integer size) {
 
@@ -52,11 +52,10 @@ public class DataController {
 
 
 
-        Integer companyID = details.getCompanyID();
+        String companyID = details.getCompanyID();
         if(!CurrentUser.isMainCompany()) {
-            Warehouse warehouse = warehouseService.getById(companyID);
             QueryWrapper<House> houseQueryWrapper1   = new QueryWrapper<>();
-            houseQueryWrapper1.eq("warehouseID", warehouse.getId());
+            houseQueryWrapper1.eq("warehouseID", companyID);
             queryWrapper.in("HouseNo", houseService.list(houseQueryWrapper1).stream().map(House::getHouseNo).toArray());
         }
         if(query != null && query.getFrom() != null) {
@@ -83,12 +82,12 @@ public class DataController {
             }
         }
         if(query != null && query.getWarehouseName() != null) {
-            QueryWrapper<Warehouse> warehouseQueryWrapper = new QueryWrapper<>();
-            warehouseQueryWrapper.like("warehouse_name", query.getWarehouseName());
-            List<Warehouse> list = warehouseService.list(warehouseQueryWrapper);
+            QueryWrapper<StoreName> storeNameQueryWrapper = new QueryWrapper<>();
+            storeNameQueryWrapper.like("StoreName", query.getWarehouseName());
+            List<StoreName> list = storeNameService.list(storeNameQueryWrapper);
             if(!list.isEmpty()){
                 QueryWrapper<House> houseQueryWrapper1 = new QueryWrapper<>();
-                houseQueryWrapper1.in("warehouseID", list.stream().map(Warehouse::getId).toArray());
+                houseQueryWrapper1.in("warehouseID", list.stream().map(StoreName::getStoreNo).toArray());
                 List<House> list1 = houseService.list(houseQueryWrapper1);
                 if(!list1.isEmpty()){
                     queryWrapper.in("HouseNo", list1.stream().map(House::getHouseNo).toArray());

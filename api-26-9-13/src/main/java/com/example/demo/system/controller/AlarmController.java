@@ -17,11 +17,11 @@ import com.example.demo.system.entity.DTO.AlarmExcelDTO;
 import com.example.demo.system.entity.PO.Alarm;
 import com.example.demo.system.entity.PO.House;
 import com.example.demo.system.entity.PO.UserAuth;
-import com.example.demo.system.entity.PO.Warehouse;
+import com.example.demo.system.entity.PO.StoreName;
 import com.example.demo.system.entity.query.AlarmQuery;
 import com.example.demo.system.service.IAlarmService;
 import com.example.demo.system.service.IHouseService;
-import com.example.demo.system.service.IWarehouseService;
+import com.example.demo.system.service.IStoreNameService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.val;
 import org.apache.poi.ss.usermodel.*;
@@ -52,7 +52,7 @@ public class AlarmController {
     IHouseService houseService;
 
     @Autowired
-    IWarehouseService warehouseService;
+    IStoreNameService storeNameService;
     @PostMapping("/{current}/{size}")
     public R query(@RequestBody(required = false) AlarmQuery query,
                    @PathVariable int current, @PathVariable int size) {
@@ -108,8 +108,9 @@ public class AlarmController {
         }
         if(query !=null && query.getWareHouseID() != null && !query.getWareHouseID().isEmpty()) {
 
-            List<Warehouse> warelist = warehouseService.list(new QueryWrapper<Warehouse>().eq("id", query.getWareHouseID()));
-            List<String> warename = warelist.stream().map(Warehouse::getWarehouseName).toList();
+            List<StoreName> storeNames = storeNameService.list(
+                    new QueryWrapper<StoreName>().eq("StoreNo", query.getWareHouseID()));
+            List<String> warename = storeNames.stream().map(StoreName::getStoreName).toList();
             if(!warename.isEmpty()){
                 v_warename = warename.getFirst();
             }else{
@@ -227,14 +228,17 @@ public class AlarmController {
             if (house == null) {
                 return;
             }
-            Integer warehouseID = house.getWarehouseID();
-            String warehouseID1=String.valueOf(warehouseID);
-            Warehouse warehouse = warehouseService.getById(warehouseID);
+            String warehouseID = house.getWarehouseID();
+            String warehouseID1 = warehouseID;
+            StoreName storeName = storeNameService.getById(warehouseID);
 
-            if(!map.containsKey(warehouseID1)) {
+            if(storeName != null && !map.containsKey(warehouseID1)) {
 
-                AlarmArgDTO dto = new AlarmArgDTO(warehouse.getWarehouseNo(),warehouse.getWarehouseName());
+                AlarmArgDTO dto = new AlarmArgDTO(storeName.getStoreNo(), storeName.getStoreName());
                 map.put(warehouseID1, dto);
+            }
+            if (storeName == null) {
+                return;
             }
                 String alertType = x.getAlertType();
                 String alertLevel = x.getAlertLevel();
@@ -274,14 +278,17 @@ public class AlarmController {
         List<Alarm> list = alarmService.list(queryWrapper);
         list.forEach(x -> {
             String houseNo = x.getHouseNo();
-            Integer warehouseID = houseService.getHouseByNo(houseNo).getWarehouseID();
-            String warehouseID1=String.valueOf(warehouseID);
-            Warehouse warehouse = warehouseService.getById(warehouseID);
+            String warehouseID = houseService.getHouseByNo(houseNo).getWarehouseID();
+            String warehouseID1 = warehouseID;
+            StoreName storeName = storeNameService.getById(warehouseID);
 
-            if(!map.containsKey(warehouseID1)) {
+            if(storeName != null && !map.containsKey(warehouseID1)) {
 
-                AlarmArgDTO dto = new AlarmArgDTO(warehouse.getWarehouseNo(),warehouse.getWarehouseName());
+                AlarmArgDTO dto = new AlarmArgDTO(storeName.getStoreNo(), storeName.getStoreName());
                 map.put(warehouseID1, dto);
+            }
+            if (storeName == null) {
+                return;
             }
             String alertType = x.getAlertType();
             String alertLevel = x.getAlertLevel();

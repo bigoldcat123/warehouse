@@ -14,19 +14,15 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th class="text-left">ID</th>
                     <th class="text-left">仓库编号</th>
                     <th class="text-left">仓库名</th>
-                    <th class="text-left">地址</th>
                     <th class="text-center">操作</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="(row, idx) in list?.records" :key="idx">
-                    <td class="text-white font-medium">{{ row.id }}</td>
                     <td class="text-white">{{ row.warehouseNo }}</td>
                     <td class="text-white">{{ row.warehouseName }}</td>
-                    <td class="text-[#b0d0f0]">{{ row.warehouseAddress || '--' }}</td>
                     <td class="text-center">
                         <div v-if="!currentUser.isGuest()" class="flex items-center justify-center gap-2">
                             <button class="action-btn action-btn--primary"
@@ -38,7 +34,7 @@
                                 编辑
                             </button>
                             <el-popconfirm title="确认删除?"
-                                @confirm="() => warehouse.deleteById(row.id!).then(() => fetchData())">
+                                @confirm="() => warehouse.deleteById(row.warehouseNo).then(() => fetchData())">
                                 <template #reference>
                                     <button class="action-btn action-btn--danger">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +49,7 @@
                     </td>
                 </tr>
                 <tr v-if="!list?.records || list.records.length === 0">
-                    <td colspan="5" class="text-center text-[#b0d0f0] py-10">
+                    <td colspan="3" class="text-center text-[#b0d0f0] py-10">
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

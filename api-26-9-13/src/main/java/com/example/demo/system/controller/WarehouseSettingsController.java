@@ -40,7 +40,7 @@ public class WarehouseSettingsController {
      * @param warehouseID 仓库ID（可选，过滤该仓库下的仓房设置）
      */
     @GetMapping
-    public R list(Integer current, Integer size, String houseNo, Integer warehouseID) {
+    public R list(Integer current, Integer size, String houseNo, String warehouseID) {
         QueryWrapper<WarehouseSettings> queryWrapper = new QueryWrapper<>();
         if (houseNo != null && !houseNo.isEmpty()) {
             queryWrapper.eq("house_no", houseNo);
@@ -67,7 +67,7 @@ public class WarehouseSettingsController {
      * @return 未设置的仓房列表
      */
     @GetMapping("/unset/{warehouseId}")
-    public R listUnset(@PathVariable Integer warehouseId) {
+    public R listUnset(@PathVariable String warehouseId) {
         QueryWrapper<House> houseQuery = new QueryWrapper<>();
         houseQuery.eq("warehouseID", warehouseId);
         List<House> houses = houseService.list(houseQuery);

@@ -41,7 +41,7 @@ public class HouseController {
     IHouseService houseService;
 
     @Autowired
-    IWarehouseService warehouseService;
+    IStoreNameService storeNameService;
     @Autowired
     IEntryService entryService;
     @Autowired
@@ -90,7 +90,7 @@ public class HouseController {
 
 
     @GetMapping
-    public R findAll(Integer current, Integer size,Integer wareHouseId,String houseNo) {
+    public R findAll(Integer current, Integer size, String wareHouseId, String houseNo) {
 
         QueryWrapper<House> queryWrapper = new QueryWrapper<>();
         if(wareHouseId !=null)
@@ -111,7 +111,7 @@ public class HouseController {
     }
 
     @GetMapping("yuntu")
-    public R listAllYuntu(Integer wareHouseId) {
+    public R listAllYuntu(String wareHouseId) {
         QueryWrapper<House> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("warehouseID", wareHouseId);
 
@@ -124,13 +124,13 @@ public class HouseController {
         return R.ok(list);
     }
     @GetMapping("/wind")
-    public R findAllWind(Integer current, Integer size,Integer wareHouseId,String houseNo) {
+    public R findAllWind(Integer current, Integer size, String wareHouseId, String houseNo) {
 
-        Warehouse warehouse = warehouseService.getById(wareHouseId);
+        StoreName storeName = storeNameService.getById(wareHouseId);
         QueryWrapper<TongfengDev> queryWrapper = new QueryWrapper<>();
 //        if (!CurrentUser.isMainCompany()) {
-        if(warehouse !=null)
-            queryWrapper.eq("WareHouseNo",warehouse.getWarehouseNo());
+        if(storeName != null)
+            queryWrapper.eq("WareHouseNo", storeName.getStoreNo());
         else {
             R.errorShow("每天这个warehouse！");
         }
@@ -151,8 +151,8 @@ public class HouseController {
 
     @PostMapping()
     public R add (@RequestBody House house) {
-        Warehouse warehouse = warehouseService.getById(house.getWarehouseID());
-        if(warehouse==null){
+        StoreName storeName = storeNameService.getById(house.getWarehouseID());
+        if(storeName == null){
             return R.error();
         }
 
@@ -199,7 +199,7 @@ public class HouseController {
     }
 
     @GetMapping("/kv/{warehouseId}")
-    public R findByWarehouseId(@PathVariable Long warehouseId) {
+    public R findByWarehouseId(@PathVariable String warehouseId) {
         QueryWrapper<House> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("warehouseID", warehouseId);
         Object[] array = houseService.list(queryWrapper).stream().map(x -> {

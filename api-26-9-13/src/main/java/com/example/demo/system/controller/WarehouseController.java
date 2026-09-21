@@ -4,23 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.common.CurrentUser;
 import com.example.demo.common.R;
-import com.example.demo.system.entity.PO.Alarm;
-import com.example.demo.system.entity.PO.Data;
 import com.example.demo.system.entity.PO.House;
-import com.example.demo.system.entity.PO.Warehouse;
-import com.example.demo.system.service.IAlarmService;
-import com.example.demo.system.service.IDataService;
+import com.example.demo.system.entity.PO.StoreName;
 import com.example.demo.system.service.IHouseService;
-import com.example.demo.system.service.IWarehouseService;
-import com.mysql.cj.log.Log;
+import com.example.demo.system.service.IStoreNameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * <p>
@@ -37,43 +30,38 @@ import java.util.Objects;
 public class WarehouseController {
 
     @Autowired
-    IWarehouseService warehouseService;
+    IStoreNameService storeNameService;
     @Autowired
     IHouseService houseService;
 
 
-    @Autowired
-    IDataService dataService;
-    @Autowired
-    IAlarmService alarmService;
-
     @GetMapping()
     public R findAll(Integer current, Integer size) {
-        Page<Warehouse> page = warehouseService.page(new Page<Warehouse>(current, size), null);
+        Page<StoreName> page = storeNameService.page(new Page<>(current, size), null);
         return R.ok(page);
     }
     @GetMapping("kv")
     public R kv() {
-        Object[] array = warehouseService.list().stream().map(x -> {
+        Object[] array = storeNameService.list().stream().map(x -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("key", x.getId());
-            map.put("value", x.getWarehouseName());
+            map.put("key", x.getStoreNo());
+            map.put("value", x.getStoreName());
             return map;
         }).toArray();
         return R.ok(array);
     }
     @GetMapping("belong/kv")
     public R belongKv() {
-        QueryWrapper<Warehouse> queryWrapper = new QueryWrapper<>();
-        Integer companyID = CurrentUser.get().getCompanyID();
+        QueryWrapper<StoreName> queryWrapper = new QueryWrapper<>();
+        String companyID = CurrentUser.get().getCompanyID();
         if(!CurrentUser.isMainCompany()) {
-            queryWrapper.eq("id", companyID);
+            queryWrapper.eq("StoreNo", companyID);
         }
-        Object[] array = warehouseService.list(queryWrapper).stream().map(x -> {
+        Object[] array = storeNameService.list(queryWrapper).stream().map(x -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("key", x.getId());
-            map.put("value", x.getWarehouseName());
-            map.put("no", x.getWarehouseNo());
+            map.put("key", x.getStoreNo());
+            map.put("value", x.getStoreName());
+            map.put("no", x.getStoreNo());
             return map;
         }).toArray();
         return R.ok(array);
@@ -81,22 +69,22 @@ public class WarehouseController {
 
 
     @PostMapping()
-    public R add (@RequestBody Warehouse warehouse) {
-        warehouseService.save(warehouse);
+    public R add (@RequestBody StoreName storeName) {
+        storeNameService.save(storeName);
         return R.ok();
     }
 
 
     @PutMapping
-    public R update (@RequestBody Warehouse warehouse) {
-        boolean b = warehouseService.updateById(warehouse);
+    public R update (@RequestBody StoreName storeName) {
+        boolean b = storeNameService.updateById(storeName);
         if (!b) {
             return R.error();
         }
         return R.ok();
     }
     @DeleteMapping("{id}")
-    public R delete (@PathVariable Long id) {
+    public R delete (@PathVariable String id) {
 
 
 
@@ -104,7 +92,7 @@ public class WarehouseController {
         List<House> list = houseService.list(new QueryWrapper<House>().eq("warehouseID", id));
 
 
-        boolean b = warehouseService.removeById(id);
+        boolean b = storeNameService.removeById(id);
         boolean warehouseID = houseService.remove(new QueryWrapper<House>().eq("warehouseID", id));
         if (b){
 

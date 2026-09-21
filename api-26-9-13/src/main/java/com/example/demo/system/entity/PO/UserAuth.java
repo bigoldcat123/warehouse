@@ -60,7 +60,7 @@ public class UserAuth implements Serializable {
      * 更新事件
      */
     @TableField("companyID")
-    private Integer companyID;
+    private String companyID;
 
     @TableField("_position")
     private String position;

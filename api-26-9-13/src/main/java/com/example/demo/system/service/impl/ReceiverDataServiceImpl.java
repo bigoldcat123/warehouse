@@ -7,13 +7,13 @@ import com.example.demo.system.entity.PO.HouseInfor;
 import com.example.demo.system.entity.PO.ReceiverData;
 import com.example.demo.system.entity.PO.PointDefine;
 import com.example.demo.system.entity.PO.House;
-import com.example.demo.system.entity.PO.Warehouse;
+import com.example.demo.system.entity.PO.StoreName;
 import com.example.demo.system.mapper.ReceiverDataMapper;
 import com.example.demo.system.service.IHouseInforService;
 import com.example.demo.system.service.IHouseService;
 import com.example.demo.system.service.IPointDefineService;
 import com.example.demo.system.service.IReceiverDataService;
-import com.example.demo.system.service.IWarehouseService;
+import com.example.demo.system.service.IStoreNameService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
     @Autowired
     IHouseInforService houseInforService;
     @Autowired
-    IWarehouseService warehouseService;
+    IStoreNameService storeNameService;
 
     @Override
     public List<DataDTO> parseDataDTO(List<ReceiverData> records) {
@@ -70,9 +70,9 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
         House house = houseService.getHouseByNo(receiverData.getHouseNo());
         if (house != null) {
             dto.setHouseName(house.getHouseName());
-            Warehouse warehouse = warehouseService.getById(house.getWarehouseID());
-            if (warehouse != null) {
-                dto.setWareHouseName(warehouse.getWarehouseName());
+            StoreName storeName = storeNameService.getById(house.getWarehouseID());
+            if (storeName != null) {
+                dto.setWareHouseName(storeName.getStoreName());
             }
         }
 

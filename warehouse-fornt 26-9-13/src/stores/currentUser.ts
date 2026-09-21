@@ -29,7 +29,7 @@ export const useCurrentUserStore = defineStore('currentUser', () => {
     return currentUser.value?.detail.username === 'guest'
   }
   function isMainComp() {
-    return currentUser.value?.detail.companyID == -1
+    return currentUser.value?.detail.companyID === '-1'
   }
   function getPriv() {
     return currentUser.value?.detail.priv.split(',')

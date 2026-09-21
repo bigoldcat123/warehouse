@@ -27,9 +27,6 @@
         <el-form-item label="仓库名" prop="warehouseName">
           <el-input v-model="ruleForm.warehouseName" placeholder="请输入仓库名" class="dark-input" />
         </el-form-item>
-        <el-form-item label="仓库地址" prop="warehouseAddress">
-          <el-input v-model="ruleForm.warehouseAddress" placeholder="请输入仓库地址" class="dark-input" />
-        </el-form-item>
         <el-form-item>
           <div class="flex items-center gap-3">
             <button type="button" class="btn-primary" @click="submitForm(ruleFormRef)">
@@ -74,13 +71,6 @@ onUpdated(() => {
 })
 const ruleFormRef = ref<FormInstance>()
 
-const validateWarehouseAddr = (rule: any, value: any, callback: any) => {
-  if (!value) {
-    return callback(new Error('请输入地址'))
-  }
-  return callback()
-}
-
 const validateWareHouseNo = (rule: any, value: any, callback: any) => {
   if (value === '') {
     callback(new Error('请输入仓库编号'))
@@ -97,14 +87,12 @@ const validateWarehouseName = (rule: any, value: any, callback: any) => {
 
 const ruleForm = reactive({
   warehouseNo: '',
-  warehouseName: '',
-  warehouseAddress: '',
+  warehouseName: ''
 })
 
 const rules = reactive<FormRules<typeof ruleForm>>({
   warehouseNo: [{ validator: validateWareHouseNo, trigger: 'blur' }],
-  warehouseName: [{ validator: validateWarehouseName, trigger: 'blur' }],
-  warehouseAddress: [{ validator: validateWarehouseAddr, trigger: 'blur' }],
+  warehouseName: [{ validator: validateWarehouseName, trigger: 'blur' }]
 })
 
 
@@ -116,7 +104,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
       warehouse.add(ruleForm).then(res => {
         emit('refresh')
       })
-      ruleForm.warehouseAddress = ''
       ruleForm.warehouseName = ''
       ruleForm.warehouseNo = ''
       emit('close')

@@ -52,7 +52,7 @@ public class House implements Serializable {
      * 所属仓库
      */
     @TableField("warehouseID")
-    private Integer warehouseID;
+    private String warehouseID;
 
     /**
      * 仓房名

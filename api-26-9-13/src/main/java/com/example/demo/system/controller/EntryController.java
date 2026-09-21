@@ -7,7 +7,6 @@ import com.example.demo.common.R;
 import com.example.demo.system.entity.PO.Alarm;
 import com.example.demo.system.entity.PO.Entry;
 import com.example.demo.system.entity.PO.House;
-import com.example.demo.system.entity.PO.Warehouse;
 import com.example.demo.system.entity.query.EntryQuery;
 import com.example.demo.system.service.IEntryService;
 import com.example.demo.system.service.IHouseService;
@@ -68,7 +67,7 @@ public class EntryController {
     //@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "0") Integer size
     @PostMapping("/{current}/{size}")
     public R list(@RequestBody EntryQuery entryQuery, @PathVariable Integer current, @PathVariable Integer size) {
-        Integer companyID = CurrentUser.get().getCompanyID();
+        String companyID = CurrentUser.get().getCompanyID();
         QueryWrapper<House> houseQueryWrapper = new QueryWrapper<>();
         if(!CurrentUser.isMainCompany()){
             houseQueryWrapper.eq("warehouseID", companyID);

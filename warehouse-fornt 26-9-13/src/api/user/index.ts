@@ -7,7 +7,7 @@ export interface type_User {
     password?:string
     name:string
     sex:string
-    companyID:number
+    companyID:string
     position:string,
     phone:string
     priv:string
@@ -36,7 +36,7 @@ class User {
     changePasswd(oldP:string,newP:string){
         return server.post<ResponseData<any>>(`${preFix}/passwd`,{oldP,newP})
     }
-    getUsersByWarehouseId(warehouseId:number) {
+    getUsersByWarehouseId(warehouseId:string) {
         return server.get<ResponseData<any>>(`${preFix}/kv/getUsersByWarehouseId/${warehouseId}`)
     }
 }

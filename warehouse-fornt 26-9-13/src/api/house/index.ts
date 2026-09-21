@@ -5,7 +5,7 @@ export type type_House = {
     id?:number,
     houseNo:string,
     houseName:string,
-    warehouseID:number,
+    warehouseID:string,
     houseAddr:string,
     houseType:'平房仓' | '筒仓' | string,
     z:number,
@@ -78,7 +78,7 @@ class House  {
     kv() {
         return server.get(preFix + '/kv')
     }
-    findByWarehouseId(id:number) {
+    findByWarehouseId(id:string) {
         return server.get(preFix + '/kv/' + id)
     }
     getTongFengInfo(id:number) {

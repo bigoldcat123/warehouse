@@ -33,7 +33,7 @@ declare type UserDetail = {
     id:string
     name: string
      sex:string;
-    companyID:number;
+    companyID:string;
      position:string;
      phone:string;
      priv:string;

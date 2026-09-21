@@ -89,7 +89,7 @@ public class UserAuthController {
         return R.ok(array);
     }
     @GetMapping("kv/getUsersByWarehouseId/{warehouseId}")
-    public R getUsersByWarehouseId(@PathVariable Long warehouseId) {
+    public R getUsersByWarehouseId(@PathVariable String warehouseId) {
         QueryWrapper<UserAuth> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("companyID", warehouseId);
         Object[] array = userAuthService.list(queryWrapper).stream().map(x -> {

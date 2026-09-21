@@ -2,10 +2,8 @@ import server from "..";
 
 const preFix = 'warehouse'
 export type type_WareHouse = {
-    id?:number,
     warehouseNo:string,
-    warehouseName:string,
-    warehouseAddress:string
+    warehouseName:string
 }
 class WareHouse {
      list(current:number,size:number) { 
@@ -14,7 +12,7 @@ class WareHouse {
     add(warehouse:type_WareHouse) {
         return server.post(preFix,warehouse)
     }
-    deleteById(id:number) {
+    deleteById(id:string) {
         return server.delete(`${preFix}/${id}`)
     }
     update(warehouse:type_WareHouse) {

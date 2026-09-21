@@ -193,7 +193,7 @@ const currentpage = ref(1)
 const size = ref(import.meta.env.ENV_PAGESIZE)
 const waerhouseKv = ref<any[]>([])
 const houseKv = ref<any[]>([])
-const waerhouseID = ref<number | undefined>(undefined)
+const waerhouseID = ref<string | undefined>(undefined)
 const houseID = ref<number | undefined>(undefined)
 const from = ref('')
 const to = ref('')
@@ -218,7 +218,7 @@ warehouse.belongKv().then(res => {
         wareHouseName: item.value,
         waerhouseId: item.key
     })
-    waerhouseID.value = Number.parseInt( currentWareHouse.getWareHouse().waerhouseId as string)
+    waerhouseID.value = currentWareHouse.getWareHouse().waerhouseId as string
     warehouseChange(waerhouseID.value)
     fetchData()
 })

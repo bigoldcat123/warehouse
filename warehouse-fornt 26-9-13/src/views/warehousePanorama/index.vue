@@ -50,7 +50,7 @@ let animationFrame = 0
 
 async function loadCurrentWarehouseName() {
   const companyID = currentUserStore.getUserDetail()?.companyID
-  if (companyID === -1) {
+  if (companyID === '-1') {
     currentWarehouseName.value = '总公司'
     return
   }
@@ -61,7 +61,7 @@ async function loadCurrentWarehouseName() {
   try {
     const response = await warehouseApi.belongKv()
     const warehouses = response.data?.value as Array<{ key: number; value: string }> | undefined
-    currentWarehouseName.value = warehouses?.find(item => Number(item.key) === Number(companyID))?.value
+    currentWarehouseName.value = warehouses?.find(item => String(item.key) === companyID)?.value
       || `仓库 ${companyID}`
   } catch {
     currentWarehouseName.value = `仓库 ${companyID}`

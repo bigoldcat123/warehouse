@@ -21,7 +21,7 @@ public class CurrentUser {
 
     private String name;
     private String sex;
-    private Integer companyID;
+    private String companyID;
     private String position;
     private String phone;
     private String priv;
@@ -30,7 +30,7 @@ public class CurrentUser {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (CurrentUser) authentication.getDetails();
     } public static boolean isMainCompany() {
-        return get().companyID == -1;
+        return "-1".equals(get().companyID);
     }
 
     public static CurrentUser getDevFakeCurrentUser() {
@@ -39,7 +39,7 @@ public class CurrentUser {
         currentUser.setName("admin");
         currentUser.setUsername("admin");
         currentUser.setEmail("admin@qq.com");
-        currentUser.setCompanyID(0);
+        currentUser.setCompanyID("0");
         currentUser.setPosition("1");
         currentUser.setPhone("1388888888");
         currentUser.setPriv("1");
@@ -51,7 +51,7 @@ public class CurrentUser {
         currentUser.setId(-1);
         currentUser.setName(username);
         currentUser.setUsername(username);
-        currentUser.setCompanyID(-1);
+        currentUser.setCompanyID("-1");
         currentUser.setPriv("guest");
         return currentUser;
     }

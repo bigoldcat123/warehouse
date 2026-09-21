@@ -21,17 +21,11 @@
       <el-form ref="ruleFormRef" style="max-width: 600px" :model="ruleForm" status-icon :rules="rules" label-width="90px"
         class="dark-form">
 
-        <el-form-item label="仓库 ID">
-          <el-input disabled v-model="ruleForm.id" class="dark-input dark-input--disabled" />
-        </el-form-item>
         <el-form-item label="仓库编号" prop="warehouseNo">
-          <el-input v-model="ruleForm.warehouseNo" placeholder="请输入仓库编号" class="dark-input" />
+          <el-input disabled v-model="ruleForm.warehouseNo" class="dark-input dark-input--disabled" />
         </el-form-item>
         <el-form-item label="仓库名" prop="warehouseName">
           <el-input v-model="ruleForm.warehouseName" placeholder="请输入仓库名" class="dark-input" />
-        </el-form-item>
-        <el-form-item label="仓库地址" prop="warehouseAddress">
-          <el-input v-model="ruleForm.warehouseAddress" placeholder="请输入仓库地址" class="dark-input" />
         </el-form-item>
         <el-form-item>
           <div class="flex items-center gap-3">
@@ -56,7 +50,7 @@
 </template>
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus';
-import { onMounted, onUpdated, reactive, ref } from 'vue'
+import { onUpdated, reactive, ref } from 'vue'
 import warehouse, { type type_WareHouse } from '@/api/warehouse';
 const visible = ref(false)
 const prop = defineProps<{
@@ -77,18 +71,9 @@ const ruleFormRef = ref<FormInstance>()
 
 onUpdated(() => {
   visible.value = prop.dialogVisible
-  ruleForm.id = prop.warehouse!.id as number
-  ruleForm.warehouseAddress = prop.warehouse!.warehouseAddress
   ruleForm.warehouseName = prop.warehouse!.warehouseName
   ruleForm.warehouseNo = prop.warehouse!.warehouseNo
 })
-
-const validateWarehouseAddr = (rule: any, value: any, callback: any) => {
-  if (!value) {
-    return callback(new Error('请输入地址'))
-  }
-  return callback()
-}
 
 const validateWareHouseNo = (rule: any, value: any, callback: any) => {
   if (value === '') {
@@ -105,16 +90,13 @@ const validateWarehouseName = (rule: any, value: any, callback: any) => {
 }
 
 const ruleForm = reactive({
-  id: 0,
   warehouseNo: '',
-  warehouseName: '',
-  warehouseAddress: '',
+  warehouseName: ''
 })
 
 const rules = reactive<FormRules<typeof ruleForm>>({
   warehouseNo: [{ validator: validateWareHouseNo, trigger: 'blur' }],
-  warehouseName: [{ validator: validateWarehouseName, trigger: 'blur' }],
-  warehouseAddress: [{ validator: validateWarehouseAddr, trigger: 'blur' }],
+  warehouseName: [{ validator: validateWarehouseName, trigger: 'blur' }]
 })
 
 
@@ -126,7 +108,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
       warehouse.update(ruleForm).then(res => {
         emit('refresh')
       })
-      ruleForm.warehouseAddress = ''
       ruleForm.warehouseName = ''
       ruleForm.warehouseNo = ''
       emit('close')
