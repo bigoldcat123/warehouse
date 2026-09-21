@@ -65,6 +65,9 @@ public class DataController {
         if(query != null && query.getTo() != null) {
             queryWrapper.le("TestDate", query.getTo());
         }
+        if(query != null && query.getHouseNo() != null && !query.getHouseNo().isBlank()) {
+            queryWrapper.eq("HouseNo", query.getHouseNo());
+        }
 //        if(query != null && query.getWarehouseName() != null) {
 //            queryWrapper.le("TestDate", query.getTo());
 //        }

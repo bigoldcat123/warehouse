@@ -12,6 +12,10 @@
             <input type="datetime-local" v-model="to" class="custom-input" />
         </div>
         <div class="filter-item">
+            <label class="filter-label">仓房编号</label>
+            <input type="text" v-model="houseNo" placeholder="请输入仓房编号" class="custom-input" />
+        </div>
+        <div class="filter-item">
             <label class="filter-label">仓房名</label>
             <input type="text" v-model="houseName" placeholder="请输入仓房名" class="custom-input" />
         </div>
@@ -147,12 +151,15 @@ import data, { type type_Data } from '@/api/data';
 import warehouse from '@/api/warehouse';
 import { useCurrentUserStore } from '@/stores/currentUser';
 import { useCurrentWareHouse } from '@/stores/currentWareHouse';
+import { useRoute } from 'vue-router';
+const route = useRoute()
 const currentWareHouse = useCurrentWareHouse()
 const kv = ref<any[]>([])
 const currentUser = useCurrentUserStore()
 const list = ref<Page<type_Data>>()
 const from = ref<string | null>(null)
 const to = ref<string | null>(null)
+const houseNo = ref<string>((route.query.houseNo as string) || '')
 const e = '@#$%^&*()_+'
 const houseName = ref<string | null>(null)
 const warehouseName = ref<string | null>(null)
@@ -161,6 +168,7 @@ const size = ref(10)
 const reset = () => {
     from.value = ''
     to.value = ''
+    houseNo.value = ''
     houseName.value = ''
     warehouseName.value = ''
     fetchData()
@@ -211,7 +219,8 @@ const query = () => {
     fetchData()
 }
 function fetchData() {
-    data.list(from.value, to.value, houseName.value, warehouseName.value == e ? null : warehouseName.value, currentpage.value, size.value).then(res => {
+    const selectedWarehouse = houseNo.value ? null : (warehouseName.value == e ? null : warehouseName.value)
+    data.list(from.value, to.value, houseName.value, selectedWarehouse, currentpage.value, size.value, houseNo.value).then(res => {
         list.value = res.data.value
     })
 }

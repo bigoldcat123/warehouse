@@ -50,10 +50,11 @@ export type type_TempRecord = {
 }
 
 class Data {
-    list(from?:string | null,to?:string| null,houseName?:string| null,warehouseName?:string| null,current?:number,size?:number) {
+    list(from?:string | null,to?:string| null,houseName?:string| null,warehouseName?:string| null,current?:number,size?:number,houseNo?:string | null) {
         return server.post<ResponseData<Page<type_Data>>>(preFix + `/${current}/${size}`, {
             from: formatServerDateTime(from),
             to: formatServerDateTime(to),
+            houseNo,
             houseName,
             warehouseName
         })
