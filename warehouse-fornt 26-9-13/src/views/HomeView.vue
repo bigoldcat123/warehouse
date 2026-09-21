@@ -5,17 +5,11 @@ import { useRouter } from 'vue-router';
 import auth from '@/api/auth';
 import server from '@/api';
 import {
-    Menu as IconMenu,
-    Location,
-    Setting,
     Avatar,
     Bell,
     Box,
     Flag,
     EditPen,
-    CloseBold,
-    VideoCamera,
-    PictureFilled,
     ArrowLeft,
     Odometer
 } from '@element-plus/icons-vue'
@@ -51,7 +45,7 @@ const v = ref(false)
             <div class="sidebar__brand py-3">
                 <img class="object-contain" src="/banner1.png" alt="logo">
             </div>
-            <el-menu class="sidebar-menu" :default-active="'/house'" :router="true"
+            <el-menu class="sidebar-menu" :default-active="$route.path" :router="true"
                 background-color="transparent" text-color="#b0d0f0" active-text-color="#ffffff">
                 <el-menu-item index="/warehousePanorama">
                     <el-icon>
@@ -60,34 +54,7 @@ const v = ref(false)
                     <span>回首页</span>
                 </el-menu-item>
 
-                <el-menu-item index="/house">
-                    <el-icon>
-                        <Location />
-                    </el-icon>
-                    <span>仓房管理</span>
-                </el-menu-item>
-
-                <el-menu-item index="/warehouseSettings">
-                    <el-icon>
-                        <EditPen />
-                    </el-icon>
-                    <span>基础信息设置</span>
-                </el-menu-item>
-
-                <!-- <el-menu-item index="/wind">
-                    <el-icon>
-                        <VideoCamera />
-                    </el-icon>
-                    <span>通风状态</span>
-                </el-menu-item>
-                <el-menu-item index="/yuntu">
-                    <el-icon>
-                        <PictureFilled />
-                    </el-icon>
-                    <span>云图播放</span>
-                </el-menu-item> -->
-
-                <el-menu-item v-if="currentUser.isMainComp()" index="/alarmarg">
+                <el-menu-item index="/alarmarg">
                     <el-icon>
                         <Flag />
                     </el-icon>
@@ -101,24 +68,20 @@ const v = ref(false)
                     <span>报警信息</span>
                 </el-menu-item>
 
-                <el-menu-item index="/data">
+                <el-menu-item index="/warehouseSettings">
                     <el-icon>
-                        <IconMenu />
+                        <EditPen />
                     </el-icon>
-                    <span>数据查看</span>
+                    <span>基础信息设置</span>
                 </el-menu-item>
-                <!-- <el-menu-item index="/gas" disabled>
+
+                <el-menu-item index="/fumigationSettings" disabled>
                     <el-icon>
                         <Odometer />
                     </el-icon>
-                    <span>气体浓度</span>
-                </el-menu-item> -->
-                <el-menu-item index="/entry">
-                    <el-icon>
-                        <setting />
-                    </el-icon>
-                    <span>仓房入库管理</span>
+                    <span>熏蒸设置（未实现）</span>
                 </el-menu-item>
+
                 <el-menu-item index="/warehouse">
                     <el-icon>
                         <Box />
@@ -133,9 +96,6 @@ const v = ref(false)
                     </el-icon>
                     <span>用户管理</span>
                 </el-menu-item>
-
-
-
             </el-menu>
         </aside>
 
