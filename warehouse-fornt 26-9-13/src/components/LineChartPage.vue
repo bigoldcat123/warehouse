@@ -1,5 +1,5 @@
 <template>
-    <div class="line-page">
+    <div :class="['line-page', { 'line-page--embedded': props.embedded }]">
         <!-- 顶部：仓房信息 + 模式切换 -->
         <header class="line-header">
             <div class="line-header__title">
@@ -785,12 +785,39 @@ onUnmounted(() => {
 /* 图表区 */
 .line-chart-wrap {
     flex: 1;
+    min-width: 0;
     background: linear-gradient(145deg, #2968a8 0%, #1e5f8a 100%);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     position: relative;
     height: calc(100vh - 220px);
     min-height: 500px;
+}
+
+.line-page--embedded {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.line-page--embedded .line-header {
+    flex-shrink: 0;
+}
+
+.line-page--embedded .line-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.line-page--embedded .line-controls {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.line-page--embedded .line-chart-wrap {
+    height: auto;
+    min-height: 0;
 }
 .line-chart {
     width: 100%;
