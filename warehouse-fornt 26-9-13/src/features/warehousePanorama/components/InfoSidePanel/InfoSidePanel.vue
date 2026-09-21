@@ -45,9 +45,9 @@
     </dl>
 
     <div class="house-actions">
-      <button type="button" @click="openHouseView('/granary3d')">查看温度图</button>
-      <button type="button" @click="openHouseView('/humidity3d')">查看湿度图</button>
-      <button type="button" @click="openHouseView('/gas3d')">查看气体浓度图</button>
+      <button type="button" @click="openVisualization('temperature')">查看温度图</button>
+      <button type="button" @click="openVisualization('humidity')">查看湿度图</button>
+      <button type="button" @click="openVisualization('ph3')">查看气体浓度图</button>
       <button type="button" @click="openHouseView('/data')">查看数据</button>
     </div>
   </aside>
@@ -71,6 +71,19 @@ function openHouseView(path: string) {
     query: {
       houseNo: selectedHouse.value.houseNo,
       houseName: `仓房 ${selectedHouse.value.houseNo}`,
+    },
+  })
+}
+
+function openVisualization(metric: 'temperature' | 'humidity' | 'ph3') {
+  if (!selectedHouse.value) return
+  router.push({
+    path: '/warehouseVisualization',
+    query: {
+      houseNo: selectedHouse.value.houseNo,
+      houseName: `仓房 ${selectedHouse.value.houseNo}`,
+      metric,
+      view: '3d',
     },
   })
 }

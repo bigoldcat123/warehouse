@@ -142,6 +142,10 @@ const router = createRouter({
       name:'warehousePanorama',
       component:() => import('@/views/warehousePanorama/index.vue')
     },{
+      path:'/warehouseVisualization',
+      name:'warehouseVisualization',
+      component:() => import('@/views/warehouseVisualization/index.vue')
+    },{
       path:'/humidity3d',
       name:'humidity3d',
       component:() => import('@/views/humidity3d/index.vue')

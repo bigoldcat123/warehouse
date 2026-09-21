@@ -22,7 +22,7 @@
                         {{ m.label }}
                     </button>
                 </div>
-                <button class="back-btn" @click="router.push('/warehousePanorama')">返回全景图</button>
+                <button v-if="!props.embedded" class="back-btn" @click="router.push('/warehousePanorama')">返回全景图</button>
             </div>
         </header>
 
@@ -179,7 +179,9 @@ const LINE_METRICS: Record<MetricKey, LineMetricConfig> = {
     },
 }
 
-const props = defineProps<{ metric: MetricKey }>()
+const props = withDefaults(defineProps<{ metric: MetricKey; embedded?: boolean }>(), {
+    embedded: false,
+})
 const cfg = computed(() => LINE_METRICS[props.metric])
 
 // ========= 路由参数 =========
