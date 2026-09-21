@@ -11,15 +11,18 @@
                 </span>
                 <span v-if="houseNo" class="text-[#b0d0f0] text-sm ml-1">{{ cfg.title }}</span>
             </div>
-            <div v-if="houseNo" class="line-header__modes">
-                <button
-                    v-for="m in modes"
-                    :key="m.key"
-                    :class="['mode-btn', { 'mode-btn--active': mode === m.key }]"
-                    @click="mode = m.key"
-                >
-                    {{ m.label }}
-                </button>
+            <div class="line-header__actions">
+                <div v-if="houseNo" class="line-header__modes">
+                    <button
+                        v-for="m in modes"
+                        :key="m.key"
+                        :class="['mode-btn', { 'mode-btn--active': mode === m.key }]"
+                        @click="mode = m.key"
+                    >
+                        {{ m.label }}
+                    </button>
+                </div>
+                <button class="back-btn" @click="router.push('/warehousePanorama')">返回全景图</button>
             </div>
         </header>
 
@@ -136,7 +139,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
 import type { AxiosResponse } from 'axios'
@@ -181,6 +184,7 @@ const cfg = computed(() => LINE_METRICS[props.metric])
 
 // ========= 路由参数 =========
 const route = useRoute()
+const router = useRouter()
 const houseNo = computed(() => (route.query.houseNo as string) || '')
 const houseName = computed(() => (route.query.houseName as string) || '')
 const stringCount = ref(1)
@@ -541,12 +545,31 @@ onUnmounted(() => {
     align-items: center;
     gap: 8px;
 }
+.line-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 .line-header__modes {
     display: flex;
     gap: 6px;
     background: rgba(0, 0, 0, 0.2);
     padding: 4px;
     border-radius: 6px;
+}
+.back-btn {
+    padding: 7px 14px;
+    color: #d8ecff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+}
+.back-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
 }
 .mode-btn {
     padding: 6px 18px;

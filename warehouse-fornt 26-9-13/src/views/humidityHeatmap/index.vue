@@ -3,7 +3,7 @@
         <template #title>{{ houseName || houseNo || '粮仓湿度俯视热力图' }}</template>
         <template #subtitle>湿度俯视热力图</template>
         <template #actions>
-            <div @click="$router.push('/house')" class="size-[20px] cursor-pointer"></div>
+            <div @click="$router.push('/warehousePanorama')" class="size-[20px] cursor-pointer"></div>
         </template>
 
         <CubeHeatmap :house-no="houseNo" metric="humidity" />

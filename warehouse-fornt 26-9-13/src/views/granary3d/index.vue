@@ -3,7 +3,7 @@
         <template #title>{{ houseName || houseNo || '3D粮仓温度' }}</template>
         <template #subtitle>{{ SENSOR_METRICS.temperature.subtitle }}</template>
         <template #actions>
-            <div @click="$router.push('/house')" class="size-[20px] cursor-pointer"></div>
+            <div @click="$router.push('/warehousePanorama')" class="size-[20px] cursor-pointer"></div>
         </template>
 
         <Granary3d :house-no="houseNo" />
