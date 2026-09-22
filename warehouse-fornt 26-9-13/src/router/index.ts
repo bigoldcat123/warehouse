@@ -27,6 +27,11 @@ const router = createRouter({
           component: () => import('@/views/warehouseSettings/index.vue')
         },
         {
+          path: '/xunzhengSettings',
+          name: 'xunzhengSettings',
+          component: () => import('@/views/xunzhengSettings/index.vue')
+        },
+        {
           path: '/alarm',
           name: 'alarm',
           component: () => import('@/views/alarm/index.vue')

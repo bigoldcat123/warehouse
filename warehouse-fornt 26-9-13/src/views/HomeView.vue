@@ -75,11 +75,11 @@ const v = ref(false)
                     <span>基础信息设置</span>
                 </el-menu-item>
 
-                <el-menu-item index="/fumigationSettings" disabled>
+                <el-menu-item index="/xunzhengSettings">
                     <el-icon>
                         <Odometer />
                     </el-icon>
-                    <span>熏蒸设置（未实现）</span>
+                    <span>熏蒸设置</span>
                 </el-menu-item>
 
                 <el-menu-item index="/warehouse">
