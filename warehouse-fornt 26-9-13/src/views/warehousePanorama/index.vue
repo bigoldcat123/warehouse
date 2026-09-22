@@ -146,13 +146,13 @@ const U_HOUSE_DEPTH = 14
 const FOURTH_AREA_Z = 24
 const FOURTH_TOWER_Z = FOURTH_AREA_Z - U_HOUSE_DEPTH / 4
 const ROOF_GRAY = '#858f92'
-const ROOF_WHITE = '#e3e7e4'
+const ROOF_LIGHT_GREEN = '#b8d8b0'
 const ROOF_BLUE = '#3977ad'
 
 function squareRoofColor(houseNumber: number) {
-  const isWhite = (houseNumber >= 9 && houseNumber <= 12)
+  const isLightGreen = (houseNumber >= 9 && houseNumber <= 12)
     || (houseNumber >= 21 && houseNumber <= 24)
-  if (isWhite) return ROOF_WHITE
+  if (isLightGreen) return ROOF_LIGHT_GREEN
   if (houseNumber === 19 || houseNumber === 20 || houseNumber === 39 || houseNumber === 40) {
     return ROOF_BLUE
   }
