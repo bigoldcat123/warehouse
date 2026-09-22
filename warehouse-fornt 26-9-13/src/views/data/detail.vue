@@ -143,13 +143,14 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
     gap: 12px;
     padding: 14px 20px;
     margin-bottom: 16px;
-    background: linear-gradient(135deg, #2968a8 0%, #1a3a5c 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #eaf5fc 100%);
+    border: 1px solid #d5e6f2;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(55, 96, 126, 0.06);
 }
 
 .detail-title {
-    color: white;
+    color: #294e67;
     font-size: 20px;
     font-weight: 700;
 }
@@ -157,11 +158,18 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
 .back-btn {
     margin-left: auto;
     padding: 6px 14px;
-    color: #b0d0f0;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #28688f;
+    background: #ffffff;
+    border: 1px solid #bcd8e9;
     border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+    color: #176795;
+    background: #dff0fb;
+    border-color: #8ebdd8;
 }
 
 .info-tags {
@@ -177,45 +185,46 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
     flex-direction: column;
     gap: 2px;
     padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #ffffff;
+    border: 1px solid #d9e7f1;
     border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(55, 96, 126, 0.04);
 }
 
 .info-tag--gas {
-    background: rgba(0, 188, 212, 0.12);
-    border-color: rgba(0, 188, 212, 0.3);
+    background: #eefafd;
+    border-color: #bee7ef;
 }
 
 .info-tag--hot {
-    background: rgba(229, 57, 53, 0.15);
-    border-color: rgba(229, 57, 53, 0.3);
+    background: #fff4f2;
+    border-color: #f2cdc8;
 }
 
 .info-tag--cold {
-    background: rgba(30, 136, 229, 0.15);
-    border-color: rgba(30, 136, 229, 0.3);
+    background: #eef7ff;
+    border-color: #c7e1f4;
 }
 
 .info-tag--average,
 .info-tag--layer {
-    background: rgba(67, 160, 71, 0.15);
-    border-color: rgba(67, 160, 71, 0.3);
+    background: #f1faf4;
+    border-color: #cce7d2;
 }
 
 .info-tag--time {
-    background: rgba(156, 39, 176, 0.15);
-    border-color: rgba(156, 39, 176, 0.3);
+    background: #f8f4fc;
+    border-color: #dfd0ec;
 }
 
 .info-tag__label {
-    color: #b0d0f0;
+    color: #71899a;
     font-size: 11px;
     font-weight: 500;
 }
 
 .info-tag__value {
-    color: white;
+    color: #304c61;
     font-size: 14px;
     font-weight: 600;
 }
@@ -227,17 +236,19 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
 
 .matrix-card {
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #d9e7f1;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(55, 96, 126, 0.06);
 }
 
 .matrix-title {
     padding: 12px 16px;
-    color: white;
+    color: #31566e;
     font-size: 16px;
     font-weight: 600;
-    background: linear-gradient(135deg, #2968a8 0%, #1e5f8a 100%);
+    background: linear-gradient(135deg, #e5f2fb 0%, #f3f9fd 100%);
+    border-bottom: 1px solid #d3e4ef;
 }
 
 .table-scroll {
@@ -253,24 +264,32 @@ const formatSensorValue = (value: number | undefined, unit: string) => {
 .matrix-table td {
     min-width: 100px;
     padding: 10px 12px;
-    color: white;
+    color: #3d5669;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid #deebf3;
 }
 
 .matrix-table thead th,
 .matrix-table tbody th {
-    color: #d4ecff;
-    background: rgba(30, 136, 229, 0.2);
+    color: #315a74;
+    background: #eaf4fb;
 }
 
 .matrix-table td {
-    background: #1e4a6e;
+    background: #ffffff;
+}
+
+.matrix-table tbody tr:nth-child(even) td {
+    background: #f8fbfd;
+}
+
+.matrix-table tbody tr:hover td {
+    background: #eef7fd;
 }
 
 .empty-data {
     padding: 28px;
-    color: #b0d0f0;
+    color: #71899a;
     text-align: center;
 }
 </style>
