@@ -33,13 +33,10 @@
                 <tr>
                     <th class="text-left">ID</th>
                     <th class="text-left">仓房编号</th>
-                    <th class="text-left">温度报警上限(℃)</th>
                     <th class="text-left">温度采集时间</th>
                     <th class="text-left">温度间隔(时)</th>
-                    <th class="text-left">湿度报警上限(%)</th>
                     <th class="text-left">湿度采集时间</th>
                     <th class="text-left">湿度间隔(时)</th>
-                    <th class="text-left">气体报警上限(ppm)</th>
                     <th class="text-left">气体采集时间</th>
                     <th class="text-left">气体间隔(时)</th>
                     <th class="text-center">操作</th>
@@ -49,13 +46,10 @@
                 <tr v-for="(row, idx) in list?.records" :key="idx">
                     <td class="text-white font-medium">{{ row.id }}</td>
                     <td class="text-white font-medium">{{ row.houseNo }}</td>
-                    <td class="text-white">{{ row.temperatureMax }}</td>
                     <td class="text-[#b0d0f0]">{{ row.temperatureCollectTime }}</td>
                     <td class="text-white">{{ row.temperatureIntervalHours }}</td>
-                    <td class="text-white">{{ row.humidityMax }}</td>
                     <td class="text-[#b0d0f0]">{{ row.humidityCollectTime }}</td>
                     <td class="text-white">{{ row.humidityIntervalHours }}</td>
-                    <td class="text-white">{{ row.gasMax }}</td>
                     <td class="text-[#b0d0f0]">{{ row.gasCollectTime }}</td>
                     <td class="text-white">{{ row.gasIntervalHours }}</td>
                     <td class="text-center">
@@ -84,7 +78,7 @@
                     </td>
                 </tr>
                 <tr v-if="!list?.records || list.records.length === 0">
-                    <td colspan="12" class="text-center text-[#b0d0f0] py-10">
+                    <td colspan="9" class="text-center text-[#b0d0f0] py-10">
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

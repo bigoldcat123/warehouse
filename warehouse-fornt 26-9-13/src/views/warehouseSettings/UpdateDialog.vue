@@ -30,9 +30,6 @@
             <el-input disabled v-model="ruleForm.houseNo" class="dark-input dark-input--disabled" />
           </el-form-item>
 
-          <el-form-item label="温度报警上限(℃)" prop="temperatureMax">
-            <el-input v-model.number="ruleForm.temperatureMax" placeholder="请输入温度报警上限" class="dark-input" />
-          </el-form-item>
           <el-form-item label="温度采集时间" prop="temperatureCollectTime">
             <el-time-select v-model="ruleForm.temperatureCollectTime" start="00:00" step="00:30" end="23:30"
               format="HH:mm:ss" placeholder="选择温度采集时间" style="width: 100%" class="dark-select" />
@@ -41,9 +38,6 @@
             <el-input v-model.number="ruleForm.temperatureIntervalHours" placeholder="请输入温度采集间隔小时数" class="dark-input" />
           </el-form-item>
 
-          <el-form-item label="湿度报警上限(%)" prop="humidityMax">
-            <el-input v-model.number="ruleForm.humidityMax" placeholder="请输入湿度报警上限" class="dark-input" />
-          </el-form-item>
           <el-form-item label="湿度采集时间" prop="humidityCollectTime">
             <el-time-select v-model="ruleForm.humidityCollectTime" start="00:00" step="00:30" end="23:30"
               format="HH:mm:ss" placeholder="选择湿度采集时间" style="width: 100%" class="dark-select" />
@@ -52,9 +46,6 @@
             <el-input v-model.number="ruleForm.humidityIntervalHours" placeholder="请输入湿度采集间隔小时数" class="dark-input" />
           </el-form-item>
 
-          <el-form-item label="气体报警上限(ppm)" prop="gasMax">
-            <el-input v-model.number="ruleForm.gasMax" placeholder="请输入气体报警上限" class="dark-input" />
-          </el-form-item>
           <el-form-item label="气体采集时间" prop="gasCollectTime">
             <el-time-select v-model="ruleForm.gasCollectTime" start="00:00" step="00:30" end="23:30"
               format="HH:mm:ss" placeholder="选择气体采集时间" style="width: 100%" class="dark-select" />
@@ -107,28 +98,16 @@ onUpdated(() => {
   visible.value = prop.dialogVisible
   ruleForm.id = prop.settings!.id as number
   ruleForm.houseNo = prop.settings!.houseNo
-  ruleForm.temperatureMax = prop.settings!.temperatureMax
   ruleForm.temperatureCollectTime = prop.settings!.temperatureCollectTime
   ruleForm.temperatureIntervalHours = prop.settings!.temperatureIntervalHours
-  ruleForm.humidityMax = prop.settings!.humidityMax
   ruleForm.humidityCollectTime = prop.settings!.humidityCollectTime
   ruleForm.humidityIntervalHours = prop.settings!.humidityIntervalHours
-  ruleForm.gasMax = prop.settings!.gasMax
   ruleForm.gasCollectTime = prop.settings!.gasCollectTime
   ruleForm.gasIntervalHours = prop.settings!.gasIntervalHours
 })
 
 const validateRequired = (message: string) => (rule: any, value: any, callback: any) => {
   if (value === '' || value === null || value === undefined) {
-    return callback(new Error(message))
-  }
-  return callback()
-}
-const validateNumber = (message: string) => (rule: any, value: any, callback: any) => {
-  if (value === '' || value === null || value === undefined) {
-    return callback()
-  }
-  if (typeof value !== 'number' || isNaN(value)) {
     return callback(new Error(message))
   }
   return callback()
@@ -146,28 +125,19 @@ const validateInterval = (rule: any, value: any, callback: any) => {
 const ruleForm = reactive({
   id: 0,
   houseNo: '',
-  temperatureMax: null as number | null,
   temperatureCollectTime: '',
   temperatureIntervalHours: null as number | null,
-  humidityMax: null as number | null,
   humidityCollectTime: '',
   humidityIntervalHours: null as number | null,
-  gasMax: null as number | null,
   gasCollectTime: '',
   gasIntervalHours: null as number | null,
 })
 
 const rules = reactive<FormRules<typeof ruleForm>>({
-  temperatureMax: [{ validator: validateRequired('请输入温度报警上限'), trigger: 'blur' },
-  { validator: validateNumber('请输入数字'), trigger: 'blur' }],
   temperatureCollectTime: [{ validator: validateRequired('请选择温度采集时间'), trigger: 'change' }],
   temperatureIntervalHours: [{ validator: validateInterval, trigger: 'blur' }],
-  humidityMax: [{ validator: validateRequired('请输入湿度报警上限'), trigger: 'blur' },
-  { validator: validateNumber('请输入数字'), trigger: 'blur' }],
   humidityCollectTime: [{ validator: validateRequired('请选择湿度采集时间'), trigger: 'change' }],
   humidityIntervalHours: [{ validator: validateInterval, trigger: 'blur' }],
-  gasMax: [{ validator: validateRequired('请输入气体报警上限'), trigger: 'blur' },
-  { validator: validateNumber('请输入数字'), trigger: 'blur' }],
   gasCollectTime: [{ validator: validateRequired('请选择气体采集时间'), trigger: 'change' }],
   gasIntervalHours: [{ validator: validateInterval, trigger: 'blur' }],
 })

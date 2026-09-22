@@ -4,13 +4,10 @@ const preFix = 'warehouseSettings'
 export type type_WarehouseSettings = {
     id?: number,
     houseNo: string,
-    temperatureMax: number | null,
     temperatureCollectTime: string,
     temperatureIntervalHours: number | null,
-    humidityMax: number | null,
     humidityCollectTime: string,
     humidityIntervalHours: number | null,
-    gasMax: number | null,
     gasCollectTime: string,
     gasIntervalHours: number | null,
     createTime?: string,

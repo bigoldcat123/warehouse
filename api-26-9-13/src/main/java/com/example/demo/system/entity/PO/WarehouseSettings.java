@@ -10,7 +10,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -43,12 +42,6 @@ public class WarehouseSettings implements Serializable {
     private String houseNo;
 
     /**
-     * 温度报警上限值（℃）
-     */
-    @TableField("temperature_max")
-    private BigDecimal temperatureMax;
-
-    /**
      * 温度采集时间（几点采集）
      */
     @TableField("temperature_collect_time")
@@ -62,12 +55,6 @@ public class WarehouseSettings implements Serializable {
     private Integer temperatureIntervalHours;
 
     /**
-     * 湿度报警上限值（%）
-     */
-    @TableField("humidity_max")
-    private BigDecimal humidityMax;
-
-    /**
      * 湿度采集时间（几点采集）
      */
     @TableField("humidity_collect_time")
@@ -79,12 +66,6 @@ public class WarehouseSettings implements Serializable {
      */
     @TableField("humidity_interval_hours")
     private Integer humidityIntervalHours;
-
-    /**
-     * 气体浓度报警上限值（ppm）
-     */
-    @TableField("gas_max")
-    private Integer gasMax;
 
     /**
      * 气体浓度采集时间（几点采集）
