@@ -102,6 +102,18 @@ public class XunzhengController {
         return R.ok(xunzhengService.isFumigating(houseNo, queryDate));
     }
 
+    /**
+     * 批量查询仓房熏蒸状态，未传日期时查询今天。
+     */
+    @GetMapping("/statuses")
+    public R statuses(
+            @RequestParam("houseNos") List<String> houseNos,
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        LocalDate queryDate = date == null ? LocalDate.now() : date;
+        return R.ok(xunzhengService.getFumigationStatuses(houseNos, queryDate));
+    }
+
     private R validate(Xunzheng xunzheng) {
         if (xunzheng.getHouseNo() == null || xunzheng.getHouseNo().isBlank()) {
             return R.errorShow("仓房编号不能为空");

@@ -5,6 +5,10 @@
       <p>WAREHOUSE PANORAMA</p>
       <h1>粮库全景图</h1>
       <span class="warehouse-name">当前仓库：{{ currentWarehouseName }}</span>
+      <div class="status-legend" aria-label="熏蒸状态图例">
+        <span><i class="status-legend__dot status-legend__dot--active"></i>正在熏蒸</span>
+        <span><i class="status-legend__dot status-legend__dot--safe"></i>未熏蒸</span>
+      </div>
     </header>
     <nav class="system-actions" aria-label="系统操作">
       <button type="button" @click="router.push('/warehouseSettings')">
@@ -30,6 +34,7 @@ import { useCurrentUserStore } from '@/stores/currentUser'
 import { useCurrentWareHouse } from '@/stores/currentWareHouse'
 import warehouseApi from '@/api/warehouse'
 import authApi from '@/api/auth'
+import xunzhengApi from '@/api/xunzheng'
 import { useRouter } from 'vue-router'
 
 const sceneContainer = ref<HTMLDivElement>()
@@ -47,6 +52,8 @@ let scene: THREE.Scene | undefined
 let camera: THREE.PerspectiveCamera | undefined
 let controls: OrbitControls | undefined
 let animationFrame = 0
+let statusDotTexture: THREE.CanvasTexture | undefined
+const statusIndicators = new Map<number, THREE.Sprite>()
 
 async function loadCurrentWarehouseName() {
   const companyID = currentUserStore.getUserDetail()?.companyID
@@ -116,6 +123,48 @@ function createHouseLabel(modelIndex: number) {
   return label
 }
 
+function getStatusDotTexture() {
+  if (statusDotTexture) return statusDotTexture
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const context = canvas.getContext('2d')!
+  context.beginPath()
+  context.arc(32, 32, 24, 0, Math.PI * 2)
+  context.fillStyle = '#ffffff'
+  context.fill()
+  context.lineWidth = 5
+  context.strokeStyle = 'rgba(255, 255, 255, 0.9)'
+  context.stroke()
+  statusDotTexture = new THREE.CanvasTexture(canvas)
+  statusDotTexture.colorSpace = THREE.SRGBColorSpace
+  return statusDotTexture
+}
+
+function addFumigationStatusDot(
+  parent: THREE.Object3D,
+  modelIndex: number,
+  x: number,
+  y: number,
+  z = 0,
+) {
+  if (!panoramaStore.getHouseNo(modelIndex)) return
+  const material = new THREE.SpriteMaterial({
+    map: getStatusDotTexture(),
+    color: '#50b86b',
+    transparent: true,
+    depthTest: false,
+  })
+  const dot = new THREE.Sprite(material)
+  dot.position.set(x + 2.05, y + 0.12, z)
+  dot.scale.set(0.66, 0.66, 1)
+  dot.renderOrder = 21
+  dot.visible = false
+  dot.userData.houseNumber = modelIndex
+  parent.add(dot)
+  statusIndicators.set(modelIndex, dot)
+}
+
 function addHouseLabel(
   parent: THREE.Object3D,
   modelIndex: number,
@@ -127,6 +176,26 @@ function addHouseLabel(
   if (!label) return
   label.position.set(x, y, z)
   parent.add(label)
+  addFumigationStatusDot(parent, modelIndex, x, y, z)
+}
+
+async function loadFumigationStatuses() {
+  const configuredHouses = panoramaStore.getConfiguredHouses()
+  if (!configuredHouses.length) return
+  try {
+    const response = await xunzhengApi.statuses(configuredHouses.map(item => item.houseNo))
+    if (response.data.code !== '200') return
+    const statuses = response.data.value || {}
+    configuredHouses.forEach(({ modelIndex, houseNo }) => {
+      const indicator = statusIndicators.get(modelIndex)
+      if (!indicator) return
+      const material = indicator.material as THREE.SpriteMaterial
+      material.color.set(statuses[houseNo] ? '#e34f4f' : '#50b86b')
+      indicator.visible = true
+    })
+  } catch {
+    // 状态未知时保持隐藏，避免将请求失败误显示为“未熏蒸”。
+  }
 }
 
 const SITE_WIDTH = 116
@@ -714,6 +783,7 @@ function initScene() {
 
   addSite()
   addWarehouseAreas()
+  loadFumigationStatuses()
 
   const animate = () => {
     animationFrame = requestAnimationFrame(animate)
@@ -742,6 +812,8 @@ onBeforeUnmount(() => {
   renderer?.domElement.removeEventListener('pointerdown', handleCanvasPointerDown)
   renderer?.domElement.removeEventListener('pointerup', handleCanvasPointerUp)
   controls?.dispose()
+  statusIndicators.clear()
+  statusDotTexture = undefined
   scene?.traverse((object) => {
     if (object instanceof THREE.Sprite) {
       object.material.map?.dispose()
@@ -790,6 +862,38 @@ onBeforeUnmount(() => {
   border-left: 3px solid #d9b66f;
   pointer-events: none;
   backdrop-filter: blur(8px);
+}
+
+.status-legend {
+  display: flex;
+  gap: 12px;
+  margin-top: 9px;
+  color: #d8e5e3;
+  font-size: 11px;
+}
+
+.status-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-legend__dot {
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgb(255 255 255 / 72%);
+  border-radius: 50%;
+  box-shadow: 0 0 7px currentColor;
+}
+
+.status-legend__dot--active {
+  color: #e34f4f;
+  background: #e34f4f;
+}
+
+.status-legend__dot--safe {
+  color: #50b86b;
+  background: #50b86b;
 }
 
 .page-heading p,

@@ -27,6 +27,13 @@ export const useWarehousePanoramaStore = defineStore('warehousePanorama', () => 
     return configuredHouseNumbers[modelIndex - 1] || ''
   }
 
+  function getConfiguredHouses() {
+    return configuredHouseNumbers.map((houseNo, index) => ({
+      modelIndex: index + 1,
+      houseNo,
+    }))
+  }
+
   async function selectHouse(modelIndex: number) {
     const houseNo = getHouseNo(modelIndex)
     selectedHouse.value = {
@@ -92,6 +99,7 @@ export const useWarehousePanoramaStore = defineStore('warehousePanorama', () => 
   return {
     selectedHouse,
     getHouseNo,
+    getConfiguredHouses,
     selectHouse,
     clearSelection,
   }

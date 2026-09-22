@@ -11,6 +11,12 @@ export type type_Xunzheng = {
 }
 
 class Xunzheng {
+  statuses(houseNos: string[], date?: string) {
+    return server.get<ResponseData<Record<string, boolean>>>(`${preFix}/statuses`, {
+      params: { houseNos: houseNos.join(','), date }
+    })
+  }
+
   isFumigating(houseNo: string, date?: string) {
     return server.get<ResponseData<boolean>>(`${preFix}/isFumigating`, {
       params: { houseNo, date }
