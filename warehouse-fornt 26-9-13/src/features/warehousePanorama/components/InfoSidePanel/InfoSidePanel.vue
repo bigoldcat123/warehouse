@@ -6,7 +6,9 @@
         <h2>仓房信息</h2>
       </div>
       <div class="house-panel__tools">
-        <span class="status-dot">UI 示例数据</span>
+        <span class="status-dot" :class="{ 'status-dot--error': selectedHouse.loadFailed }">
+          {{ selectedHouse.loading ? '数据加载中' : selectedHouse.loadFailed ? '部分数据加载失败' : '实时数据' }}
+        </span>
         <button
           type="button"
           class="house-panel__close"
@@ -24,14 +26,16 @@
       </div>
       <div>
         <dt>熏蒸状态</dt>
-        <dd class="status-safe">{{ selectedHouse.fumigationStatus }}</dd>
+        <dd :class="selectedHouse.fumigationStatus === '正在熏蒸' ? 'status-warning' : 'status-safe'">
+          {{ selectedHouse.fumigationStatus }}
+        </dd>
       </div>
       <div>
         <dt>仓间氧浓度</dt>
         <dd>{{ selectedHouse.oxygenConcentration }}</dd>
       </div>
       <div>
-        <dt>仓间 CQ2 浓度</dt>
+        <dt>仓间 CO₂ 浓度</dt>
         <dd>{{ selectedHouse.cq2Concentration }}</dd>
       </div>
       <div>
@@ -168,6 +172,11 @@ function openVisualization(metric: 'temperature' | 'humidity' | 'ph3') {
   white-space: nowrap;
 }
 
+.status-dot--error {
+  color: #f0b3a9;
+  border-color: rgb(217 121 105 / 35%);
+}
+
 .house-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -203,6 +212,10 @@ function openVisualization(metric: 'temperature' | 'humidity' | 'ph3') {
 
 .house-details dd.status-safe {
   color: #84d3a3;
+}
+
+.house-details dd.status-warning {
+  color: #f4bd72;
 }
 
 .house-actions {

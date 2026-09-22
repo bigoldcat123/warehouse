@@ -3,6 +3,7 @@ package com.example.demo.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.demo.system.entity.DTO.DataDTO;
 import com.example.demo.system.entity.DTO.DataDetailDTO;
+import com.example.demo.system.entity.DTO.WarehousePanoramaInfoDTO;
 import com.example.demo.system.entity.PO.HouseInfor;
 import com.example.demo.system.entity.PO.ReceiverData;
 import com.example.demo.system.entity.PO.PointDefine;
@@ -94,6 +95,26 @@ public class ReceiverDataServiceImpl extends ServiceImpl<ReceiverDataMapper, Rec
                 receiverData.getTemperatureSet(), stringCount, layerCount, "PH3"));
         dto.setTemperatureMatrix(parseOptionalMatrix(
                 receiverData.getTempData(), stringCount, layerCount, "温度"));
+        return dto;
+    }
+
+    @Override
+    public WarehousePanoramaInfoDTO getLatestPanoramaInfo(String houseNo) {
+        validateHouseNo(houseNo);
+        ReceiverData receiverData = getOne(new QueryWrapper<ReceiverData>()
+                .eq("HouseNo", houseNo)
+                .orderByDesc("TestDate")
+                .orderByDesc("ID")
+                .last("LIMIT 1"), false);
+        if (receiverData == null) {
+            return null;
+        }
+        WarehousePanoramaInfoDTO dto = new WarehousePanoramaInfoDTO();
+        dto.setHouseNo(receiverData.getHouseNo());
+        dto.setOAir(receiverData.getOAir());
+        dto.setCo2Air(receiverData.getCo2Air());
+        dto.setPh3(getLastValue(receiverData.getTemperatureSet()));
+        dto.setTestDate(receiverData.getTestDate());
         return dto;
     }
 

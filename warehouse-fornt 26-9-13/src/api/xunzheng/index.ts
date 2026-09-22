@@ -11,6 +11,12 @@ export type type_Xunzheng = {
 }
 
 class Xunzheng {
+  isFumigating(houseNo: string, date?: string) {
+    return server.get<ResponseData<boolean>>(`${preFix}/isFumigating`, {
+      params: { houseNo, date }
+    })
+  }
+
   list(current: number, size: number, warehouseID: string, houseNo?: string) {
     return server.get<ResponseData<Page<type_Xunzheng>>>(preFix, {
       params: { current, size, warehouseID, houseNo }

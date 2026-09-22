@@ -27,6 +27,14 @@ public class ReceiverDataController {
     IReceiverDataService receiverDataService;
 
     /**
+     * 查询仓房最新环境数据，供仓库全景图信息面板使用。
+     */
+    @GetMapping("/latest")
+    public R getLatest(@RequestParam("houseNo") String houseNo) {
+        return handleQuery(() -> receiverDataService.getLatestPanoramaInfo(houseNo));
+    }
+
+    /**
      * 查询仓房所有 TestDate，返回去重、升序的时间数组。
      */
     @GetMapping("/testDates")
